@@ -43,6 +43,15 @@
 - Mem0 is optional and must pass `.trae/scripts/mem0-healthcheck.ps1`
 - local files remain the source of truth
 
+### Semantic Search Status (2026-06-18)
+
+- `-Semantic` parameter added to `memory-retrieve.ps1` — attempts `ruflo memory search` for semantic retrieval
+- **ruflo CLI is not currently available** on this system (executable not found, npm not installed)
+- `-Semantic` silently falls back to keyword-only search when ruflo is unavailable
+- **Active alternative**: `-UseMem0` flag performs HTTP-based semantic search via Mem0 endpoint
+- To enable `-Semantic`: install ruflo CLI and ensure `all-MiniLM-L6-v2` model is cached at `~/.cache/xenova/transformers/Xenova/all-MiniLM-L6-v2/`
+- Model files (90MB onnx + configs) are already cached locally but unused without ruflo executable
+
 ## Prohibited
 
 - do not write ordinary success notes here

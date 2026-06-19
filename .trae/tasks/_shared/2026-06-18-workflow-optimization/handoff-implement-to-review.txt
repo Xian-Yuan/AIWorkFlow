@@ -1,0 +1,24 @@
+# Handover: Implement -> Review+Verify
+
+## Task Identity
+- Task: _shared/2026-06-18-workflow-optimization
+- Project type: other
+
+## Current Phase
+- Current: review+verify (switch to **Pro model**)
+- Previous: implement (done)
+
+## Change Summary
+### New Files
+  (none)
+
+### Modified Files
+  (none)
+
+### Spec progress: 0/0 scenarios done
+
+## Pro Session Instructions (paste into new Pro session)
+1. **Code Review** - check cross-file deps, edge cases, code style
+2. **Compile Verify** - run build
+3. **Fix Issues** - fix compile errors or review findings directly
+4. **Output Report** - summary of passed, fixed, known risks

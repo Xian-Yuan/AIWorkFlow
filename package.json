@@ -1,0 +1,7 @@
+{
+  "name": "ruflo-local",
+  "private": true,
+  "dependencies": {
+    "ruflo": "^3.10.46"
+  }
+}

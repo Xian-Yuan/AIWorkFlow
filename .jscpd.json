@@ -1,0 +1,22 @@
+{
+  "threshold": 10,
+  "reporters": ["console", "json"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/Intermediate/**",
+    "**/Binaries/**",
+    "**/DerivedDataCache/**",
+    "**/Saved/**",
+    "**/.codex-shared-profile/**",
+    "**/.trae/tasks/**",
+    "**/.opencode/tasks/**",
+    "**/Docs/Memory/**",
+    "**/_archived/**"
+  ],
+  "format": ["cpp", "javascript", "typescript", "python", "markdown", "json", "yaml", "html", "css"],
+  "absolute": true,
+  "noSymlinks": true,
+  "mode": "strict",
+  "gitignore": true
+}

@@ -1,6 +1,6 @@
 ---
 name: "prompt-compressor"
-description: "提示词生成与压缩引擎。将结构化约束转换为自然流畅的角色描述，压缩冗余文本，保证特征完整的前提下输出可用的角色提示词。"
+description: "提示词生成与压缩引擎。将结构化约束转换为自然流畅的角色描述，自动生成负向提示词，压缩冗余文本，输出生图可用的角色提示词。"
 ---
 
 # Prompt Compressor — 提示词生成与压缩引擎
@@ -88,6 +88,10 @@ description: "提示词生成与压缩引擎。将结构化约束转换为自然
 ━━━━━━━━━━━━━━━━━━━━━━━━
 {自然描述角色提示词}
 ━━━━━━━━━━━━━━━━━━━━━━━━
+🚫 Negative Prompt
+━━━━━━━━━━━━━━━━━━━━━━━━
+{英文标签, 逗号分隔, 一行}
+━━━━━━━━━━━━━━━━━━━━━━━━
 📐 特征N项全部保留 | 描述模式
 ```
 
@@ -99,7 +103,11 @@ description: "提示词生成与压缩引擎。将结构化约束转换为自然
 ━━━━━━━━━━━━━━━━━━━━━━━━
 爱丽丝，人类女性刺客。标准体型，白色短发，冷峻神色。不对称披风战术装，暗色装束缀银扣，腰间双匕首反握。指尖暗影缠绕，衣摆藤蔓纹。前倾蓄势站姿。新艺术曲线，8bit低像素，角色展示图，高清。背景纯灰，全身站立。
 ━━━━━━━━━━━━━━━━━━━━━━━━
-📐 特征17项全部保留 | 描述模式
+🚫 Negative Prompt
+━━━━━━━━━━━━━━━━━━━━━━━━
+blurry, soft edges, transparency, gradient, smooth shading, warm colors, bright red, gold, plate armor, heavy armor, large weapon, shiny, reflective, flowing cape, complex background, multiple views, weapon breakdown, cropped body, detailed upper body
+━━━━━━━━━━━━━━━━━━━━━━━━
+📐 特征17项全部保留 | 描述模式 | 负向15项
 ```
 
 ---
@@ -116,6 +124,68 @@ description: "提示词生成与压缩引擎。将结构化约束转换为自然
 
 ---
 
+---
+
+## 负向提示词生成
+
+从 Character Designer 传入的约束文件中提取 FORBID 段，生成英文 Negative Prompt。
+
+### 生成流程
+
+```
+已加载约束文件 FORBID 段 → 查 neg_rules.md 映射表 → 提取英文标签 → 去重合并 → 按类别排序输出
+```
+
+### 映射规则
+
+见 `neg_rules.md`。**确定性映射**，不依赖 AI 即兴翻译。每条中文 FORBID 对应固定的英文标签。
+
+### 去重规则
+
+- 多个文件重复的 FORBID 只保留英文标签一次
+- 近义词合并（如 "warm colors" 和 "bright red" → 保留 "warm colors, bright colors"）
+- 不出现相互矛盾的标签（如同时有 "bright" 和 "dark"）
+
+### 排序
+
+1. 渲染风格/画质（全局效果）
+2. 配色（全局色调）
+3. 服装 + 设计流派
+4. 体型 + 种族
+5. 职业 + 武器 + 战斗风格
+6. 性格 + 发型
+7. 元素 + 力量来源
+8. 展示模版
+
+### 示例
+
+输入：刺客（暗色装束 + 匕首 + 反握）+ 像素风 + 角色展示图
+
+Negative Prompt:
+```
+warm colors, bright red, gold, white, vibrant palette, plate armor,
+heavy armor, large weapon, transparency, blur, soft edges, gradient,
+smooth shading, complex background, multiple views, weapon breakdown,
+cropped body
+```
+
+---
+
 ## AI 模型设置
 
 见 `settings_design.md`。用户在设置面板配置活跃模型、API端点、temperature。默认: `deepseek-v4` | 可选: `deepseek-v4-flash`。
+
+---
+
+## 生图模型适配
+
+见 `target_config.md`。根据用户选择的目标模型（SD/MJ/Flux），将通用提示词转换为模型最优格式。
+
+### 快速参考
+
+| 模型 | 正向语法 | 负向语法 | 格式特点 |
+|------|---------|---------|---------|
+| SD | `(keyword:1.2)` 权重 | 逗号分隔 | 英文, 前75token权重高 |
+| MJ | `keyword::2` 权重 | `--no kw1,kw2` | 短语(非逗号), --ar --stylize |
+| Flux | 自然英文句子 | (可留空) | 自然语言, CFG=1-3 |
+| 通用 | 中文短语连接 | 英文逗号 | 默认格式

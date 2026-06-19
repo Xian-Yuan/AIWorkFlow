@@ -1,0 +1,11 @@
+allowBuilds:
+  '@claude-flow/cli': set this to true or false
+  '@google/genai': set this to true or false
+  agentdb: set this to true or false
+  agentic-flow: set this to true or false
+  argon2: set this to true or false
+  better-sqlite3: set this to true or false
+  hnswlib-node: set this to true or false
+  protobufjs: set this to true or false
+  sharp: set this to true or false
+  tldjs: set this to true or false

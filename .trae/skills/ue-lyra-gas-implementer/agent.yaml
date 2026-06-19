@@ -1,0 +1,14 @@
+mode: subagent
+description: "Lyra/GAS 主体实现智能体 — 负责 GameFeature/Experience/PawnData/InputConfig/AbilitySet/GAS 主链路落地"
+permissions:
+  read: allow
+  edit: allow
+  bash: allow
+  websearch: allow
+  write: allow
+  glob: allow
+  grep: allow
+  list: allow
+  webfetch: allow
+  task: allow
+  skill: allow

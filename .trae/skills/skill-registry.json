@@ -1,0 +1,413 @@
+﻿{
+    "skills_with_agent_yaml":  6,
+    "authoritative_runtime":  ".trae/scripts (see Docs/AI/27)",
+    "skills":  [
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4123,
+                       "directory":  "ue5-debug-validation",
+                       "name":  "ue5-debug-validation",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  6353,
+                       "directory":  "ue5-cpp-gameplay",
+                       "name":  "ue5-cpp-gameplay",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2680,
+                       "directory":  "ue5-blueprint-workflow",
+                       "name":  "ue5-blueprint-workflow",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  17682,
+                       "directory":  "ue5-mass-entity",
+                       "name":  "ue5-mass-entity",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  5471,
+                       "directory":  "ue5-performance-packaging",
+                       "name":  "ue5-performance-packaging",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  8558,
+                       "directory":  "ue5-pcg-building",
+                       "name":  "ue5-pcg-building",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  1874,
+                       "directory":  "ue5-module-router",
+                       "name":  "ue5-module-router",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  true,
+                       "size_bytes":  10894,
+                       "directory":  "ue-lyra-gas-implementer",
+                       "name":  "ue-lyra-gas-implementer",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  true,
+                       "size_bytes":  5822,
+                       "directory":  "ue-ai-validator",
+                       "name":  "ue-ai-validator",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4236,
+                       "directory":  "token-guardian",
+                       "name":  "token-guardian",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  true,
+                       "size_bytes":  12773,
+                       "directory":  "ue-project-router",
+                       "name":  "ue-project-router",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4113,
+                       "directory":  "ue5-auto-assistant",
+                       "name":  "ue5-auto-assistant",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  1795,
+                       "directory":  "ue5-architecture",
+                       "name":  "ue5-architecture",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  5104,
+                       "directory":  "ue5-animation-guide",
+                       "name":  "ue5-animation-guide",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  6100,
+                       "directory":  "writing-plans",
+                       "name":  "writing-plans",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4524,
+                       "directory":  "webapp-testing",
+                       "name":  "webapp-testing",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  true,
+                       "size_bytes":  4480,
+                       "directory":  "web-implementer",
+                       "name":  "web-implementer",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  22624,
+                       "directory":  "writing-skills",
+                       "name":  "writing-skills",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  12365,
+                       "directory":  "金璃小天才",
+                       "name":  "金璃小天才",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  12055,
+                       "directory":  "金璃好帮手",
+                       "name":  "金璃好帮手",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  14377,
+                       "directory":  "xg-uecpp-course",
+                       "name":  "xg-uecpp-course",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  5672,
+                       "directory":  "ue5-world-interaction",
+                       "name":  "ue5-world-interaction",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  8608,
+                       "directory":  "ue5-ui-umg-slate",
+                       "name":  "ue5-ui-umg-slate",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  5512,
+                       "directory":  "ue5-save-load-replication",
+                       "name":  "ue5-save-load-replication",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  3260,
+                       "directory":  "ui-ux-pro-max",
+                       "name":  "ui-ux-pro-max",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  3794,
+                       "directory":  "web-fullstack",
+                       "name":  "web-fullstack",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4201,
+                       "directory":  "verification-before-completion",
+                       "name":  "verification-before-completion",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  7983,
+                       "directory":  "using-git-worktrees",
+                       "name":  "using-git-worktrees",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  18811,
+                       "directory":  "daughter-companion",
+                       "name":  "daughter-companion",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  3593,
+                       "directory":  "codex-project-router",
+                       "name":  "codex-project-router",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2114,
+                       "directory":  "code-simplifier",
+                       "name":  "code-simplifier",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  6441,
+                       "directory":  "dispatching-parallel-agents",
+                       "name":  "dispatching-parallel-agents",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2469,
+                       "directory":  "executing-plans",
+                       "name":  "executing-plans",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4747,
+                       "directory":  "enhanced-subagent",
+                       "name":  "enhanced-subagent",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2651,
+                       "directory":  "doc-governance",
+                       "name":  "doc-governance",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  7099,
+                       "directory":  "anti-duplication",
+                       "name":  "anti-duplication",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  9538,
+                       "directory":  "anti-degradation",
+                       "name":  "anti-degradation",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4782,
+                       "directory":  "agent-memory-bench",
+                       "name":  "agent-memory-bench",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  10634,
+                       "directory":  "brainstorming",
+                       "name":  "brainstorming",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  true,
+                       "size_bytes":  8608,
+                       "directory":  "code-quality-reviewer",
+                       "name":  "code-quality-reviewer",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  5120,
+                       "directory":  "code-knowledge-graph",
+                       "name":  "code-knowledge-graph",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  true,
+                       "size_bytes":  10137,
+                       "directory":  "character-designer",
+                       "name":  "character-designer",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  5523,
+                       "directory":  "spec-living",
+                       "name":  "spec-living",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2980,
+                       "directory":  "smart-requirements",
+                       "name":  "smart-requirements",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2808,
+                       "directory":  "requesting-code-review",
+                       "name":  "requesting-code-review",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  12546,
+                       "directory":  "subagent-driven-development",
+                       "name":  "subagent-driven-development",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  9867,
+                       "directory":  "test-driven-development",
+                       "name":  "test-driven-development",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  9077,
+                       "directory":  "task-orchestrator",
+                       "name":  "task-orchestrator",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  9884,
+                       "directory":  "systematic-debugging",
+                       "name":  "systematic-debugging",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  2053,
+                       "directory":  "github-project-search",
+                       "name":  "github-project-search",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  7061,
+                       "directory":  "finishing-a-development-branch",
+                       "name":  "finishing-a-development-branch",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4003,
+                       "directory":  "failure-memory",
+                       "name":  "failure-memory",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4720,
+                       "directory":  "implicit-requirements",
+                       "name":  "implicit-requirements",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  6314,
+                       "directory":  "receiving-code-review",
+                       "name":  "receiving-code-review",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  6835,
+                       "directory":  "prompt-compressor",
+                       "name":  "prompt-compressor",
+                       "description":  ""
+                   },
+                   {
+                       "has_agent_yaml":  false,
+                       "size_bytes":  4523,
+                       "directory":  "output-compressor",
+                       "name":  "output-compressor",
+                       "description":  ""
+                   }
+               ],
+    "version":  "1.2.0",
+    "total_skills":  56,
+    "created":  "2026-06-18",
+    "phases_completed":  [
+                             "Phase1-AgentMerge",
+                             "Phase2-SharedInfra",
+                             "Phase3-ScriptCopy",
+                             "Phase4-RufloCleanup",
+                             "Phase5-DocsIndex"
+                         ],
+    "source_of_truth":  "skills/",
+    "junctions":  [
+                      ".trae/skills",
+                      ".agents/skills"
+                  ]
+}

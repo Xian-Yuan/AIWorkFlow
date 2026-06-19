@@ -1,0 +1,7 @@
+﻿{
+    "max_recall_history":  1000,
+    "rotten_threshold_days":  90,
+    "top_k":  5,
+    "min_failures_for_benchmark":  10,
+    "benchmark_interval_days":  7
+}

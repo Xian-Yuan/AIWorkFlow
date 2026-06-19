@@ -40,6 +40,20 @@
 
 所有任务（UE5 / Web / 其他）通过 `ue-project-router` 唯一入口启动，自动检测项目类型和任务阶段，状态机驱动流转。
 
+### 模型分层策略（Pro + Flash）
+
+> 详见 `Docs/AI/24-Pro-Flash-Model-Tiering.md`
+
+采用 DeepSeek V4 Pro（深度推理）+ V4 Flash（快速执行）分层使用，成本降低 60-80%：
+
+| 阶段 | 推荐模型 | 原因 | Token 占比 |
+|------|---------|------|-----------|
+| Plan | **Pro** | 深度推理、架构决策、边界条件识别 | 10-15% |
+| Implement | **Flash** | 执行密集型，单文件编码质量与 Pro 差距极小 | 60-80% |
+| Review + Verify | **Pro**（同一会话） | 审查+编译+修复+验收，无需切换模型 | 10-15% |
+
+自动化：每阶段结束运行 `task-handoff.ps1 <task-name>` 自动生成交接模板。
+
 ### 入口与状态机
 
 - **唯一入口**：`ue-project-router`（`.trae/skills/ue-project-router/SKILL.md`）
@@ -52,17 +66,16 @@
 ```
 任何项目需求
   ↓ ue-project-router (项目类型检测 + 阶段检测)
-Phase 1: Plan    → task-guard plan -Apply → phase: implement
-Phase 2: Implement → task-guard implement -Apply → phase: review
+Phase 1: Plan     [Pro]  → task-guard plan -Apply → phase: implement
+Phase 2: Implement [Flash] → task-guard implement -Apply → phase: review
   ├─ UE5:  ue-lyra-gas-implementer / ue5-cpp-gameplay / ...
   ├─ Web:  web-implementer → web-fullstack / ui-ux-pro-max / ...
   └─ Other: brainstorming → 按需加载
-Phase 3: Review    → task-guard review -Apply → phase: verify (code-quality-reviewer)
-Phase 4: Verify    → task-guard verify -Apply → phase: archive
-  ├─ UE5:  ue-ai-validator
-  ├─ Web:  router 直接处理 (npm build + test + 功能回归)
+Phase 3: Review+Verify [Pro] → task-guard review -Apply → task-guard verify -Apply → phase: archive
+  ├─ UE5:  code-quality-reviewer → ue-ai-validator（同一 Pro 会话）
+  ├─ Web:  code-quality-reviewer → npm build + test（同一 Pro 会话）
   └─ Other: 按配置执行
-Phase 5: Archive   → task-state transition archived
+Phase 4: Archive   → task-state transition archived
 ```
 
 ### 项目类型检测（Step 0，最先执行）
@@ -75,11 +88,25 @@ Phase 5: Archive   → task-state transition archived
 
 ### 阶段一：Plan（由 ue-project-router 主导）
 1. 检测项目类型（UE5/Web/Other）
-2. 分析需求、澄清模糊点、搜索已有实现
-3. 按项目类型选择对应路由表和 Skill
-4. 拆分任务、决定单/多 Agent 协作
-5. 输出 routing.md + tasks.md，用户确认后自动流转
-6. 写回状态字段：`clarification_status`、`user_confirmed_plan`、`router_skill_loaded`
+2. **搜索已有设计文档**（强制，先于外部搜索）
+   - Glob 搜索 `Docs/superpowers/specs/` + `Docs/superpowers/plans/`
+   - 读取 2-4 篇最相关的设计文档 → 提取关键约束
+   - **隐含需求推导**：从设计文档反向推导用户没说出口的前提条件
+     - 如：装备文档有品质体系 → 沙盒必须复用，不能另搞一套
+     - 如：战斗文档有 12 步管线 → 沙盒不能截断/简化管线
+     - 推导结果写入 `analysis.md` 的"隐含需求"章节
+   - 硬门禁（二选一即阻断）：
+     - 设计文档存在但未引用 → 禁止进入依赖链推导
+     - 设计文档中定义了模型/管线/校验/UI 约定，但隐含需求章节未覆盖 → 禁止进入依赖链推导
+3. 分析需求 + 澄清模糊点 + 读取 failure memory
+4. **开源项目参考搜索**（系统性/功能性需求强制执行，hotfix 除外）
+   - WebSearch 搜索关键实现 → WebFetch 读取 2-3 个高质量架构
+   - 输出结构化对比摘要到 analysis.md
+5. 搜索项目内已有实现 + 引擎/框架原生方案
+6. 按项目类型选择对应路由表和 Skill
+7. 拆分任务、决定单/多 Agent 协作
+8. 输出 routing.md + tasks.md，用户确认后自动流转
+9. 写回状态字段：`clarification_status`、`user_confirmed_plan`、`router_skill_loaded`
 
 本阶段禁止修改任何代码。
 
@@ -87,10 +114,11 @@ Phase 5: Archive   → task-state transition archived
 1. 入口验证：`task-state.ps1 check <name> implement`
 2. 编辑前硬门禁：`task-state.ps1 can-edit <name>`，失败时禁止任何 `edit/write/apply_patch`
 3. Web 项目先进入 `web-implementer`，再由它加载主 Web skill
-4. 读取 routing.md 获取主 Skill，**用 Skill tool 加载**（`Skipping this step is prohibited.`）
-5. 按项目类型遵循对应编码规范
-6. 每完成一项立即打勾 tasks.md 并提交
-7. 构建/编译验证（UE5: UnrealBuildTool / Web: npm run build）
+4. 首次编辑前可按需读取少量 failure memory，输出 `Pre-Edit Failure Reminder`
+5. 读取 routing.md 获取主 Skill，**用 Skill tool 加载**（`Skipping this step is prohibited.`）
+6. 按项目类型遵循对应编码规范
+7. 每完成一项立即打勾 tasks.md 并提交
+8. 构建/编译验证（UE5: UnrealBuildTool / Web: npm run build）
 
 ### 阶段三：Review（由 code-quality-reviewer 主导，不区分项目类型）
 1. 框架/结构合规检查
@@ -103,6 +131,13 @@ Phase 5: Archive   → task-state transition archived
 - **Web**：router 直接执行（npm build + test + 功能回归 + UI 截图）
 - **Other**：按项目配置执行
 - 输出验收报告到 `.trae/tasks/<name>/verification-report.md`
+
+### Basic Memory 第一阶段
+- `Docs/Memory/README.md` 是 failure memory 的规则说明
+- `Docs/Memory/indexes/memory-index.md` 是 Router / Implement 的轻量检索入口
+- `Review FAIL` / `Verify FAIL` / workflow regression fail 可生成 `Docs/Memory/candidates/` 中的 memory candidate
+- 只有通过转正门槛的 candidate 才能进入 `Docs/Memory/failures/`
+- memory 注入只允许摘要，不允许整篇 memory 原文进入 prompt
 
 ### 阻塞点（必须用 AskUserQuestion 暂停）
 - Step 0: 项目类型无法自动判定时
@@ -242,7 +277,49 @@ public:
 - 每个数据手册顶部写清对应框架文档的具体章节号
 - 禁止在框架文档中重复数据手册的内容（不写"具体数值"，只写"见数据手册"）
 
-## DeepSeek API 缓存优化
+## 测试分层约定（Web 项目）
+
+### 文件放置规则
+
+| 层 | 路径模式 | 框架 | 范围 |
+|----|---------|------|------|
+| **Domain 纯逻辑** | `src/domain/<模块>/__tests__/<模块>.test.ts` | Vitest | 纯函数 I/O、边界值、不变量 |
+| **Persistence** | `src/persistence/**/*.test.ts` | Vitest | CRUD + 序列化往返 |
+| **Runtime 服务** | `src/runtime/**/*.test.ts` | Vitest | 服务调用 + 状态变更 |
+| **UI 组件** | `src/presentation/**/*.test.tsx` | Vitest + React DOM | 静态渲染 + 关键文案断言 |
+| **E2E** | `tests/*.spec.ts` | Playwright | 完整用户流程（有浏览器） |
+
+### 每个模块的最小覆盖目标
+
+| 层 | 必须覆盖 |
+|----|---------|
+| domain | 核心函数的正常输入/边界值/错误输入 各 1 条 |
+| persistence | save → load 往返一致 + list 返回非空 |
+| runtime | create → mutate → query 状态链 |
+| UI | 关键文案 + 组件渲染不崩溃 |
+| E2E | 新建游戏 → 核心交互 → 存档 → 回主菜单 |
+
+### 新增模块时的测试门禁
+
+- 新建 domain 模块 → 必须同步创建 `__tests__/` 目录和至少 1 条冒烟测试
+- 新建 UI 组件 → 至少 1 条渲染断言（包含关键按钮/文案）
+- 修复 bug → 先写失败测试再现 bug → 再修复代码 → 测试通过
+
+### 设计与测试的交叉约束
+
+- 设计文档中标注"必补测试"的用例 → 实现阶段必须补齐
+- 设计文档 §测试策略 章节的用例清单 → 实现完成后逐条对照打勾
+- E2E 测试的交互流程 → 必须匹配 spec.md 中的 Scenario 编号
+
+## DeepSeek API 优化
+
+### 模型分层（Pro + Flash）
+
+> 详见 `Docs/AI/24-Pro-Flash-Model-Tiering.md`
+
+Plan/Review/Verify 用 Pro（深度推理），Implement 用 Flash（快速执行），成本降低 60-80%。阶段边界 `/clear` + 切换模型 + handover。
+
+### Context Caching
 
 > Context Caching 默认启用。静态内容（CLAUDE.md/rules/skills）前置组成稳定前缀 → 重复请求输入 token 成本降至 1/10。
 > 动态信息（状态/时间戳/进度）用 `<system-reminder>` 追加，**不修改 prompt 前缀**，避免缓存断裂。

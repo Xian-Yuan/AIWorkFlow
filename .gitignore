@@ -1,13 +1,79 @@
-# 项目目录由各自的独立 Git 仓库管理，不纳入根仓库
-Project/
-Project/LyraStarterGame - 5.7/
+# Root repository boundary: workflow sources only
+#
+# The root Git repository owns shared AI workflow, documentation, and
+# cross-IDE configuration. Projects under Project/ own independent
+# repositories. Everything at root is ignored by default, then explicitly
+# approved workflow paths are allowed.
 
-# 可能的临时文件
+/*
+
+# Root policy and common configuration files
+!/.contextignore
+!/.gitattributes
+!/.gitignore
+!/.gitmodules
+!/.jscpd.json
+!/.repomixignore
+!/AGENTS.md
+!/CLAUDE.md
+!/LICENSE
+!/README.md
+!/framework-growth-log.md
+!/gen-context.config.json
+!/opencode.json
+!/package.json
+!/pnpm-lock.yaml
+!/pnpm-workspace.yaml
+!/repomix.config.json
+!/skills-lock.json
+
+# Shared repository and editor configuration
+!/.github/
+!/.github/**
+!/.vscode/
+!/.vscode/**
+
+# Canonical shared documentation and skills
+!/Docs/
+!/Docs/**
+!/skills/
+!/skills/**
+
+# Trae shared workflow runtime
+!/.trae/
+/.trae/*
+!/.trae/memory/
+!/.trae/memory/**
+!/.trae/references/
+!/.trae/references/**
+!/.trae/rules/
+!/.trae/rules/**
+!/.trae/scripts/
+!/.trae/scripts/**
+!/.trae/skills/
+!/.trae/skills/**
+!/.trae/tasks/
+!/.trae/tasks/**
+
+# OpenCode adapters and shared task mirrors
+!/.opencode/
+/.opencode/*
+!/.opencode/agents/
+!/.opencode/agents/**
+!/.opencode/mcp.json
+!/.opencode/rules/
+!/.opencode/rules/**
+!/.opencode/skills/
+!/.opencode/skills/**
+!/.opencode/tasks/
+!/.opencode/tasks/**
+
+# Generated or archived content inside otherwise visible workflow paths
+**/_archived/
+**/__pycache__/
+**/.pytest_cache/
+**/node_modules/
 *.log
-.temp/
-Tools/
-秋叶comfyui整合包/
-
-# 本地误生成的递归技能副本
-.opencode/skills/prompt-compressor/prompt-compressor/
-.trae/skills/prompt-compressor/prompt-compressor/
+*.tmp
+*.bak
+*~

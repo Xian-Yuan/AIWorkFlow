@@ -1,0 +1,25 @@
+# Keep text normalization deterministic across Codex, OpenCode, Trae,
+# VS Code, and command-line Git. This overrides machine-level autocrlf.
+* text=auto eol=lf
+
+# Windows-native launchers may retain CRLF where required.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets must never be normalized.
+*.7z binary
+*.dll binary
+*.exe binary
+*.gif binary
+*.gz binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.pdf binary
+*.png binary
+*.pyc binary
+*.tar binary
+*.uasset binary
+*.umap binary
+*.webp binary
+*.zip binary

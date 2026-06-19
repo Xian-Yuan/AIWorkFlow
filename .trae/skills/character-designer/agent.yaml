@@ -1,0 +1,14 @@
+mode: subagent
+description: "角色设计对话智能体 — 引导玩家逐步完成角色设计，管理特征库，审查设计合理性，生成最终Prompt"
+permissions:
+  read: allow
+  edit: allow
+  bash: allow
+  websearch: allow
+  write: allow
+  glob: allow
+  grep: allow
+  list: allow
+  webfetch: allow
+  task: allow
+  skill: allow

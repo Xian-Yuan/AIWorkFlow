@@ -67,6 +67,8 @@ Implementation plans belong under:
 | 37 | `37-Agent-Reach-Integration.md` | Agent-Reach multi-platform search integration guide |
 | 38 | `38-Jinli-Agent-Soul-Architecture.md` | 金璃 Agent 灵魂层架构 |
 
+| 39 | `39-Root-Git-Workspace-Boundary.md` | Cross-IDE root Git boundary, scan protection, line endings, and push safety |
+
 ## Generated Inventories
 
 | Document | Purpose |

@@ -1,0 +1,14 @@
+mode: subagent
+description: "AI 与验证收口智能体 — StateTree/BT/EQS/SmartObject 选型判断 + 编译/运行时/资产/回归检查"
+permissions:
+  read: allow
+  edit: allow
+  bash: allow
+  websearch: allow
+  write: allow
+  glob: allow
+  grep: allow
+  list: allow
+  webfetch: allow
+  task: allow
+  skill: allow

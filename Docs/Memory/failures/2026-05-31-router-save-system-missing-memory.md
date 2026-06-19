@@ -5,9 +5,13 @@ phase: plan
 project_type: ue5
 module: router
 tags:
-  - router
-  - save
-  - implicit-requirement
+  - phase:plan
+  - mod:router
+  - dom:ue5
+  - dom:save
+  - pat:implicit-requirement
+  - pat:under-engineering
+  - sys:save-game
 severity: high
 write_trigger: verify_fail
 retrieval_scope:

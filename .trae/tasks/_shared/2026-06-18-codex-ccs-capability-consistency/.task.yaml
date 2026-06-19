@@ -1,0 +1,22 @@
+task_name: 2026-06-18-codex-ccs-capability-consistency
+workflow: full
+phase: archive
+project_type: other
+implement_mode: direct
+isolation: branch
+clarification_status: answered
+user_confirmed_plan: true
+router_skill_loaded: true
+review_result: pass
+verify_result: pass
+verification_report: E:\UEGameDevelopment\.trae\tasks\_shared\2026-06-18-codex-ccs-capability-consistency\verification-report.md
+archived: false
+design_doc: Docs/superpowers/specs/2026-06-18-codex-ccs-capability-consistency-design.md
+base_ref: null
+created_at: 2026-06-18
+verified_at: 2026-06-18
+fix_attempts: 0
+spec_exists: true
+spec_scenario_count: 10
+spec_scenarios_done: 10
+

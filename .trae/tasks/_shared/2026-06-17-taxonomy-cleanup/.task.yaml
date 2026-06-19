@@ -1,0 +1,17 @@
+﻿workflow: full
+phase: verify
+project_type: other
+implement_mode: direct
+isolation: branch
+clarification_status: none
+user_confirmed_plan: true
+router_skill_loaded: false
+review_result: passed
+verify_result: passed
+verification_report: Docs/AI/document-taxonomy-inventory.md updated; labels changed to redirects/empty; update-docs-tree.ps1 check passed
+archived: true
+design_doc: null
+base_ref: null
+created_at: 2026-06-17
+verified_at: 2026-06-17
+fix_attempts: 0

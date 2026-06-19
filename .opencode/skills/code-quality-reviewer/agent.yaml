@@ -1,0 +1,14 @@
+mode: subagent
+description: "代码质检 + 改动验收智能体。双重职责：代码框架合规/冗余/安全检查 + 逐项对照需求验收、收集证据、输出报告。强制 fail-closed 独立验证。"
+permissions:
+  read: allow
+  edit: allow
+  bash: allow
+  websearch: allow
+  write: allow
+  glob: allow
+  grep: allow
+  list: allow
+  webfetch: allow
+  task: allow
+  skill: allow

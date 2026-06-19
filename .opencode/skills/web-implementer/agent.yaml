@@ -1,0 +1,14 @@
+mode: subagent
+description: "Web 实现智能体 — 负责 Web 项目的 Implement 阶段落地，强制 can-edit 门禁与真实 skill 加载"
+permissions:
+  read: allow
+  edit: allow
+  bash: allow
+  websearch: allow
+  write: allow
+  glob: allow
+  grep: allow
+  list: allow
+  webfetch: allow
+  task: allow
+  skill: allow

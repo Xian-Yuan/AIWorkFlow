@@ -1,8 +1,0 @@
-- [x] Task 1: 新增 `开发者模式` 入口与 `DeveloperModeShell`，打通主界面到地图编辑器模块首页的入口
-- [x] Task 2: 建立 `map-editor-types`、`tile-palette`、`create-empty-map-asset`，锁定 tile 编辑器基础数据模型
-- [x] Task 3: 实现 `editor-reducer`、按层 palette 过滤、基础画布绘制与撤销重做，形成最小可编辑闭环
-- [x] Task 4: 扩展 Dexie 表与 `map/world` 仓储，实现地图保存、列表浏览、打开和重新编辑
-- [x] Task 5: 实现 `world-composition` 与相邻地图只读幽灵层预览，支持多地图拼接参考
-- [x] Task 6: 实现 `runtime-map-loader` 与游戏内桥接，让已发布编辑地图可在运行时显示
-- [x] Task 7: 实现 AI 草稿辅助面板与规则化房屋布局草稿输出，保持建议层与正式层分离
-- [x] Task 8: 完成 Vitest、Playwright、build 回归验证，并在必要时同步设计文档命名
