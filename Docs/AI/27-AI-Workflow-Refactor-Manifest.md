@@ -32,6 +32,7 @@ Read order for workflow work:
 | Multi-agent task packets | `Docs/AI/33-Multi-Agent-Task-Packet-Workflow.md`, `.trae/scripts/work-package-template.md`, `.trae/scripts/agent-result-template.md` | Lets multiple models find bounded work and return evidence |
 | DS4 Flash worker repair loop | `Docs/AI/40-DS4-Flash-Worker-Repair-Loop.md`, `.trae/scripts/worker-repair-loop.ps1` | Repackages independent verification failures into narrower, bounded Flash work and trips architecture review after three same-root failures |
 | Issuer-worker authority | `Docs/AI/41-Issuer-Worker-Authority-Separation.md`, `.trae/scripts/authority-core.psm1`, `.trae/scripts/issuer-*.ps1` | Proves publisher/reviewer/archive authority using Windows SID, non-exportable CNG signatures, and bound hashes |
+| GitHub SSH publication | `Docs/AI/42-GitHub-SSH-Publish-Workflow.md` | Publishes reviewed root-workflow commits through the protected-origin/writable-gh remote model with worktree isolation and remote SHA verification |
 | Codex workflow adapter | `skills/codex-project-router/SKILL.md` | Makes Codex use shared task packets, architecture evidence, and gates |
 | Workflow regression | `.trae/scripts/test-workflow-regression.ps1` | Mechanical regression checks |
 

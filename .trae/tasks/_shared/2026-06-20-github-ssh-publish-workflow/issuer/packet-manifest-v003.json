@@ -1,0 +1,32 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-20-github-ssh-publish-workflow",
+    "packet_version":  3,
+    "authority_profile":  "issuer-worker-v1",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "issued_at":  "2026-06-20T00:37:40.2660180+08:00",
+    "core_files":  [
+                       {
+                           "path":  "analysis.md",
+                           "sha256":  "890d02ba8dd6886f986f1b2407658d54f8d051e38459b1cf90d7dfe7bcb55f60"
+                       },
+                       {
+                           "path":  "doc-impact.md",
+                           "sha256":  "1cba8def94376e72ed5c8837fdeb0e76460d536e784ce2d9a9c3023d9e3be860"
+                       },
+                       {
+                           "path":  "routing.md",
+                           "sha256":  "0f5115380203a6778b195ce2b428b2be5b9d5b3ff7518ebc3ae1ac9ab4213eaf"
+                       },
+                       {
+                           "path":  "spec.md",
+                           "sha256":  "2831346085d2e9510cb0f14f9975d5af6ad85bafe2b86bbd43fde10246df239e"
+                       },
+                       {
+                           "path":  "tasks.md",
+                           "sha256":  "17aa11f3e1908de4fbd8320d9dbd426b5cd52b8d857c1ad86a54d43277362177"
+                       }
+                   ],
+    "packet_digest":  "0da94bf6c1846b1108d058e2783f3e31323f1e609818f88c2a81e860bc8488ea"
+}

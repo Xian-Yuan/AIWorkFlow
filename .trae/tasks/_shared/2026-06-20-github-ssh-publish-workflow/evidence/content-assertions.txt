@@ -1,0 +1,8 @@
+[PASS] Repository
+[PASS] Ssh443
+[PASS] ProtectedOrigin
+[PASS] Worktree
+[PASS] Junction
+[PASS] PushMain
+[PASS] RemoteSha
+[PASS] NoForce

@@ -1,0 +1,41 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-20-github-ssh-publish-workflow",
+    "packet_version":  3,
+    "packet_digest":  "0da94bf6c1846b1108d058e2783f3e31323f1e609818f88c2a81e860bc8488ea",
+    "execution_mode":  "issuer_direct",
+    "work_package_path":  null,
+    "work_package_digest":  null,
+    "capability_path":  null,
+    "capability_digest":  null,
+    "result_path":  null,
+    "result_digest":  null,
+    "source_root":  "workspace",
+    "source_paths":  [
+                         "Docs/AI/.cache-manifest.md",
+                         "Docs/AI/27-AI-Workflow-Refactor-Manifest.md",
+                         "Docs/AI/42-GitHub-SSH-Publish-Workflow.md",
+                         "Docs/AI/README.md"
+                     ],
+    "source_diff_digest":  "b8ea278397ea0932d2b962e8acc2fc086a0844d8bd4146baec65ed68c59c462c",
+    "evidence_paths":  [
+                           "evidence/content-assertions.txt",
+                           "evidence/diff-check.txt",
+                           "evidence/doc-guard.txt",
+                           "evidence/docs-tree.txt",
+                           "evidence/review-source-paths.txt",
+                           "evidence/workflow-regression.txt",
+                           "verification-report.md"
+                       ],
+    "evidence_manifest_digest":  "82416e430244417f76fcba8c34afb31a6b6d5a982351364cb590338ea5cee469",
+    "acceptance_criteria_digest":  "ff00a9deb54620f83dcb8d1fb05bbc3ca0deff73e0ff82f9d7042c543b99914d",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "review_context_id":  "github-ssh-publish-review-v3-20260620",
+    "worker_context_id":  null,
+    "reviewed_at":  "2026-06-20T00:38:08.6292713+08:00",
+    "decision":  "accepted",
+    "summary":  "GitHub SSH publish workflow independently verified after formatting correction",
+    "root_cause_id":  null,
+    "approval_digest":  "163304a6631a1f69895e1f2c78cd6b6441f4d010faa5a31fcd777f612642f030"
+}
