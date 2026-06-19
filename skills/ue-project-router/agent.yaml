@@ -1,0 +1,14 @@
+mode: primary
+description: "默认入口 — 需求路由分流智能体。分析需求、澄清模糊点、锁定边界、选择skill/agent、决定单/多agent协作。"
+permissions:
+  read: allow
+  websearch: allow
+  edit: allow
+  bash: allow
+  write: allow
+  glob: allow
+  grep: allow
+  list: allow
+  webfetch: allow
+  task: allow
+  skill: allow

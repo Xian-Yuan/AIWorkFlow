@@ -1,0 +1,3 @@
+display_name: UE Project Router
+short_description: Route this UE5.7 singleplayer project request to one primary skill, optional secondary skills, and the right docs before implementation.
+default_prompt: Analyze this Unreal Engine request for the current Lyra + GAS singleplayer project, choose one primary skill, optional secondary skills, required Docs/AI entries, and decide whether to use single-agent or multi-agent execution.

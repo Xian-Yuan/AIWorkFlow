@@ -1,0 +1,1 @@
+- [ ] Confirm blocked plan stays blocked

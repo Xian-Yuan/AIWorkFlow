@@ -1,0 +1,3 @@
+display_name: UE AI Validator
+short_description: Validate AI design, asset wiring, and debug risk for this UE5.7 Lyra + GAS singleplayer project before handoff.
+default_prompt: Validate this UE5.7 Lyra + GAS + AI implementation for the current singleplayer project, checking AI architecture fit, compile/runtime risk, asset hookup, regression scope, and whether the plan should be revised before execution.

@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "unreal-mcpython": {
+      "command": "python",
+      "args": [
+        "G:/UEGameDevelopment/Project/MLCase/Plugins/unreal-mcp/mcp-server/src/unreal_mcp/main.py"
+      ],
+      "env": {
+        "PYTHONPATH": "G:/UEGameDevelopment/Project/MLCase/Plugins/unreal-mcp/mcp-server/src"
+      }
+    },
+    "sigmap": {
+      "command": "G:/UEGameDevelopment/Tools/sigmap/sigmap.exe",
+      "args": ["--mcp"]
+    },
+    "windows-mcp": {
+      "command": "G:/UEGameDevelopment/秋叶comfyui整合包/ComfyUI-aki-v3/python/python.exe",
+      "args": ["-m", "windows_mcp"]
+    }
+  }
+}

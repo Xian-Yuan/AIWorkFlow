@@ -1,0 +1,65 @@
+# Repository outputs and VCS
+.git/
+.gitignore
+
+# Local tool installs and transient downloads
+.tools/
+.tmp/
+
+# Node / web dependencies
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+.vite/
+coverage/
+
+# Unreal Engine generated folders
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vs/
+.idea/
+Script/
+ScriptModules/
+ShaderAutogen/
+StagedBuilds/
+webcache_*/
+
+# Unreal heavy/binary content
+*.uasset
+*.umap
+*.ubulk
+*.uexp
+*.dll
+*.pdb
+*.exe
+*.lib
+*.obj
+*.pch
+
+# Plugin generated output
+Project/**/Plugins/**/Binaries/
+Project/**/Plugins/**/Intermediate/
+Project/**/Plugins/**/Saved/
+
+# Logs, caches, databases
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.cache
+
+# Media / generated assets
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.mp4
+*.mov
+*.wav
+*.mp3

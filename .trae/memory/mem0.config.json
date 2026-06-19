@@ -1,0 +1,11 @@
+{
+  "enabled": false,
+  "mode": "local-experiment",
+  "endpoint": "http://127.0.0.1:8888",
+  "project": "UEGameDevelopment",
+  "use_for_scopes": ["router", "implement"],
+  "sync_only_promoted_failures": true,
+  "max_results_router": 3,
+  "max_results_implement": 2,
+  "timeout_ms": 1500
+}

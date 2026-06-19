@@ -1,0 +1,33 @@
+# SigMap ignore file — gitignore syntax
+# Files and directories listed here are excluded from signature extraction.
+# This file is union-merged with .repomixignore if present.
+
+node_modules/
+dist/
+build/
+out/
+.next/
+coverage/
+target/
+vendor/
+*.generated.*
+*.pb.*
+*_pb.*
+*.min.js
+*.min.css
+
+# UE5 build artifacts
+Intermediate/
+Binaries/
+DerivedDataCache/
+Saved/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# AI tools noise
+.comfyui/
+ComfyUI-aki-v3/
+python/
+Temp/

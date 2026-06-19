@@ -1,0 +1,17 @@
+workflow: full
+phase: implement
+project_type: web
+implement_mode: subagent
+isolation: branch
+clarification_status: not_needed
+user_confirmed_plan: true
+router_skill_loaded: true
+review_result: pending
+verify_result: pending
+verification_report: null
+archived: false
+design_doc: Docs/superpowers/specs/2026-05-31-airpgweb-ingame-tile-map-editor-design.md
+base_ref: d7d92e6db805ac0ef15626d4f0134d858b1701d2
+created_at: 2026-05-31
+verified_at: null
+fix_attempts: 0

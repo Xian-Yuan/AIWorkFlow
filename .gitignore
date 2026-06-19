@@ -1,0 +1,13 @@
+# 项目目录由各自的独立 Git 仓库管理，不纳入根仓库
+Project/
+Project/LyraStarterGame - 5.7/
+
+# 可能的临时文件
+*.log
+.temp/
+Tools/
+秋叶comfyui整合包/
+
+# 本地误生成的递归技能副本
+.opencode/skills/prompt-compressor/prompt-compressor/
+.trae/skills/prompt-compressor/prompt-compressor/

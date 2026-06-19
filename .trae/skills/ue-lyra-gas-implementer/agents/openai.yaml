@@ -1,0 +1,3 @@
+display_name: UE Lyra GAS Implementer
+short_description: Implement Lyra + GAS gameplay features for this singleplayer UE5.7 project with complete files, asset wiring, and validation steps.
+default_prompt: Implement this feature for the current UE5.7 Lyra + GAS singleplayer project, producing architecture mapping, file list, code/config steps, asset hookup, and validation with no default multiplayer assumptions.

@@ -1,0 +1,55 @@
+{
+  "output": ".github/copilot-instructions.md",
+  "outputs": [
+    "copilot"
+  ],
+  "adapters": null,
+  "srcDirs": [
+    "Project/CharacterDesignTool",
+    "Project/MLCase/Source",
+    "Docs",
+    "src",
+    "app",
+    "lib",
+    "packages",
+    "services",
+    "api",
+    "server",
+    "client",
+    "web",
+    "frontend",
+    "backend"
+  ],
+  "exclude": [
+    "node_modules",
+    ".git",
+    "dist",
+    "build",
+    "out",
+    "__pycache__",
+    ".next",
+    "coverage",
+    "target",
+    "vendor",
+    ".context"
+  ],
+  "maxDepth": 6,
+  "maxSigsPerFile": 25,
+  "maxTokens": 6000,
+  "autoMaxTokens": true,
+  "coverageTarget": 0.8,
+  "modelContextLimit": 128000,
+  "maxTokensHeadroom": 0.2,
+  "secretScan": true,
+  "monorepo": true,
+  "diffPriority": true,
+  "watchDebounce": 300,
+  "routing": false,
+  "format": "default",
+  "tracking": false,
+  "mcp": {
+    "autoRegister": true
+  },
+  "strategy": "full",
+  "hotCommits": 10
+}
