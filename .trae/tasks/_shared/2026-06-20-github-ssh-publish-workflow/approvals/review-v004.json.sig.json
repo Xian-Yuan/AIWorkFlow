@@ -3,6 +3,6 @@
     "algorithm":  "ECDSA_P256_SHA256",
     "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
     "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
-    "digest":  "ffe066ede79efec1b8a0abfaab59ce79f9a51a99b52f2a0522aa7b444ba58b94",
-    "signature_base64":  "+Y7u50/VLSIoPDTInCGKJuH9V0Iy4RtlIyYT3euBPx9LUE2sO8DnQNIZw6k6Wpa3n7tCehEE8vhJWq4uHGh6uA=="
+    "digest":  "15d103ae6152c89ced05456c92161d6339404c16eafdc7a76d189c54d7362e55",
+    "signature_base64":  "QMF6fQ3tRnyroywXI4crBaDUXFdkLSIFXqs4QuoHTXxCOKBqmvO7TWrFWites8l4GWWjZATgHOhL0dkSJoOYkQ=="
 }
