@@ -1,4 +1,4 @@
-﻿workflow: full
+workflow: full
 phase: implement
 project_type: other
 implement_mode: direct
@@ -6,8 +6,8 @@ isolation: branch
 clarification_status: not_needed
 user_confirmed_plan: true
 router_skill_loaded: true
-review_result: pending
-verify_result: pending
+review_result: fail
+verify_result: fail
 verification_report: verification-report.md
 archived: false
 design_doc: null
@@ -15,5 +15,6 @@ base_ref: null
 created_at: 2026-06-18
 fix_attempts: 0
 spec_exists: true
-spec_scenario_count: 11
-spec_scenarios_done: 11
+spec_scenario_count: 12
+spec_scenarios_done: 3
+legacy_trust: legacy_untrusted

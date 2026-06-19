@@ -68,7 +68,7 @@ OpenCode 采用 **Plan + Implement 双 Agent 架构**。Plan 负责"想清楚做
 **设计原则：**
 - 不要让 agent 的数量超过问题本身需要的认知边界数
 - Plan 阶段用 Pro 模型（深度推理），Implement 阶段用 Flash 模型（快速执行）
-- 金璃好帮手 合并了原 ue-lyra-gas-implementer、web-implementer、ue-ai-validator、code-quality-reviewer 的职责
+- 金璃好帮手只承担实现与 Worker 自检；最终 Review/Verify/Archive 属于原 Issuer
 - character-designer 移出开发流水线，保留 skill 但不再作为 OpenCode agent
 - 领域知识通过 skill 动态加载，不通过 agent 静态拆分
 
@@ -104,7 +104,7 @@ OpenCode 采用 **Plan + Implement 双 Agent 架构**。Plan 负责"想清楚做
 | 5 | **Agent legibility is the goal** | 中文注释优先、命名清晰、文件结构扁平 |
 | 6 | **Fewer tools, more expressiveness** | 主 skill 选一个 + 若干次 skill，不堆砌 |
 | 7 | **Progressive disclosure** | 先加载路由摘要 → 按需读取深层文档 |
-| 8 | **Corrections are cheap, waiting is expensive** | Review 不阻塞流转，Verify 阶段集中修复 |
+| 8 | **Corrections are cheap, waiting is expensive** | Worker 快速提交，Issuer 快速拒绝并重发窄包；最终审核和归档不降级 |
 
 ## 协作顺序
 
@@ -116,7 +116,8 @@ OpenCode 采用 **Plan + Implement 双 Agent 架构**。Plan 负责"想清楚做
      ├─ UE5: ue-lyra-gas-implementer (+ ue-ai-validator 并行)
      ├─ Web: web-implementer → 加载 web-fullstack/ui-ux-pro-max/webapp-testing
      └─ Other: general subagent
-  → code-quality-reviewer (Review + Verify)
+  → 原 Issuer 独立 Review + Verify
+  → 原 Issuer 显式签名 Archive
   → 用户确认结论
 ```
 

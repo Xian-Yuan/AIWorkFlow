@@ -22,3 +22,5 @@
 | S18 | pass | pass | PASS |  |
 | S19 | pass | pass | PASS |  |
 | S20 | pass | pass | PASS |  |
+| S21 | pass | pass | PASS |  |
+| S22 | pass | pass | PASS |  |

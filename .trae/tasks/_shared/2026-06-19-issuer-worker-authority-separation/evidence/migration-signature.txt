@@ -1,0 +1,206 @@
+{
+    "schema_version":  1,
+    "scanned_at":  "2026-06-19T17:29:36.3964502+08:00",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "applied":  true,
+    "tasks":  [
+                  {
+                      "task":  "2026-06-18-pipeline-architecture",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\ai-drama\\2026-06-18-pipeline-architecture",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-scriptwriter-skill",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\ai-drama\\2026-06-18-scriptwriter-skill",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-viral-analyzer-skill",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\ai-drama\\2026-06-18-viral-analyzer-skill",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-19-fix-verification-blockers",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\ai-drama\\2026-06-19-fix-verification-blockers",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "combat-sandbox",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\airpgweb\\combat-sandbox",
+                      "phase":  "review",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "combat-sandbox-v2",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\airpgweb\\combat-sandbox-v2",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "ingame-tile-editor",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\airpgweb\\ingame-tile-editor",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-17-taxonomy-cleanup",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-17-taxonomy-cleanup",
+                      "phase":  "verify",
+                      "archived":  "true",
+                      "classification":  "migration_required"
+                  },
+                  {
+                      "task":  "2026-06-18-ai-drama-workflow-research",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-ai-drama-workflow-research",
+                      "phase":  "plan",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-codex-ccs-capability-consistency",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-codex-ccs-capability-consistency",
+                      "phase":  "archive",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-hermes-local-worker-deployment",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-hermes-local-worker-deployment",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-agent-soul-upgrade",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-agent-soul-upgrade",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-persona-language-vision-foundation",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-persona-language-vision-foundation",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-self-evolution-engine",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-self-evolution-engine",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-soul-core-1-5-release",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-soul-core-1-5-release",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-soul-core-agent-bridge",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-soul-core-agent-bridge",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-soul-core-bridge-v2",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-soul-core-bridge-v2",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-jinli-soul-core-mcp-plugin",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-jinli-soul-core-mcp-plugin",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-workflow-ecosystem-upgrade",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-workflow-ecosystem-upgrade",
+                      "phase":  "review",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-18-workflow-optimization",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-18-workflow-optimization",
+                      "phase":  "verify",
+                      "archived":  "true",
+                      "classification":  "migration_required"
+                  },
+                  {
+                      "task":  "2026-06-19-ds4-flash-worker-repair-loop",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-19-ds4-flash-worker-repair-loop",
+                      "phase":  "archive",
+                      "archived":  "true",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-19-hermes-workflow-integration",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-19-hermes-workflow-integration",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "2026-06-19-issuer-worker-authority-separation",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\2026-06-19-issuer-worker-authority-separation",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "not_applicable"
+                  },
+                  {
+                      "task":  "jinli-soul-core",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\jinli-soul-core",
+                      "phase":  "plan",
+                      "archived":  "true",
+                      "classification":  "migration_required"
+                  },
+                  {
+                      "task":  "regression-deepseek-s01-plan-blocked",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\regression-deepseek-s01-plan-blocked",
+                      "phase":  "plan",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "regression-deepseek-s02-unconfirmed-plan",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\regression-deepseek-s02-unconfirmed-plan",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "regression-deepseek-s03-router-not-loaded",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\regression-deepseek-s03-router-not-loaded",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  },
+                  {
+                      "task":  "regression-deepseek-s04-implement-authorized",
+                      "path":  "E:\\UEGameDevelopment\\.trae\\tasks\\_shared\\regression-deepseek-s04-implement-authorized",
+                      "phase":  "implement",
+                      "archived":  "false",
+                      "classification":  "legacy_untrusted"
+                  }
+              ],
+    "migration_digest":  "1eba5c73fe8e0fed0449b53f5c92bdda8a150fca170670335d310c8d4337afb7"
+}

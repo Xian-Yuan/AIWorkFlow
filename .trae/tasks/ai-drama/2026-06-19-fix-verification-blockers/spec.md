@@ -51,18 +51,21 @@
 - **WHEN** 检查每个 task 的 checkbox
 - **THEN** 已实现的任务标记为 `[x]`
 - **THEN** 每个 WP 有对应的 worker report（work-packages/*.md 末尾追加完成记录）
+- **Status**: ✅ 已完成。已实现的 tasks 已勾选，未实现的保留 [ ] 并注明原因。
 
 ### AC09: Verify 门禁通过
 - **GIVEN** 修复完成
 - **WHEN** 运行 `task-guard.ps1 <task-name> verify`
 - **THEN** 返回 exit code 0
 - **THEN** `.task.yaml` 中 `review_result: passed`, `verify_result: passed`
+- **Status**: ⚠️ 已运行 verify 门禁，输出已记录。但因原始 task packet 有未实现任务（真实 AI 后端、E2E 测试等），verify 返回 BLOCKED。提交流程等待爸爸批准。
 
 ### AC10: Verification Report 有实际命令输出
 - **GIVEN** verification-report.md
 - **WHEN** 检查报告内容
 - **THEN** 报告包含实际运行的命令及其 stdout/stderr 输出
 - **THEN** 不包含空的自检"✅"标记
+- **Status**: ✅ 已完成。3 份 verification-report.md 全部重写，包含 pytest 完整输出、pipeline run 输出、import 验证等实际命令证据。
 
 ## Non-Goals
 - 不重写架构（保持现有 6 层架构设计）
@@ -77,3 +80,24 @@
 3. WP03: 测试覆盖（加测试 + 取消 pending 标记）
 4. WP04: 验收文档（勾选 + verification-report + verify 门禁）
 5. WP05: P1 修复（资产复制/占位替换）
+
+## Current Progress Audit (2026-06-19 15:45)
+
+- **Current Phase**: Implement
+- **Verified AC**: 9/10（AC01-AC08 ✅, AC10 ✅, AC09 ⚠️ 待批准）
+- **AC01 (包结构)**: ✅ 9 个模块 import 通过，python -m 全部 exit 0
+- **AC02 (真实 Handler)**: ✅ 7 个 phase 全为非 lambda 真实函数，Phase 2 调用 Scriptwriter cmd_quick
+- **AC03 (角色追踪)**: ✅ _detect_characters 使用 char_map + regex 回退，不返回空数组
+- **AC04 (TTS-first)**: ✅ duration_source != "tts_measured" → ValueError
+- **AC05 (SRT 多对白)**: ✅ 音频 consumption 修复，不重复使用第一段
+- **AC06 (资产复制)**: ✅ shutil.copy2 复制文件到项目目录
+- **AC07 (测试覆盖)**: ✅ 95 tests 全通过（56 新增 + 39 已有）
+- **AC08 (任务勾选)**: ✅ 3 个 task packet 已根据实际完成情况勾选
+- **AC09 (Verify 门禁)**: ⚠️ 已运行并记录输出，但因原始 task 有未实现功能，verify 返回 BLOCKED。需爸爸批准才能设 passed
+- **AC10 (Verification Report)**: ✅ 3 份报告全部重写，含 py.test 输出、pipeline run、import 验证等实际证据
+- **WP01**: ✅ 完成
+- **WP02**: ✅ 完成；Scriptwriter 管线调用 + known_ids 修复 + 全 7 阶段 E2E 通过
+- **WP03**: ✅ 完成；联网环境 `95 passed`（+2 新增 known_ids 测试）
+- **WP05**: ✅ 完成；资产复制 + PLACEHOLDER 替换
+- **WP04**: ✅ 主要任务完成；T4.3/T4.4/T4.5/T4.6 已完成，T4.2 等待爸爸批准
+- **Next Step**: 等待爸爸审查结果，决定是否批准归档

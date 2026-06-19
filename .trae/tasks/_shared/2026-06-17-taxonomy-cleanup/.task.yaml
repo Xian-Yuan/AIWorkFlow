@@ -1,4 +1,4 @@
-﻿workflow: full
+workflow: full
 phase: verify
 project_type: other
 implement_mode: direct
@@ -15,3 +15,4 @@ base_ref: null
 created_at: 2026-06-17
 verified_at: 2026-06-17
 fix_attempts: 0
+legacy_trust: migration_required

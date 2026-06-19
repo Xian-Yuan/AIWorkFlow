@@ -131,9 +131,16 @@
 | Phase | Status | Key Decision |
 |-------|--------|-------------|
 | Plan | ✅ Completed | 调研 14+ 开源项目，确定 7 阶段管线 + 工具抽象层架构 |
-| Implement | ⬜ Pending | 待外部模型执行 |
+| Implement | ➡️ Migrated | 实施迁移至 `ai-drama/2026-06-18-pipeline-architecture` |
 | Review | ⬜ Pending | — |
 | Verify | ⬜ Pending | — |
+
+## Current Progress Audit (2026-06-19)
+
+- 本包仅作为调研与初始需求基线，不再承载实施状态。
+- 当前实施事实源：`ai-drama/2026-06-18-pipeline-architecture`。
+- 当前阻断修复事实源：`ai-drama/2026-06-19-fix-verification-blockers`。
+- 原始 8 条 AC 尚未在本包内形成独立验证证据，因此保持 `0/8 verified`。
 
 ## Non-Goals
 

@@ -34,7 +34,7 @@
 | 5 | **Agent legibility is the goal** | 代码优化目标：Agent 可读性 > 人类可读性 | 注释用中文（Agent 理解优先级）、命名清晰、文件结构扁平 |
 | 6 | **Fewer tools, more expressiveness** | 少而精的工具 > 多而杂的工具。渐进披露 > 一次性全加载 | Skill 路由表保持精炼（UE5: 10个 / Web: 6个 / Other: 3个） |
 | 7 | **Progressive disclosure** | Agent 递归发现上下文，不是一次性全塞入 | 先加载 CLAUDE.md 目录 → 按需读取深层 Docs/AI/ 文档 |
-| 8 | **Corrections are cheap, waiting is expensive** | 高吞吐下事后修复比阻塞合并门槛更高效 | Review 不阻塞流转（有条件通过仍可推进），Verify 阶段集中修复 |
+| 8 | **Corrections are cheap, waiting is expensive** | Worker 快速执行，Issuer 快速拒绝并重发窄包 | 不降低最终审核、签名和归档门槛 |
 
 ## 工作流（Plan → Implement → Review → Verify — Comet 风格，多项目类型）
 
@@ -59,7 +59,8 @@
 - **唯一入口**：`ue-project-router`（`.trae/skills/ue-project-router/SKILL.md`）
 - **状态文件**：`.trae/tasks/<task-name>/.task.yaml`（含 `project_type` 字段：`ue5` / `web` / `other`）
 - **状态管理**：`.trae/scripts/task-state.ps1`（init/get/set/transition/check）
-- **守卫检查**：`.trae/scripts/task-guard.ps1`（plan/implement/review/verify -Apply）
+- **守卫检查**：`.trae/scripts/task-guard.ps1`（Verify 只检查，不归档）
+- **Authority**：`issuer-identity.ps1`、`task-packet-seal.ps1`、`worker-capability.ps1`、`issuer-review.ps1`、`issuer-archive.ps1`
 
 ### 阶段流转
 
@@ -67,15 +68,15 @@
 任何项目需求
   ↓ ue-project-router (项目类型检测 + 阶段检测)
 Phase 1: Plan     [Pro]  → task-guard plan -Apply → phase: implement
-Phase 2: Implement [Flash] → task-guard implement -Apply → phase: review
+Phase 2: Implement [Flash] → Worker 仅提交 progress/result
   ├─ UE5:  ue-lyra-gas-implementer / ue5-cpp-gameplay / ...
   ├─ Web:  web-implementer → web-fullstack / ui-ux-pro-max / ...
   └─ Other: brainstorming → 按需加载
-Phase 3: Review+Verify [Pro] → task-guard review -Apply → task-guard verify -Apply → phase: archive
+Phase 3: Review+Verify [原 Issuer / Pro] → issuer-review approve/reject → task-guard verify
   ├─ UE5:  code-quality-reviewer → ue-ai-validator（同一 Pro 会话）
   ├─ Web:  code-quality-reviewer → npm build + test（同一 Pro 会话）
   └─ Other: 按配置执行
-Phase 4: Archive   → task-state transition archived
+Phase 4: Archive   → issuer-archive archive（独立显式签名动作）
 ```
 
 ### 项目类型检测（Step 0，最先执行）
@@ -120,17 +121,18 @@ Phase 4: Archive   → task-state transition archived
 7. 每完成一项立即打勾 tasks.md 并提交
 8. 构建/编译验证（UE5: UnrealBuildTool / Web: npm run build）
 
-### 阶段三：Review（由 code-quality-reviewer 主导，不区分项目类型）
+### 阶段三：Review（由原 Issuer 主导，不区分项目类型）
 1. 框架/结构合规检查
 2. 冗余分析（是否与已有实现重复）
 3. 安全审查（UE5: 网络复制/RPC / Web: XSS/SQL注入/密钥暴露）
-4. 输出质检报告，通过后自动流转
+4. 原 Issuer 独立复验并签署 approve/reject；Worker 自检不能替代 Review
 
 ### 阶段四：Verify（按项目类型分派）
 - **UE5**：`ue-ai-validator`（编译 + AI选型 + 资产接线 + 回归）
 - **Web**：router 直接执行（npm build + test + 功能回归 + UI 截图）
 - **Other**：按项目配置执行
 - 输出验收报告到 `.trae/tasks/<name>/verification-report.md`
+- Verify 只验证，不自动归档；归档必须由 `issuer-archive.ps1 archive` 显式签署
 
 ### Basic Memory 第一阶段
 - `Docs/Memory/README.md` 是 failure memory 的规则说明

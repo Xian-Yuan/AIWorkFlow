@@ -59,6 +59,9 @@ if (-not (Test-Path $YAML_FILE)) {
 $phase = Get-YamlField "phase" $YAML_FILE
 $projectType = Get-YamlField "project_type" $YAML_FILE
 $workflow = Get-YamlField "workflow" $YAML_FILE
+$workerProfile = Get-YamlField "worker_profile" $YAML_FILE
+$activeRepairPackage = Get-YamlField "active_repair_package" $YAML_FILE
+$authorityProfile = Get-YamlField "authority_profile" $YAML_FILE
 
 if ($Direction -eq "auto") {
     switch ($phase) {
@@ -116,7 +119,97 @@ switch ($Direction) {
 - New Agent reads spec.md -> Quick Status table to understand state
 "@
         }
-        $handoff = @"
+        if ($workerProfile -eq "ds4-flash") {
+            $modelHint = "DS4 Flash (fresh context)"
+            if ($authorityProfile -eq "issuer-worker-v1") {
+                $capabilityDir = Join-Path $TASK_DIR "capabilities"
+                $capabilities = if (Test-Path -LiteralPath $capabilityDir) {
+                    @(Get-ChildItem -LiteralPath $capabilityDir -Filter "*.capability.json" -File | Sort-Object Name)
+                }
+                else { @() }
+                $capabilityList = if ($capabilities.Count -gt 0) {
+                    ($capabilities | ForEach-Object { "- " + (Resolve-Path -LiteralPath $_.FullName -Relative) }) -join "`n"
+                }
+                else {
+                    "- No signed capability exists. Issuer must run worker-capability.ps1 issue."
+                }
+                $handoff = @"
+# Handover: Issuer -> DS4 Flash Worker
+
+## Task Identity
+- Task: $TaskName
+- Worker profile: ds4-flash
+- Authority profile: issuer-worker-v1
+
+## Signed Capabilities
+$capabilityList
+
+## Worker Contract
+1. Use only the assigned signed capability.
+2. Read the work package named by the capability.
+3. Modify only capability Allowed Paths.
+4. Do not modify `.task.yaml`, task docs, work packages, evidence, approvals, or archive state.
+5. Append progress with `worker-submit.ps1 progress`.
+6. Submit one final result with `worker-submit.ps1 result`.
+7. Report only `working`, `partial`, `blocked`, or `implementation_done`.
+8. Review, Verify, repair publication, and Archive belong to the original Issuer.
+"@
+            }
+            else {
+            $workPackageDir = Join-Path $TASK_DIR "work-packages"
+            $packageFiles = @()
+            if ($activeRepairPackage) {
+                $candidate = Join-Path $TASK_DIR $activeRepairPackage
+                if (Test-Path -LiteralPath $candidate) {
+                    $packageFiles = @($candidate)
+                }
+            }
+            if ($packageFiles.Count -eq 0 -and (Test-Path -LiteralPath $workPackageDir)) {
+                $packageFiles = @(Get-ChildItem -LiteralPath $workPackageDir -Filter "*.md" -File |
+                    Where-Object {
+                        $content = Get-Content -LiteralPath $_.FullName -Raw
+                        $content -match "(?mi)^Status:\s*(unclaimed|claimed)\s*$"
+                    } |
+                    Sort-Object Name |
+                    Select-Object -ExpandProperty FullName)
+            }
+            $packageList = if ($packageFiles.Count -gt 0) {
+                ($packageFiles | ForEach-Object { "- " + (Resolve-Path -LiteralPath $_ -Relative) }) -join "`n"
+            }
+            else {
+                "- No ready DS4 work package found. Lead must publish one before implementation."
+            }
+            $handoff = @"
+# Handover: Lead -> DS4 Flash Worker
+
+## Task Identity
+- Task: $TaskName
+- Project type: $projectType
+- Worker profile: ds4-flash
+- State file: $YAML_FILE
+
+## Assigned Work Packages
+$packageList
+
+## Worker Contract
+1. Start a fresh context for one work package.
+2. Read only the assigned package and its Read First files.
+3. Modify only Allowed Paths and honor Forbidden Paths.
+4. Work on the package Root Cause ID only; do not redesign the architecture.
+5. Run the exact Required Verification command.
+6. Write the exact Return Report, including raw command results and Worker Authority.
+7. Do not edit tests, acceptance criteria, task state, verification evidence, or Review/Verify results.
+8. If blocked, stop and report the smallest reproducible blocker.
+
+## Completion Boundary
+- DS4 Flash may report implementation results only.
+- Codex lead independently performs Review and Verify.
+- A failed lead verification is repackaged through worker-repair-loop.ps1; the worker does not reopen the full plan.
+"@
+            }
+        }
+        else {
+            $handoff = @"
 # Handover: Plan -> Implement
 
 ## Task Identity
@@ -141,6 +234,7 @@ switch ($Direction) {
 5. When all done, run: task-handoff.ps1 $TaskName
 $specSummary
 "@
+        }
     }
     "implement-to-review" {
         $nextPhase = "review"; $modelHint = "Pro"
@@ -154,7 +248,54 @@ $specSummary
             $tm = [regex]::Matches($sc,'###\s+S\d+'); $dm = [regex]::Matches($sc,'\*\*Status\*\*:\s*\[x\]')
             $specSummary = "Spec progress: $($dm.Count)/$($tm.Count) scenarios done"
         }
-        $handoff = @"
+        if ($authorityProfile -eq "issuer-worker-v1") {
+            $modelHint = "Original Issuer (fresh review context)"
+            $handoff = @"
+# Handover: Worker Submission -> Issuer Review
+
+## Task Identity
+- Task: $TaskName
+- Authority profile: issuer-worker-v1
+
+## Issuer Contract
+1. Start a fresh review context under the original Issuer Windows SID.
+2. Verify packet and capability signatures.
+3. Independently rerun required tests and build the evidence manifest.
+4. Run `issuer-review.ps1 approve` or `issuer-review.ps1 reject`.
+5. On reject, publish the repair package only through the Issuer command.
+6. Do not archive during Review or Verify.
+7. Archive later with `issuer-archive.ps1 archive`.
+"@
+        }
+        elseif ($workerProfile -eq "ds4-flash") {
+            $modelHint = "Codex lead/verifier"
+            $handoff = @"
+# Handover: DS4 Flash Worker -> Codex Review+Verify
+
+## Task Identity
+- Task: $TaskName
+- Project type: $projectType
+- Worker profile: ds4-flash
+
+## Change Summary
+### New Files
+$addedList
+
+### Modified Files
+$modifiedList
+
+### $specSummary
+
+## Independent Acceptance Contract
+1. Review every worker report but do not accept its success claims as evidence.
+2. Independently rerun the required commands and acceptance criteria.
+3. Record verifier role, verifier model, worker model, and verifier context in verification-report.md.
+4. On failure, run worker-repair-loop.ps1 record-failure with one Root Cause ID and narrower Allowed Paths.
+5. Do not set Review/Verify pass until the relevant task guard passes.
+"@
+        }
+        else {
+            $handoff = @"
 # Handover: Implement -> Review+Verify
 
 ## Task Identity
@@ -180,10 +321,30 @@ $modifiedList
 3. **Fix Issues** - fix compile errors or review findings directly
 4. **Output Report** - summary of passed, fixed, known risks
 "@
+        }
     }
     "review-to-verify" {
-        $nextPhase = "verify"; $modelHint = "Pro (same model, no switch)"
-        $handoff = @"
+        $nextPhase = "verify"
+        if ($workerProfile -eq "ds4-flash") {
+            $modelHint = "Codex lead/verifier"
+            $handoff = @"
+# Handover: Codex Review -> Independent Verify
+
+## Task Identity
+- Task: $TaskName
+- Project type: $projectType
+- Worker profile: ds4-flash
+
+## Instructions
+1. Continue as the Codex lead that is independent of the DS4 worker context.
+2. Rerun automated verification and map evidence to every acceptance criterion.
+3. Confirm worker claims were not accepted without verification.
+4. Run task-guard.ps1 $TaskName verify before declaring completion.
+"@
+        }
+        else {
+            $modelHint = "Pro (same model, no switch)"
+            $handoff = @"
 # Handover: Review -> Verify
 
 ## Task Identity
@@ -200,6 +361,7 @@ $modifiedList
 3. Asset wiring completeness check (UE5)
 4. Output verification report
 "@
+        }
     }
 }
 

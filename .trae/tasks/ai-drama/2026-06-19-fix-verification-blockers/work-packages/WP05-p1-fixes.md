@@ -113,3 +113,24 @@ ffprobe test_minimal.mp3 2>&1 | Select-String "Duration"
 ffprobe test_minimal.mp4 2>&1 | Select-String "Duration"
 python -c "from PIL import Image; Image.open('test_minimal.png')"
 ```
+
+---
+
+## Worker Report — 2026-06-19 15:45
+
+**Owner**: 金璃好帮手 (via Plan 金璃小天才)  
+**Status**: Completed
+
+### Completed Tasks
+
+| Task | Description | Result |
+|------|-------------|--------|
+| T5.1 | 全局资产复用复制文件 | ✅ `shutil.copy2()` + fallback `create_minimal_png()` |
+| T5.2 | PLACEHOLDER 替换 | ✅ 新包 `ai_drama_placeholder_assets` + 5 模块更新 + 测试更新 |
+
+### Evidence
+
+- `ai_drama_placeholder_assets/` 包: `create_minimal_png`, `create_minimal_mp3`, `create_minimal_mp4`, `create_minimal_keyframe`
+- 5 模块已替换: asset_generator, video_generator, compositor, tts_generator, keyframe_generator
+- 测试断言已更新: 检查 PNG signature / MP4 ftyp atom 而非 `b"PLACEHOLDER_*"`
+- Tests: `95 passed`

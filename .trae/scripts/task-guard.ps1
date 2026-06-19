@@ -83,6 +83,89 @@ function Get-YamlField {
     return $value
 }
 
+function Test-IsDs4Task {
+    return (Get-YamlField "worker_profile") -eq "ds4-flash"
+}
+
+function Test-IsAuthorityTask {
+    return (Get-YamlField "authority_profile") -eq "issuer-worker-v1"
+}
+
+function Test-AuthorityPolicy {
+    if (-not (Test-IsAuthorityTask)) { return $true }
+    $routingPath = Join-Path $TASK_DIR "routing.md"
+    if (-not (Test-FileNonEmpty $routingPath)) { return $false }
+    $routing = Get-Content -LiteralPath $routingPath -Raw
+    foreach ($pattern in @(
+        "(?mi)^##\s+Authority Policy\s*$",
+        "(?mi)^\s*-\s*Authority profile:\s*issuer-worker-v1\s*$",
+        "(?mi)^\s*-\s*Packet mutation authority:\s*issuer only\s*$",
+        "(?mi)^\s*-\s*Review authority:\s*original issuer only\s*$",
+        "(?mi)^\s*-\s*Verify authority:\s*original issuer only\s*$",
+        "(?mi)^\s*-\s*Archive authority:\s*original issuer only\s*$",
+        "(?mi)^\s*-\s*Verify auto-archive:\s*forbidden\s*$"
+    )) {
+        if ($routing -notmatch $pattern) {
+            Write-Red "routing.md authority policy missing: $pattern"
+            return $false
+        }
+    }
+    return $true
+}
+
+function Test-AuthorityPacketReady {
+    if (-not (Test-IsAuthorityTask)) { return $true }
+    try {
+        Import-Module (Join-Path $PSScriptRoot "authority-core.psm1") -Force -DisableNameChecking
+        $authorityTask = Resolve-AuthorityTask $TaskName $resolved.Root
+        $null = Test-AuthorityPacketSeal $authorityTask
+        return $true
+    }
+    catch {
+        Write-Red "Authority packet verification failed: $($_.Exception.Message)"
+        return $false
+    }
+}
+
+function Test-AuthorityWorkerSubmissions {
+    $routing = Get-Content -LiteralPath (Join-Path $TASK_DIR "routing.md") -Raw
+    if ($routing -notmatch "(?mi)^\s*-\s*External workers:\s*yes\s*$") { return $true }
+    try {
+        Import-Module (Join-Path $PSScriptRoot "authority-core.psm1") -Force -DisableNameChecking
+        $authorityTask = Resolve-AuthorityTask $TaskName $resolved.Root
+        $packet = Test-AuthorityPacketSeal $authorityTask
+        $capabilityDir = Join-Path $TASK_DIR "capabilities"
+        $capabilities = if (Test-Path -LiteralPath $capabilityDir) {
+            @(Get-ChildItem -LiteralPath $capabilityDir -Filter "*.capability.json" -File)
+        }
+        else { @() }
+        foreach ($package in @(Get-WorkPackages)) {
+            $relativePackage = "work-packages/$($package.Name)"
+            $current = @()
+            foreach ($candidate in $capabilities) {
+                try {
+                    $artifact = Test-AuthorityCapability $authorityTask $candidate.FullName
+                    if ($artifact.packet_digest -eq $packet.packet_digest -and $artifact.work_package_path -eq $relativePackage) {
+                        $current += [pscustomobject]@{ File=$candidate; Artifact=$artifact }
+                    }
+                }
+                catch {}
+            }
+            $selected = $current | Sort-Object { $_.Artifact.attempt_id } | Select-Object -Last 1
+            if (-not $selected) { throw "No current signed capability for $relativePackage" }
+            $resultPath = Join-Path $TASK_DIR ($selected.Artifact.result_path -replace "/", "\")
+            if (-not (Test-Path -LiteralPath $resultPath)) { throw "Worker result missing for $relativePackage" }
+            $result = Get-Content -LiteralPath $resultPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($result.status -ne "implementation_done") { throw "Worker result is not implementation_done for $relativePackage" }
+        }
+        return $true
+    }
+    catch {
+        Write-Red "Authority worker submission verification failed: $($_.Exception.Message)"
+        return $false
+    }
+}
+
 function Set-YamlField {
     param([string]$Field, [string]$Value)
     $content = Get-Content $YAML_FILE -Raw
@@ -213,6 +296,11 @@ function Test-ArchitectureVerificationAndWorkPackagePolicy {
         }
     }
 
+    if (Test-IsDs4Task) {
+        if (-not (Test-Ds4RepairPolicy)) { return $false }
+        if (-not (Test-Ds4WorkPackageQuality)) { return $false }
+    }
+
     if ($tasks -notmatch "(?i)automated verification") {
         Write-Red "tasks.md missing automated verification task"
         return $false
@@ -223,6 +311,66 @@ function Test-ArchitectureVerificationAndWorkPackagePolicy {
         return $false
     }
 
+    return $true
+}
+
+function Test-Ds4RepairPolicy {
+    $routingPath = Join-Path $TASK_DIR "routing.md"
+    if (-not (Test-FileNonEmpty $routingPath)) { return $false }
+    $routing = Get-Content -LiteralPath $routingPath -Raw
+    if ($routing -notmatch "(?m)^##\s+Worker Repair Policy\s*$") {
+        Write-Red "routing.md missing Worker Repair Policy for ds4-flash"
+        return $false
+    }
+    $required = @(
+        "Worker profile:\s*ds4-flash",
+        "Lead/verifier:\s*(codex|ds4-flash-fresh-context)",
+        "Fresh context per repair:\s*yes",
+        "Automatic repair package generation:\s*yes",
+        "Maximum attempts per root cause:\s*3",
+        "Only lead may set Review/Verify pass:\s*yes",
+        "Worker reports required before merge:\s*yes"
+    )
+    foreach ($pattern in $required) {
+        if ($routing -notmatch $pattern) {
+            Write-Red "routing.md DS4 repair policy missing: $pattern"
+            return $false
+        }
+    }
+    $leadVerifier = Get-YamlField "lead_verifier"
+    if ($leadVerifier -notin @("codex","ds4-flash-fresh-context")) {
+        Write-Red ".task.yaml lead_verifier must be codex or ds4-flash-fresh-context for ds4-flash"
+        return $false
+    }
+    return $true
+}
+
+function Test-Ds4WorkPackageQuality {
+    $workPackages = @(Get-WorkPackages)
+    if ($workPackages.Count -eq 0) {
+        Write-Red "ds4-flash task requires at least one work package"
+        return $false
+    }
+    $requiredSections = @(
+        "Worker Profile",
+        "Context Budget",
+        "Root Cause Boundary",
+        "Do Not Game The Gate",
+        "Stop Conditions"
+    )
+    foreach ($package in $workPackages) {
+        $content = Get-Content -LiteralPath $package.FullName -Raw
+        $label = "DS4 work package $($package.Name)"
+        if (-not (Test-MarkdownSections $content $requiredSections $label)) { return $false }
+        if ($content -notmatch "(?mi)^\s*Target model:\s*deepseek-v4-flash\s*$") {
+            Write-Red "$label must target deepseek-v4-flash"
+            return $false
+        }
+        if ($content -notmatch "(?mi)^\s*Fresh context required:\s*yes\s*$") {
+            Write-Red "$label must require a fresh context"
+            return $false
+        }
+    }
     return $true
 }
 
@@ -302,6 +450,7 @@ function Test-WorkerReportQuality {
     $externalWorkers = ($routing -match "External workers:\s*yes")
     $reportsRequired = ($routing -match "Worker reports required before merge:\s*yes")
     if (-not ($externalWorkers -and $reportsRequired)) { return $true }
+    if (Test-IsAuthorityTask) { return Test-AuthorityWorkerSubmissions }
 
     $workPackages = @(Get-WorkPackages)
     if ($workPackages.Count -eq 0) {
@@ -340,8 +489,38 @@ function Test-WorkerReportQuality {
             Write-Red "$label must declare Extra scope taken: no"
             return $false
         }
+        if (Test-IsDs4Task) {
+            if (-not (Test-MarkdownSections $content @("Worker Authority") $label)) { return $false }
+            $authorityRules = @(
+                "Review result set by worker:\s*no",
+                "Verify result set by worker:\s*no",
+                "Task state changed by worker:\s*no",
+                "Acceptance criteria changed by worker:\s*no",
+                "Tests weakened by worker:\s*no"
+            )
+            foreach ($rule in $authorityRules) {
+                if ($content -notmatch "(?mi)^\s*-\s*$rule\s*$") {
+                    Write-Red "$label violates worker authority rule: $rule"
+                    return $false
+                }
+            }
+        }
     }
 
+    return $true
+}
+
+function Test-Ds4RepairState {
+    if (-not (Test-IsDs4Task)) { return $true }
+    $status = Get-YamlField "repair_loop_status"
+    if ($status -eq "architecture_review") {
+        Write-Red "DS4 repair loop is in architecture_review; automatic implementation cannot advance"
+        return $false
+    }
+    if ($status -notin @("idle","repair_required","resolved")) {
+        Write-Red "Invalid DS4 repair_loop_status: $status"
+        return $false
+    }
     return $true
 }
 
@@ -377,6 +556,62 @@ function Test-VerificationReportQuality {
         }
     }
     return $true
+}
+
+function Test-Ds4VerifierIndependence {
+    if (-not (Test-IsDs4Task)) { return $true }
+    $reportValue = Get-YamlField "verification_report"
+    $reportPath = Resolve-VerificationReportPath $reportValue
+    if (-not $reportPath -or -not (Test-Path -LiteralPath $reportPath)) {
+        Write-Red "DS4 task requires an existing verification report before Review/Verify pass"
+        return $false
+    }
+    $report = Get-Content -LiteralPath $reportPath -Raw
+    foreach ($pattern in @(
+        "(?mi)^Verifier role:\s*lead\s*$",
+        "(?mi)^Worker model:\s*deepseek-v4-flash\s*$",
+        "(?mi)^\s*-\s*Independent verification run by reviewer:\s*yes\s*$",
+        "(?mi)^\s*-\s*Worker success claims accepted without verification:\s*no\s*$"
+    )) {
+        if ($report -notmatch $pattern) {
+            Write-Red "DS4 verification report missing independence evidence: $pattern"
+            return $false
+        }
+    }
+
+    $modelMatch = [regex]::Match($report, "(?mi)^Verifier model:\s*(?<value>.+?)\s*$")
+    $contextMatch = [regex]::Match($report, "(?mi)^Verifier context:\s*(?<value>.+?)\s*$")
+    if (-not $modelMatch.Success -or -not $contextMatch.Success) {
+        Write-Red "DS4 verification report must declare Verifier model and Verifier context"
+        return $false
+    }
+    $model = $modelMatch.Groups["value"].Value.Trim()
+    $context = $contextMatch.Groups["value"].Value.Trim()
+    $leadVerifier = Get-YamlField "lead_verifier"
+    if ($leadVerifier -eq "codex" -and $model -ne "codex") {
+        Write-Red "Configured lead_verifier=codex requires Verifier model: codex"
+        return $false
+    }
+    if ($leadVerifier -eq "ds4-flash-fresh-context" -and $model -ne "deepseek-v4-flash") {
+        Write-Red "Configured Flash fallback requires Verifier model: deepseek-v4-flash"
+        return $false
+    }
+    if ($model -eq "codex") {
+        if ($context -notin @("independent","fresh")) {
+            Write-Red "Codex verifier context must be independent or fresh"
+            return $false
+        }
+        return $true
+    }
+    if ($model -eq "deepseek-v4-flash") {
+        if ($context -ne "fresh") {
+            Write-Red "Flash-only verification must run in a fresh context"
+            return $false
+        }
+        return $true
+    }
+    Write-Red "Unsupported DS4 verifier model: $model"
+    return $false
 }
 
 function Test-ProjectSpecificChecks {
@@ -436,6 +671,7 @@ function Guard-Plan {
     Test-Check "tasks.md has at least one task" { Tasks-Has-Any }
     Test-Check "mature solution evidence and quality gate present" { Test-MatureSolutionEvidence }
     Test-Check "architecture context, acceptance criteria, automated verification, and work package policy present" { Test-ArchitectureVerificationAndWorkPackagePolicy }
+    Test-Check "issuer-worker authority policy is complete" { Test-AuthorityPolicy }
     Test-Check "clarification_status resolved" { (Get-YamlField "clarification_status") -in @("not_needed","answered") }
     Test-Check "user_confirmed_plan is true" { (Get-YamlField "user_confirmed_plan") -eq "true" }
     Test-Check "router_skill_loaded is true" { (Get-YamlField "router_skill_loaded") -eq "true" }
@@ -451,12 +687,14 @@ function Guard-Implement {
     }
     Test-Check "all tasks checked" { Tasks-All-Done }
     Test-Check "tasks.md exists" { Test-FileNonEmpty (Join-Path $TASK_DIR "tasks.md") }
+    Test-Check "authority packet seal is current" { Test-AuthorityPacketReady }
     Test-Check "external worker reports are complete and scoped" { Test-WorkerReportQuality }
+    Test-Check "DS4 repair state allows review" { Test-Ds4RepairState }
     $mr = Test-ProjectSpecificChecks
     if (-not $mr) { $script:BLOCKED = $true; Write-Red "  [BLOCKED] Mechanical checks failed" }
     Invoke-DocGuard "implement"
     $fa = Get-YamlField "fix_attempts"
-    if ($fa -and [int]$fa -ge 3) {
+    if (-not (Test-IsDs4Task) -and $fa -and [int]$fa -ge 3) {
         Write-Red "  [BLOCKED] Fix-attempt count = $fa (>=3). Forced fresh subagent required."
         $script:BLOCKED = $true
     }
@@ -466,6 +704,17 @@ function Guard-Implement {
 function Guard-Review {
     Write-Host "=== Guard: review -> verify ==="
     Test-Check "review_result is pass" { (Get-YamlField "review_result") -eq "pass" }
+    if (Test-IsAuthorityTask) {
+        $approval = Get-YamlField "verification_report"
+        Test-Check "issuer-signed review approval is current" {
+            if (-not $approval) { return $false }
+            $reviewScript = Join-Path $PSScriptRoot "issuer-review.ps1"
+            & $reviewScript verify $TaskName -Approval $approval *> $null
+            return ($LASTEXITCODE -eq 0)
+        }
+        return
+    }
+    Test-Check "DS4 verifier is independent" { Test-Ds4VerifierIndependence }
     $report = Get-YamlField "verification_report"
     if (-not $report -and (Get-YamlField "review_result") -eq "pass") {
         Write-Yellow "  [WARN] review_result=pass but no verification_report yet"
@@ -481,7 +730,17 @@ function Guard-Verify {
         $resolvedReport -and (Test-Path $resolvedReport)
     }
     Test-Check "verify_result is pass" { (Get-YamlField "verify_result") -eq "pass" }
-    Test-Check "verification report contains required automated acceptance evidence" { Test-VerificationReportQuality }
+    if (Test-IsAuthorityTask) {
+        Test-Check "issuer-signed review approval is current" {
+            $reviewScript = Join-Path $PSScriptRoot "issuer-review.ps1"
+            & $reviewScript verify $TaskName -Approval $report *> $null
+            return ($LASTEXITCODE -eq 0)
+        }
+    }
+    else {
+        Test-Check "verification report contains required automated acceptance evidence" { Test-VerificationReportQuality }
+        Test-Check "DS4 verifier is independent" { Test-Ds4VerifierIndependence }
+    }
     $fa = Get-YamlField "fix_attempts"
     if ($fa -and [int]$fa -ge 3) { Write-Yellow "  [WARN] High fix-attempt count ($fa)" }
     Write-Host "  [METRICS] Agent evaluation metrics -> see .trae/tasks/$TaskName/verification-report.md"
@@ -490,6 +749,15 @@ function Guard-Verify {
 function Guard-Archive {
     Write-Host "=== Guard: archive completeness ==="
     Test-Check "archived is true" { (Get-YamlField "archived") -eq "true" }
+    if (Test-IsAuthorityTask) {
+        Test-Check "issuer-signed archive certificate is current" {
+            $certificate = Get-YamlField "archive_certificate"
+            if (-not $certificate) { return $false }
+            $archiveScript = Join-Path $PSScriptRoot "issuer-archive.ps1"
+            & $archiveScript verify $TaskName -ArchiveCertificate $certificate *> $null
+            return ($LASTEXITCODE -eq 0)
+        }
+    }
 }
 
 if (-not (Test-Path $TASK_DIR)) { Write-Red "FATAL: task directory not found: $TASK_DIR"; exit 1 }
@@ -508,7 +776,14 @@ function Invoke-StateTransition {
     switch ($Event) {
         "plan-complete" { Set-YamlField "phase" "implement" }
         "implement-complete" { Set-YamlField "phase" "review"; Set-YamlField "review_result" "pending" }
-        "review-pass" { Set-YamlField "review_result" "pass"; Set-YamlField "phase" "verify"; Set-YamlField "verify_result" "pending"; Set-YamlField "verification_report" "null" }
+        "review-pass" {
+            Set-YamlField "review_result" "pass"
+            Set-YamlField "phase" "verify"
+            Set-YamlField "verify_result" "pending"
+            if (-not (Test-IsDs4Task)) {
+                Set-YamlField "verification_report" "null"
+            }
+        }
         "verify-pass" { Set-YamlField "verify_result" "pass"; Set-YamlField "phase" "archived"; Set-YamlField "archived" "true" }
         default { Write-Red "Unknown state transition event: $Event"; exit 1 }
     }
@@ -516,9 +791,12 @@ function Invoke-StateTransition {
 
 switch ($Phase) {
     "plan"      { Guard-Plan; if ($Apply -and -not $BLOCKED) { Invoke-StateTransition "plan-complete" } }
-    "implement" { Guard-Implement; if ($Apply -and -not $BLOCKED) { Invoke-StateTransition "implement-complete" } }
-    "review"    { Guard-Review; if ($Apply -and -not $BLOCKED) { Invoke-StateTransition "review-pass" } }
-    "verify"    { Guard-Verify; if ($Apply -and -not $BLOCKED) { Invoke-StateTransition "verify-pass" } }
+    "implement" {
+        Guard-Implement
+        if ($Apply -and -not $BLOCKED -and -not (Test-IsAuthorityTask)) { Invoke-StateTransition "implement-complete" }
+    }
+    "review"    { Guard-Review }
+    "verify"    { Guard-Verify }
     "archive"   { Guard-Archive }
     default     { Write-Red "Unknown phase: $Phase. Use: plan | implement | review | verify | archive"; exit 1 }
 }

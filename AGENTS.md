@@ -19,6 +19,10 @@ Codex must use the shared task-packet workflow for project work:
 
 Simple worker models must only work from `work-packages/*.md`; architecture decisions and final verification stay with the lead model.
 
+For `worker_profile: ds4-flash`, follow `Docs/AI/40-DS4-Flash-Worker-Repair-Loop.md`. DS4 failures must use `worker-repair-loop.ps1 record-failure`; direct Review/Verify failure transitions are not allowed. Only the lead verifier may accept the task.
+
+For `authority_profile: issuer-worker-v1`, follow `Docs/AI/41-Issuer-Worker-Authority-Separation.md`. Workers may only use signed capabilities plus `worker-submit.ps1`; they must not edit the task packet, approve, publish repair work, or archive. Verify never archives. Only the original Issuer SID/key may sign Review and explicit Archive.
+
 > **Harness Engineering 原则：本文件是目录，不是百科全书。详细信息在 `Docs/AI/`、`.trae/` 和 `.opencode/`。**
 
 ## ⛔ IMPLEMENT PHASE GATE (non-skippable)

@@ -15,3 +15,4 @@ base_ref: null
 created_at: 2026-06-18
 verified_at: 2026-06-18
 fix_attempts: 0
+legacy_trust: migration_required

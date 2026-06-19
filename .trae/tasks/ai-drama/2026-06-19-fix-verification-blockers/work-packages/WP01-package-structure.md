@@ -2,7 +2,16 @@
 
 Owner model: 金璃好帮手
 Difficulty: medium（涉及 9 个目录重命名 + import 路径调整）
-Status: pending
+Status: completed
+Completed at: 2026-06-19
+
+## Worker Report
+- T1.1: ✅ 9 个目录重命名成功
+- T1.2: ✅ 9 个 __init__.py 添加导出
+- T1.3: ✅ 修复 2 处连字符引用（conftest.py 注释）
+- T1.3b: ✅ 修复 scriptwriter(8文件) + viral_analyzer(2文件) 的绝对→相对 import
+- T1.4: ✅ 全部 9 模块 `python -m ai_drama_* --help` 返回 exit 0
+- T1.5: ✅ 9 个 SKILL.md 名称更新
 
 ## Goal
 让 9 个 Skill 成为合法 Python 包，`python -m ai_drama_*` 可执行。

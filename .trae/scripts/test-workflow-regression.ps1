@@ -403,6 +403,18 @@ try {
         & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $ValidateCapabilities -Mode Inspect *> $null
         Add-Result "S20" "validate-codex-capabilities-inspect" "pass" $(if ($LASTEXITCODE -eq 0) { "pass" } else { "fail" }) ($LASTEXITCODE -eq 0)
     }
+
+    $WorkerRepairLoopRegression = Join-Path $PSScriptRoot "test-worker-repair-loop.ps1"
+    if (Test-Path $WorkerRepairLoopRegression) {
+        & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $WorkerRepairLoopRegression *> $null
+        Add-Result "S21" "ds4-worker-repair-loop-pass" "pass" $(if ($LASTEXITCODE -eq 0) { "pass" } else { "fail" }) ($LASTEXITCODE -eq 0)
+    }
+
+    $AuthoritySeparationRegression = Join-Path $PSScriptRoot "test-authority-separation.ps1"
+    if (Test-Path $AuthoritySeparationRegression) {
+        & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $AuthoritySeparationRegression *> $null
+        Add-Result "S22" "issuer-worker-authority-separation-pass" "pass" $(if ($LASTEXITCODE -eq 0) { "pass" } else { "fail" }) ($LASTEXITCODE -eq 0)
+    }
 }
 finally {
     Pop-Location

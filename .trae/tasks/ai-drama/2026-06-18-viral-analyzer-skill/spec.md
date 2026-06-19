@@ -512,9 +512,19 @@ output/viral_analysis/{analysis_id}/
 | Phase | Status | Key Decision |
 |-------|--------|-------------|
 | Plan | ✅ Completed | 独立 Skill + 双引擎(分析+创作) + 4 知识库 + 异常值驱动 + 结构镜像 |
-| Implement | ✅ Completed | 26 文件: 骨架+知识库+3分析引擎+创作引擎+CLI+测试 |
-| Review | ⬜ Pending | — |
-| Verify | ✅ Self-verified | 13 AC 全部覆盖, verification-report.md 已写 |
+| Implement | 🚧 In Progress | 分析/创作代码路径和 20 个测试已落地，真实外部输入验证未完成 |
+| Review | ❌ Failed | 现有测试以 fixture/MockLLM 为主，不能证明 URL/频道端到端 |
+| Verify | ❌ Failed | 仅 4 条 AC 有直接自动化证据 |
+
+## Current Progress Audit (2026-06-19)
+
+- **Current Phase**: Implement
+- **Verified AC**: 4/13（ScriptInject 文件结构、知识库追加/去重、Z-score、版权结构规则）。
+- **Automated tests**: 20/20 通过，但主要使用预构造报告与 MockLLM。
+- **E2E blocker**: 未保存 3 个真实视频 URL、2 篇小说、1 个频道的可复现命令输出。
+- **Knowledge blocker**: VideoAnalyzer 使用非包内导入追加知识库，异常会被捕获后静默降级。
+- **Downstream blocker**: ScriptInject 能生成文件，但 Scriptwriter 尚未消费注入参数。
+- **Next Step**: 修复包内导入，补真实 Video/Novel/Channel 测试和与 Scriptwriter 的消费链路。
 
 ## Non-Goals
 

@@ -1,5 +1,10 @@
 ﻿# Tasks: AI 漫剧/真人剧 自动化管线 (ai-drama-producer)
 
+> **2026-06-19 进度审计**：本包是上游调研与需求基线，实施工作已迁移至
+> `ai-drama/2026-06-18-pipeline-architecture` 及
+> `ai-drama/2026-06-19-fix-verification-blockers`。下列 checkbox 保留为原始实施
+> backlog，不再代表本调研包自身的完成度。
+
 ## Dependency Graph
 
 ```

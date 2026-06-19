@@ -3,6 +3,10 @@
 Verification Result: pass | fail
 Verified at: <YYYY-MM-DD HH:mm>
 Verifier: <agent/model>
+Verifier role: lead
+Verifier model: codex | deepseek-v4-flash
+Worker model: deepseek-v4-flash | other
+Verifier context: independent | fresh | same
 
 ## Review Basis
 - Worker reports reviewed: yes | no | not-applicable

@@ -68,6 +68,8 @@ Implementation plans belong under:
 | 38 | `38-Jinli-Agent-Soul-Architecture.md` | 金璃 Agent 灵魂层架构 |
 
 | 39 | `39-Root-Git-Workspace-Boundary.md` | Cross-IDE root Git boundary, scan protection, line endings, and push safety |
+| 40 | `40-DS4-Flash-Worker-Repair-Loop.md` | DS4 Flash bounded delegation, independent Codex acceptance, and automatic repair repackaging |
+| 41 | `41-Issuer-Worker-Authority-Separation.md` | Cryptographic issuer authority, bounded worker capabilities, independent approval, and explicit archive |
 
 ## Generated Inventories
 

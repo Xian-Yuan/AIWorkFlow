@@ -23,3 +23,17 @@
 
 ## No Code Changes
 Reason: 本任务是纯调研 + spec 编写。产出物是 task packet，供外部模型直接读取并实现。不涉及任何现有项目文件的修改。
+
+## Progress Audit Update (2026-06-19)
+
+早期 “No Code Changes” 仅描述 Plan 创建时状态。后续实现实际位于：
+
+- `Project/AIDramaProducer/skills/ai_drama_orchestrator/`
+- `Project/AIDramaProducer/skills/ai_drama_text_preprocessor/`
+- `Project/AIDramaProducer/skills/ai_drama_asset_generator/`
+- `Project/AIDramaProducer/skills/ai_drama_keyframe_generator/`
+- `Project/AIDramaProducer/skills/ai_drama_tts_generator/`
+- `Project/AIDramaProducer/skills/ai_drama_video_generator/`
+- `Project/AIDramaProducer/skills/ai_drama_compositor/`
+
+本次仅更新任务包进度，未修改项目代码。

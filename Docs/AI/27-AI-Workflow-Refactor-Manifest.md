@@ -30,6 +30,8 @@ Read order for workflow work:
 | Failure memory | `skills/failure-memory/SKILL.md`, `Docs/Memory/` | Cross-session failure lessons |
 | Mature solution first | `Docs/AI/29-Mature-Solution-First-Workflow.md`, `.trae/scripts/task-guard.ps1` | Blocks MVP/reduced-quality plans unless explicitly approved |
 | Multi-agent task packets | `Docs/AI/33-Multi-Agent-Task-Packet-Workflow.md`, `.trae/scripts/work-package-template.md`, `.trae/scripts/agent-result-template.md` | Lets multiple models find bounded work and return evidence |
+| DS4 Flash worker repair loop | `Docs/AI/40-DS4-Flash-Worker-Repair-Loop.md`, `.trae/scripts/worker-repair-loop.ps1` | Repackages independent verification failures into narrower, bounded Flash work and trips architecture review after three same-root failures |
+| Issuer-worker authority | `Docs/AI/41-Issuer-Worker-Authority-Separation.md`, `.trae/scripts/authority-core.psm1`, `.trae/scripts/issuer-*.ps1` | Proves publisher/reviewer/archive authority using Windows SID, non-exportable CNG signatures, and bound hashes |
 | Codex workflow adapter | `skills/codex-project-router/SKILL.md` | Makes Codex use shared task packets, architecture evidence, and gates |
 | Workflow regression | `.trae/scripts/test-workflow-regression.ps1` | Mechanical regression checks |
 
@@ -96,6 +98,7 @@ Each active task should contain:
 8. Mature production-grade implementation is the default; MVP/prototype/reduced-quality plans require explicit user opt-in and a recorded Quality Exception.
 9. Multi-model collaboration must go through task packets and work packages; worker models do not own architecture or final verification.
 10. Codex must use `skills/codex-project-router/SKILL.md` for project work until a native `.codex/tasks` adapter exists.
+11. Worker models may append progress and submit one result only; task mutation, Review, Verify, repair publication, and Archive are original-Issuer capabilities.
 
 ## Verification Commands
 
@@ -119,6 +122,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\.trae\scripts\update-docs-
 | Spec lifecycle | .trae/scripts/spec-living.ps1 | Active authoritative |
 | Memory retrieval | .trae/scripts/memory-retrieve.ps1 | Active authoritative |
 | Verification | .trae/scripts/verify.ps1 | Active authoritative |
+| DS4 repair orchestration | .trae/scripts/worker-repair-loop.ps1 | Active authoritative for tasks with worker_profile=ds4-flash |
+| Issuer identity and signatures | .trae/scripts/authority-core.psm1 + issuer-identity.ps1 | Active authoritative |
+| Packet/capability authority | task-packet-seal.ps1 + worker-capability.ps1 + worker-submit.ps1 | Active authoritative |
+| Review and archive authority | issuer-review.ps1 + issuer-archive.ps1 | Active authoritative |
 | Regression testing | .trae/scripts/test-workflow-regression.ps1 | Active authoritative |
 | Rule registry | engine/rule-registry.json + engine/rule-enforcer.ps1 | Active authoritative |
 | Phase machine | engine/phase-machine.ps1 | DISABLED — parse errors |

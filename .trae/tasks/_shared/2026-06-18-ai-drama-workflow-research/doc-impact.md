@@ -23,3 +23,8 @@
 
 ## No Code Changes
 Reason: 本任务是纯调研 + spec 编写。产出物是 task packet，供外部模型直接读取并实现。不涉及任何现有项目文件的修改。
+
+## Progress Audit Update (2026-06-19)
+
+- 本包保持为调研基线，实施状态迁移至 `ai-drama/2026-06-18-pipeline-architecture`。
+- 更新 `.task.yaml`、`spec.md`、`tasks.md`，避免将原始实施 backlog 误认为本包未完成的研究工作。

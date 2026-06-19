@@ -39,6 +39,15 @@ Verifier 模式（Planner Profile 在 Verify 阶段的工具子集）：
 - `code-quality-reviewer`
 - `verification-before-completion`
 
+#### 静默 Bundle 加载协议（防 UI 闪烁）
+
+Bundle 加载流程必须遵循以下规则，避免 `skill` 工具调用结果在 UI 中覆盖式渲染导致内容"一闪消失"：
+
+1. **时机**：Bundle 在会话初始化阶段（第一条用户消息之前）加载，不在对话中途加载。
+2. **顺序**：一次性加载所有 Bundle 中的 skill，不要在单次工具调用之间输出任何中间文本。
+3. **确认**：所有 skill 加载完成后，输出**仅一条**简短确认（如 `⚙️ Hermes Profile loaded`）。不在加载期间输出进度文本。
+4. **约束**：禁止在 `skill` 工具调用之间插入 `I'm loading...`、`让我加载...` 等中间文本，这会在 UI 中产生中间渲染状态。
+
 ### 启动环境
 
 ```

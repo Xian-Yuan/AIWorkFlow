@@ -1,19 +1,25 @@
-# Claim: 金璃好帮手 WP02
+# WP02 Claim: Hermes Workflow MCP Server
 
-Task packet: `.trae/tasks/_shared/2026-06-19-hermes-workflow-integration/`
-Work package: `work-packages/WP02-hermes-workflow-mcp.md`
-Claimed at: `2026-06-19 14:11`
-Owner model: `金璃好帮手 (opencode deepseek-v4-pro)`
+- **Claim ID**: hermes-mcp-WP02
+- **Task**: _shared/2026-06-19-hermes-workflow-integration
+- **Claimed by**: 金璃好帮手 (lead model)
+- **Status**: active
 
-## Claimed Paths
+## Claim Scope
+
+Implementation of the jinli-workflow MCP server:
+1. Path validation and traversal rejection (paths.py)
+2. Role-based tool authorization (policy.py)
+3. Claim and report schema validation (schemas.py)
+4. Business logic layer delegating to PowerShell scripts (service.py)
+5. JSON-RPC MCP server over stdio (server.py)
+6. Package entry point (__main__.py, __init__.py)
+7. Unit tests (test_workflow_mcp.py)
+
+## Allowed Paths
 - `.trae/hermes/mcp/jinli_workflow/**`
 - `.trae/hermes/tests/test_workflow_mcp.py`
-- `.trae/tasks/_shared/2026-06-19-hermes-workflow-integration/claims/hermes-mcp-WP02.md`
-- `.trae/tasks/_shared/2026-06-19-hermes-workflow-integration/reports/hermes-mcp-WP02-result.md`
 
-## Scope Boundary
-- In scope: Implement jinli_workflow MCP server with typed tools, role authorization, path validation, gate delegation, claim collision safety, and report validation
-- Out of scope: Profiles, Skills, guard plugin, sync/launch adapters, documentation, application code
-
-## Expected Report
-- `reports/hermes-mcp-WP02-result.md`
+## Gates
+- [x] Plan gate: PASS
+- [x] Can-Edit: PASS

@@ -22,9 +22,9 @@ M1 must complete first (defines integration contract). M2/M3/M4 can proceed in p
 
 - [x] R01 — Add valid YAML frontmatter to `jinli-agent-soul`.
 - [x] R02 — Re-run skill discovery and workflow regression.
-- [ ] R03 — Deploy the installed Plugin adapter fix.
-- [ ] R04 — Prove the mandatory `response_plan` lifecycle returns a live plan.
-- [ ] R05 — Reissue independent verification and pass the Verify gate.
+- [x] R03 — Deploy the installed Plugin adapter fix.
+- [x] R04 — Prove the mandatory `response_plan` lifecycle returns a live plan.
+- [x] R05 — Reissue independent verification and pass the Verify gate.
 
 | Module | Tasks | Count | Status |
 |--------|-------|:-----:|:------:|

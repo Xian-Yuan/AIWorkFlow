@@ -20,4 +20,4 @@ fix_attempts: 0
 spec_exists: true
 spec_scenario_count: 7
 spec_scenarios_done: 0
-
+legacy_trust: legacy_untrusted

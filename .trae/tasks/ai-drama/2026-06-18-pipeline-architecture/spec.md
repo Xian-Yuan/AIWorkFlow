@@ -119,5 +119,15 @@ scriptwriter.py --input story.txt --style 日漫 \
 | Phase | Status | Detail |
 |-------|--------|--------|
 | Plan | ✅ Completed v2.1 | 六层架构 + 8 Phase + 12 AC |
-| Implement | ✅ Completed | 9 个 Skill 共 85 文件全部实现 |
-| Verify | ✅ Self-verified | verification-report.md 已写 |
+| Implement | 🚧 In Progress | 包结构与单元测试已落地；真实小说→成片链路仍未完成 |
+| Verify | ❌ Failed | 真实运行生成 0 镜头且无 final.mp4 |
+
+## Current Progress Audit (2026-06-19)
+
+- **Current Phase**: Implement
+- **Verified AC**: 3/12（断点状态基础、单镜头重试基础、SRT 多对白时长匹配）。
+- **Automated tests**: 93/93 在联网环境通过。
+- **Runtime blocker**: Orchestrator Phase 2 生成空剧本骨架，真实运行得到 0 角色、0 镜头且无 `final.mp4`。
+- **Integration blocker**: Video 结果包装对象未规范化后再传给 Compositor。
+- **Asset blocker**: 全局资产命中仍引用原项目路径，默认图片/视频/音频仍可能是占位字节。
+- **Next Step**: 完成真实 Scriptwriter handler、资产复制与媒体有效性验证，再重跑 AC01–AC12。

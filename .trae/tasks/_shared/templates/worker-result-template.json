@@ -1,0 +1,22 @@
+{
+  "status": "implementation_done",
+  "context_id": "worker-context-id",
+  "changed_files": [
+    "Project/Example/src/file.ps1"
+  ],
+  "commands": [
+    {
+      "command": "exact verification command",
+      "result": "pass"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC01",
+      "result": "pass",
+      "evidence": "bounded worker evidence"
+    }
+  ],
+  "extra_scope_taken": false,
+  "unresolved_risks": []
+}

@@ -140,6 +140,18 @@ Worker models must not own:
 - final acceptance
 - quality exceptions
 - rejected shortcut reversal
+- task packet or checklist mutation
+- formal task progress
+- repair package publication
+- Review, Verify, or Archive
+
+For `authority_profile: issuer-worker-v1`:
+
+- Codex is the Issuer and seals the packet before delegation.
+- The Worker receives only a signed capability and writes progress/result through `worker-submit.ps1`.
+- Codex independently signs approval with `issuer-review.ps1`.
+- `task-guard verify` is verification-only and does not archive.
+- Codex archives explicitly with `issuer-archive.ps1`.
 
 ## Output Contract
 

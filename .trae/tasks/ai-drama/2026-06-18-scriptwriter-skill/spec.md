@@ -103,5 +103,15 @@
 | Phase | Status | Detail |
 |-------|--------|--------|
 | Plan | ✅ Completed v2.1 | 3 步生成 + 15 条规则 + 15 AC + 注入接口 |
-| Implement | ✅ Completed | 38 文件: 骨架+风格+Schema+9验证器+3步+CLI+测试 |
-| Verify | ✅ Self-verified | verification-report.md 已写 |
+| Implement | 🚧 In Progress | 核心 3 步模块、Schema、验证器和 CLI 已落地；交互输出与 v2.1 注入仍缺失 |
+| Verify | ❌ Failed | 单元测试通过，但 AC14/AC15 与真实 LLM E2E 无证据 |
+
+## Current Progress Audit (2026-06-19)
+
+- **Current Phase**: Implement
+- **Verified AC**: 10/15（以 19 个本地测试覆盖的 Schema、引用、时长和字段校验为主）。
+- **Completed foundation**: 3 步模块、10 风格预设、JSON Schema、9 个验证器、CLI 包入口。
+- **Open behavior**: 增量修改、`script_summary.md`、`feasibility_report.md`、`tts_plan.json`。
+- **v2.1 blocker**: CLI 与生成链路没有 `style_injection.json`、`character_archetypes.json` 输入参数，AC14/AC15 未实现。
+- **E2E blocker**: 尚无真实 LLM Quick/Review Mode 端到端证据。
+- **Next Step**: 补齐 WP07 输出、AC14/AC15 注入与真实生成验证。

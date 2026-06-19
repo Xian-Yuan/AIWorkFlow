@@ -104,6 +104,19 @@ base_ref: $baseRef
 created_at: $today
 verified_at: null
 fix_attempts: 0
+worker_profile: none
+lead_verifier: null
+repair_loop_status: idle
+active_root_cause: null
+active_repair_package: null
+authority_profile: none
+authority_status: legacy
+issuer_key_id: null
+issuer_sid: null
+packet_version: 0
+packet_digest: null
+legacy_trust: legacy_untrusted
+archive_certificate: null
 spec_exists: false
 spec_scenario_count: 0
 spec_scenarios_done: 0
@@ -143,6 +156,23 @@ function Test-ImplementChecks {
     $rsl = Get-YamlField "router_skill_loaded" $FilePath
     if ($rsl -eq "true") { Write-Host "  [PASS] router_skill_loaded=true" -ForegroundColor Green }
     else { Write-Host "  [FAIL] router_skill_loaded=$rsl" -ForegroundColor Red; $localBlocked = $true }
+    $authorityProfile = Get-YamlField "authority_profile" $FilePath
+    $issuerSid = Get-YamlField "issuer_sid" $FilePath
+    if ($authorityProfile -eq "issuer-worker-v1" -and $issuerSid) {
+        $currentSid = if ($env:JINLI_AUTH_TEST_MODE -eq "1" -and $env:JINLI_AUTH_TEST_SID) {
+            $env:JINLI_AUTH_TEST_SID
+        }
+        else {
+            [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+        }
+        if ($currentSid -eq $issuerSid) {
+            Write-Host "  [PASS] authority issuer SID matches" -ForegroundColor Green
+        }
+        else {
+            Write-Host "  [FAIL] authority task edits require issuer SID" -ForegroundColor Red
+            $localBlocked = $true
+        }
+    }
     $tasksFile = Join-Path $TASK_DIR "tasks.md"
     if (Test-Path $tasksFile) { Write-Host "  [PASS] tasks.md exists" -ForegroundColor Green }
     else { Write-Host "  [FAIL] tasks.md missing" -ForegroundColor Red; $localBlocked = $true }
@@ -171,23 +201,20 @@ switch ($Command) {
     "set" {
         Require-FileExists $YAML_FILE
         $field = $Arg1; $value = $Arg2
-        $validFields = @("phase","workflow","implement_mode","isolation","clarification_status","user_confirmed_plan","router_skill_loaded","review_result","verify_result","verification_report","archived","design_doc","created_at","verified_at","base_ref","project_type","fix_attempts","spec_exists","spec_scenario_count","spec_scenarios_done")
+        $validFields = @("workflow","implement_mode","isolation","clarification_status","user_confirmed_plan","router_skill_loaded","design_doc","created_at","verified_at","base_ref","project_type","fix_attempts","worker_profile","lead_verifier","repair_loop_status","active_root_cause","active_repair_package","spec_exists","spec_scenario_count","spec_scenarios_done")
         if ($field -notin $validFields) { Write-Red "ERROR: Unknown field '$field'. Valid: $($validFields -join ', ')"; exit 1 }
         $enumMap = @{
-            "phase"=@("plan","implement","review","verify","archive")
             "workflow"=@("full","hotfix")
             "implement_mode"=@("direct","subagent")
             "isolation"=@("branch","worktree")
             "clarification_status"=@("pending","not_needed","asked","answered")
             "user_confirmed_plan"=@("true","false")
             "router_skill_loaded"=@("true","false")
-            "review_result"=@("pending","pass","fail")
-            "verify_result"=@("pending","pass","fail")
-            "archived"=@("true","false")
             "project_type"=@("ue5","web","other")
+            "worker_profile"=@("none","ds4-flash")
+            "repair_loop_status"=@("idle","repair_required","architecture_review","resolved")
         }
         if ($enumMap.ContainsKey($field)) { Validate-Enum $value $enumMap[$field] }
-        if ($field -eq "phase") { Write-Yellow "WARNING: Setting 'phase' directly bypasses state machine. Use 'transition' instead." }
         Set-YamlField $YAML_FILE $field $value
         Write-Green "[SET] ${field}=${value}"
     }
@@ -196,7 +223,28 @@ switch ($Command) {
         $event = $Arg1
         Validate-Enum $event @("plan-complete","implement-complete","review-pass","review-fail","verify-pass","verify-fail","archived")
         function Require-Phase { param([string]$Expected); $actual = Get-YamlField "phase" $YAML_FILE; if ($actual -ne $Expected) { Write-Red "ERROR: expected phase '$Expected', got '$actual'"; exit 1 } }
-        function Require-ReviewEvidence { $report = Get-YamlField "verification_report" $YAML_FILE; if (-not $report -or -not (Test-Path $report)) { Write-Red "ERROR: verification_report must point to existing file"; exit 1 } }
+        function Require-ReviewEvidence {
+            $report = Get-YamlField "verification_report" $YAML_FILE
+            $reportPath = if ($report -and [System.IO.Path]::IsPathRooted($report)) { $report } else { Join-Path $TASK_DIR $report }
+            if (-not $report -or -not (Test-Path -LiteralPath $reportPath)) {
+                Write-Red "ERROR: verification_report must point to existing file"
+                exit 1
+            }
+        }
+        $workerProfile = Get-YamlField "worker_profile" $YAML_FILE
+        $authorityProfile = Get-YamlField "authority_profile" $YAML_FILE
+        if ($authorityProfile -eq "issuer-worker-v1" -and $event -ne "plan-complete") {
+            Write-Red "ERROR: Authority-managed tasks cannot use generic transitions. Use issuer packet, review, and archive commands."
+            exit 1
+        }
+        if ($event -in @("review-pass","verify-pass","archived")) {
+            Write-Red "ERROR: Review, Verify, and Archive acceptance require issuer-signed commands"
+            exit 1
+        }
+        if ($workerProfile -eq "ds4-flash" -and $event -in @("review-fail","verify-fail")) {
+            Write-Red "ERROR: DS4 failures must use worker-repair-loop.ps1 record-failure so evidence and repair packages cannot be skipped"
+            exit 1
+        }
         switch ($event) {
             "plan-complete" { Require-Phase "plan"; Test-PlanReady $YAML_FILE; Set-YamlField $YAML_FILE "phase" "implement" }
             "implement-complete" {
@@ -210,7 +258,15 @@ switch ($Command) {
                     if ($tm.Count -gt 0) { Set-YamlField $YAML_FILE "spec_scenario_count" $tm.Count; Set-YamlField $YAML_FILE "spec_scenarios_done" $dm.Count; Write-Yellow "  Spec: $($dm.Count)/$($tm.Count) scenarios complete" }
                 }
             }
-            "review-pass" { Require-Phase "review"; Set-YamlField $YAML_FILE "review_result" "pass"; Set-YamlField $YAML_FILE "phase" "verify"; Set-YamlField $YAML_FILE "verify_result" "pending"; Set-YamlField $YAML_FILE "verification_report" "null" }
+            "review-pass" {
+                Require-Phase "review"
+                Set-YamlField $YAML_FILE "review_result" "pass"
+                Set-YamlField $YAML_FILE "phase" "verify"
+                Set-YamlField $YAML_FILE "verify_result" "pending"
+                if ($workerProfile -ne "ds4-flash") {
+                    Set-YamlField $YAML_FILE "verification_report" "null"
+                }
+            }
             "review-fail" { Require-Phase "review"; Set-YamlField $YAML_FILE "review_result" "fail"; Set-YamlField $YAML_FILE "phase" "implement" }
             "verify-pass" { Require-Phase "verify"; Require-ReviewEvidence; Set-YamlField $YAML_FILE "verify_result" "pass"; Set-YamlField $YAML_FILE "phase" "archive"; Set-YamlField $YAML_FILE "verified_at" (Get-Date -Format "yyyy-MM-dd") }
             "verify-fail" { Require-Phase "verify"; Set-YamlField $YAML_FILE "verify_result" "fail"; Set-YamlField $YAML_FILE "phase" "implement" }

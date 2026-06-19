@@ -265,13 +265,17 @@ AI 必须输出：
 
 ## 与现有工作流的兼容性
 
-本方案**不修改**现有 Comet 四阶段工作流结构，仅：
+本方案不改变 Comet 四阶段的名称，但 DS4 Flash 任务会增加受门禁保护的修复状态：
 - 合并 Review + Verify 为同一 Pro 会话
 - 增加模型推荐标注
 - 提供 `task-handoff.ps1` 自动化交接
+- `worker_profile: ds4-flash` 启用专用发包、报告权限和独立验收门禁
+- Review/Verify 失败通过 `worker-repair-loop.ps1 record-failure` 自动生成更窄的修复包
+- 同一根因第三次失败进入 `architecture_review`，停止自动重发
+- `authority_profile: issuer-worker-v1` 时，Flash 只能追加进度和提交结果；原 Issuer 独占任务包更新、审核、修复包发布和显式归档
+- Verify 不再自动归档，Archive 必须由原 Issuer 使用签名审批单独执行
 
-- `task-state.ps1` / `task-guard.ps1` 状态机不变
-- 阶段门禁不变
+完整规则见 `Docs/AI/40-DS4-Flash-Worker-Repair-Loop.md` 和 `Docs/AI/41-Issuer-Worker-Authority-Separation.md`。
 - 阻塞点不变
 
 ---

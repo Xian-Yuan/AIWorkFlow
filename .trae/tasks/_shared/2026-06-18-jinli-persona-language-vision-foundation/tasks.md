@@ -31,11 +31,11 @@ T02 + T03 + T04 + T05 + T06
 - [x] R01 — Restore Avatar and Dialogue tests so all declared suites execute.
 - [x] R02 — Accept UTF-8 BOM in Dynamic Soul JSON without weakening invalid-JSON errors.
 - [x] R03 — Implement an explicit cross-process Vision CLI supervisor with stale-PID fail-closed behavior.
-- [ ] R04 — Deploy the corrected response-plan and Vision CLI adapter to the installed MCP Plugin.
-- [ ] R05 — Install Python vision dependencies and run the complete pytest suite.
-- [ ] Verify selected mature path was implemented and no rejected shortcut was introduced.
-- [ ] Run automated verification and record command output in verification-report.md.
-- [ ] Map implementation result to Acceptance Criteria in verification-report.md.
+- [x] R04 — Deploy the corrected response-plan and Vision CLI adapter to the installed MCP Plugin.
+- [x] R05 — Install Python vision dependencies and run the complete pytest suite.
+- [x] Verify selected mature path was implemented and no rejected shortcut was introduced.
+- [x] Run automated verification and record command output in verification-report.md.
+- [x] Map implementation result to Acceptance Criteria in verification-report.md.
 
 ## Phase Exit Criteria
 

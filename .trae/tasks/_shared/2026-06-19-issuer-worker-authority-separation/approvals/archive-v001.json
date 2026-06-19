@@ -1,0 +1,16 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-19-issuer-worker-authority-separation",
+    "packet_version":  1,
+    "packet_digest":  "e94afec707f301b13d68e263631f58ad3be4a8e67bdda9e7267c3d04cd8861e5",
+    "review_approval_path":  "approvals/review-v001.json",
+    "review_approval_digest":  "629b89b526f5504d7ffbdb986c744c2459d9fac594706d0ae851f8ec4057ff4b",
+    "source_diff_digest":  "3d72e07bbe7d7e2821c5a1ae7c8ce883308507895d330e582eb5306075f18010",
+    "evidence_manifest_digest":  "a79125f4eba4752b8617a294b5d3a0a8090d6ae97ad4ca6342255785291c5e40",
+    "acceptance_criteria_digest":  "6f58ecea0e2113686fc63ee589623d72abfe0846f6a31c72efeffd859f76c847",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "archived_at":  "2026-06-19T17:45:12.1130731+08:00",
+    "decision":  "archived",
+    "archive_digest":  "37765667363e6da6c5e4c11f5b94b3b38b46ff7fe019df8d10edec5ea6522b1c"
+}

@@ -1,4 +1,4 @@
-﻿workflow: full
+workflow: full
 phase: plan
 project_type: other
 implement_mode: direct
@@ -15,5 +15,7 @@ base_ref: null
 created_at: 2026-06-18
 fix_attempts: 0
 spec_exists: true
-spec_scenario_count: 0
+spec_scenario_count: 8
 spec_scenarios_done: 0
+superseded_by: ai-drama/2026-06-18-pipeline-architecture
+legacy_trust: legacy_untrusted

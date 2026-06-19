@@ -27,13 +27,15 @@ The default token-saving collaboration mode is:
 - Worker models execute only the assigned work package and return evidence in `reports/`.
 - Reviewer/verifier independently runs the gates and checks evidence before accepting the task.
 
-The lead agent must not rely on a worker's success claim. A task is accepted only when:
+The lead is the cryptographic Issuer. The Worker cannot update task files or formal progress. A task is accepted only when:
 
 - the task packet passes `task-guard.ps1`;
 - every required worker report exists;
 - every required worker report declares `Status: done`;
 - every required worker report declares `Extra scope taken: no`;
 - final verification maps command output back to acceptance criteria.
+- the original Issuer signs the current packet/source/evidence/acceptance hashes;
+- Archive is explicitly signed after verification and is never a side effect of Verify.
 
 ## Core Rule
 
@@ -101,6 +103,19 @@ review_result: pending | pass | fail
 verify_result: pending | pass | fail
 verification_report: null | <path>
 fix_attempts: 0
+worker_profile: none | ds4-flash
+lead_verifier: null | codex
+repair_loop_status: idle | repair_required | architecture_review | resolved
+active_root_cause: null | RCxx
+active_repair_package: null | work-packages/WPxx-fix-*.md
+authority_profile: none | issuer-worker-v1
+authority_status: draft | issued | worker_active | repair_issued | verified | archived
+issuer_key_id: null | <public-key-digest>
+issuer_sid: null | <windows-sid>
+packet_version: 0 | <integer>
+packet_digest: null | <sha256>
+legacy_trust: not_applicable | legacy_untrusted | migration_required
+archive_certificate: null | approvals/archive-vNNN.json
 ```
 
 ### `routing.md`
@@ -210,6 +225,28 @@ Work package rules:
 - It must not contain unresolved `<placeholder>` text.
 - It must define a concrete verification command and expected result.
 
+### DS4 Flash Worker Profile
+
+When `.task.yaml` declares `worker_profile: ds4-flash`, the package must also declare a fresh context, one Root Cause ID, a bounded context budget, anti-gaming rules, and stop conditions. Worker reports must include a `Worker Authority` section proving that the worker did not set Review/Verify results, edit task state or acceptance criteria, or weaken tests.
+
+Final acceptance remains with the lead verifier. Codex must independently rerun verification. Flash fallback verification is accepted only from a declared fresh context. Failed verification must use `worker-repair-loop.ps1 record-failure`; direct legacy failure transitions are blocked. The third consecutive failure for one root cause stops redistribution and enters architecture review.
+
+See `Docs/AI/40-DS4-Flash-Worker-Repair-Loop.md`.
+
+### Issuer-Worker Authority Profile
+
+`authority_profile: issuer-worker-v1` replaces prompt-based role claims with Windows SID, non-exportable CNG signatures, packet sealing, signed worker capabilities, signed Review approval, and explicit signed Archive.
+
+The Worker:
+
+- cannot update `.task.yaml`, `tasks.md`, `spec.md`, work packages, approval, evidence, or Archive state;
+- appends progress and creates one JSON result through `worker-submit.ps1`;
+- cannot obtain a strong-mode capability under the Issuer SID.
+
+The original Issuer seals every packet version, issues capabilities, independently reviews, publishes rejected repair work, and explicitly archives.
+
+See `Docs/AI/41-Issuer-Worker-Authority-Separation.md`.
+
 Good worker tasks:
 
 - update a project doc from a known design
@@ -271,7 +308,7 @@ Reports must include:
 - unresolved risks
 - explicit "no extra scope taken" statement
 
-Lead agent reviews reports before marking `tasks.md` items done. If `Worker reports required before merge: yes`, `task-guard.ps1 implement` blocks unless `reports/*.md` exists for the work packages, every report has `Status: done`, and every report states `Extra scope taken: no`.
+For legacy tasks, the lead reviews Markdown reports before marking `tasks.md` items done. For authority-managed tasks, the Worker cannot mark tasks; the Issuer reviews signed JSON results and updates the checklist.
 
 ## Final Verification Report
 
@@ -334,6 +371,10 @@ Codex-specific rules:
 - `verify_result: pass`
 - `verification_report` points to a real file
 - verification report contains required evidence sections
+- for authority tasks, the current issuer-signed approval matches all bound hashes
+- Verify never archives
+
+`issuer-archive.ps1 archive` separately verifies accepted approval, packet/source/evidence/AC hashes, complete scenarios, resolved repair state, and original Issuer authority.
 
 ## Regression Requirements
 
@@ -350,6 +391,18 @@ Codex-specific rules:
 - external worker report with `Status: done` and no extra scope passes
 - valid verification report passes Verify gate
 - weak verification report fails Verify gate
+- DS4 policy and package omissions fail Plan
+- DS4 worker authority claims fail Implement
+- same-context Flash verification fails Verify
+- failed DS4 verification creates immutable evidence and a narrower repair package
+- third same-root failure enters architecture review without another package
+- legacy failure transitions cannot bypass repair orchestration
+- handoff publishes only the active repair package
+- Worker cannot mutate task state or claim approval
+- same-SID strong-mode capability issuance fails
+- packet/source/evidence mutation invalidates authority artifacts
+- Verify does not archive
+- only explicit original-Issuer Archive succeeds
 - docs indexes include this document
 - Codex adapter skill exists
 

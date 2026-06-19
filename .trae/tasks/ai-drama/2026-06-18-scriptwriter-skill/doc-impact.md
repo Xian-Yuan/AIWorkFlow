@@ -23,3 +23,12 @@
 
 ## No Code Changes
 Reason: 本任务是纯 spec 编写。产出物是 task packet，供外部模型直接读取并实现 ai-drama-scriptwriter Skill。
+
+## Progress Audit Update (2026-06-19)
+
+早期 “No Code Changes” 仅描述 Plan 创建时状态。后续实现实际位于：
+
+- `Project/AIDramaProducer/skills/ai_drama_scriptwriter/`
+- `.agents/skills/ai-drama-scriptwriter/SKILL.md`
+
+本次仅更新任务包进度；真实 LLM E2E、交互输出和 AC14/AC15 仍为待办。

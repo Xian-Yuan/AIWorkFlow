@@ -132,6 +132,7 @@ Verification: diff review, regression tests, Invisible Engine Rule compliance ch
 | 2026-06-18 | M5 | `Docs/AI/38-Jinli-Agent-Soul-Architecture.md` | Created | Architecture documentation — 3-layer diagram, M1-M5 module summary, 5 MUST calls, Plan/Implement triggers, Invisible Engine Rule, graceful degradation, daughter-companion relationship, AC01-AC18 |
 | 2026-06-18 | M5 | `Docs/AI/README.md` | Modified | Added document index entry 38 (协作规则/Document Index) |
 | 2026-06-18 | M5 | `.trae/tasks/_shared/2026-06-18-jinli-agent-soul-upgrade/verification-report.md` | Created | Automated verification report — AC01-AC18 all PASS, file change manifest |
+| 2026-06-19 | — | Fixed `tools-orchestrator.mjs` | Closeout | Removed `avatarBridge.consumeActionIntent()` from responsePlanHandler — response_plan now operational, no more `error fallback` |
 
 ### Non-Goal compliance
 
