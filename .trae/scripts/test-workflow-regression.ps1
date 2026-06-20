@@ -48,7 +48,12 @@ function New-TaskPacket {
         [bool]$WeakAnalysis = $false,
         [bool]$MissingWorkPackagePolicy = $false,
         [bool]$VerifyMode = $false,
-        [bool]$WeakReport = $false
+        [bool]$WeakReport = $false,
+        [ValidateSet("","deep","fast")][string]$RequirementProfile = "",
+        [bool]$MissingRequirementsDocument = $false,
+        [bool]$MissingExecutionPrompt = $false,
+        [bool]$MissingFastTrackReason = $false,
+        [bool]$OutsideArtifactPaths = $false
     )
 
     $dir = if ($Scope) {
@@ -62,12 +67,28 @@ function New-TaskPacket {
     $phase = if ($VerifyMode) { "verify" } else { "plan" }
     $verifyResult = if ($VerifyMode) { "pass" } else { "pending" }
     $reportValue = if ($VerifyMode) { "verification-report.md" } else { "null" }
+    $clarificationStatus = if ($RequirementProfile -eq "deep") { "answered" } else { "not_needed" }
+    $requirementsYaml = if ($RequirementProfile) {
+        $requirementsStatus = if ($RequirementProfile -eq "deep") { "confirmed" } else { "not_required" }
+        $requirementsDoc = if ($MissingRequirementsDocument) { "missing-requirements.md" } elseif ($OutsideArtifactPaths) { "../__outside-requirements.md" } else { "requirements.md" }
+        $executionPrompt = if ($MissingExecutionPrompt) { "missing-execution-prompt.md" } elseif ($OutsideArtifactPaths) { "../__outside-execution-prompt.md" } else { "execution-prompt.md" }
+        $fastReason = if ($RequirementProfile -eq "fast" -and -not $MissingFastTrackReason) { "Bounded exact fix with no architecture, data ownership, or user-journey impact." } else { "null" }
+@"
+requirements_gate_version: 1
+change_profile: $RequirementProfile
+requirements_status: $requirementsStatus
+requirements_doc: $requirementsDoc
+execution_prompt: $executionPrompt
+fast_track_reason: $fastReason
+"@
+    } else { "" }
     Set-Content -LiteralPath (Join-Path $dir ".task.yaml") -Value @"
 phase: $phase
 project_type: other
-clarification_status: not_needed
+clarification_status: $clarificationStatus
 user_confirmed_plan: true
 router_skill_loaded: true
+$requirementsYaml
 review_result: pass
 verify_result: $verifyResult
 verification_report: $reportValue
@@ -88,6 +109,36 @@ fix_attempts: 0
 "@
     }
 
+    $requirementRouting = if ($RequirementProfile -eq "deep") {
+@"
+
+## Requirement Discovery Gate
+- Change profile: deep
+- Requirements status: confirmed
+- Requirements document: requirements.md
+- Execution prompt: execution-prompt.md
+- Plain-language summary confirmed: yes
+- Unresolved high-impact questions: none
+"@
+    }
+    elseif ($RequirementProfile -eq "fast") {
+        $reason = if ($MissingFastTrackReason) { "" } else { "Bounded exact fix with no architecture, data ownership, or user-journey impact." }
+@"
+
+## Fast Track Assessment
+- Change profile: fast
+- Expected behavior is concrete: yes
+- Change is bounded: yes
+- Architecture or data ownership change: no
+- User journey redesign: no
+- Unresolved high-impact implicit requirements: none
+- Verification is bounded: yes
+- Fast-track reason: $reason
+- Execution prompt: execution-prompt.md
+"@
+    }
+    else { "" }
+
     Set-Content -LiteralPath (Join-Path $dir "routing.md") -Value @"
 # Routing
 
@@ -97,6 +148,7 @@ fix_attempts: 0
 - Mature Solution Evidence: analysis.md#Mature-Solution-Evidence
 - Rejected shortcuts reviewed: yes
 - User confirmation must include quality level: yes
+$requirementRouting
 $workPackagePolicy
 "@
 
@@ -180,6 +232,92 @@ Reason: workflow regression fixture
 ## Docs Tree Updates
 - None
 "@
+
+    if ($RequirementProfile -and -not $MissingRequirementsDocument) {
+        Set-Content -LiteralPath (Join-Path $dir "requirements.md") -Value @"
+# Requirement Understanding
+
+## Desired Outcome
+- Prevent premature implementation.
+
+## Intended User and Context
+- A non-technical decision maker working with a planning agent.
+
+## End-to-End Experience
+- Clarify, teach back, confirm, then generate execution artifacts.
+
+## Confirmed Decisions
+- The selected change profile is $RequirementProfile.
+
+## Implicit Requirements
+- The planner owns technical translation.
+
+## Boundaries and Non-Goals
+- Do not infer unresolved high-impact choices.
+
+## Success Experience
+- The user recognizes the described outcome as their intent.
+
+## Open Questions
+None.
+
+## Teach-Back Summary
+- The agent understands the goal and may proceed to technical planning.
+
+## User Confirmation Evidence
+- Confirmed in the planning conversation.
+"@
+    }
+
+    if ($RequirementProfile -and -not $MissingExecutionPrompt) {
+        Set-Content -LiteralPath (Join-Path $dir "execution-prompt.md") -Value @"
+# Task Execution Prompt
+
+## Role
+- Execute the approved task packet without changing its intent.
+
+## Goal
+- Implement the confirmed requirement.
+
+## Task Packet Truth Sources
+- requirements.md
+- analysis.md
+- spec.md
+- tasks.md
+
+## Confirmed Decisions
+- Respect the selected $RequirementProfile profile.
+
+## Accepted Architecture
+- Follow analysis.md.
+
+## Allowed Paths
+- .trae/tasks/_shared/$Name/
+
+## Forbidden Paths
+- Project/
+
+## Non-Goals
+- Do not change acceptance criteria.
+
+## Acceptance Criteria
+- AC01: Gate behavior is correct.
+
+## Verification Commands
+- regression -> pass
+
+## Stop Conditions
+- Stop if the task packet is incomplete.
+
+## Evidence Rule
+- Do not claim success without current-session evidence.
+"@
+    }
+
+    if ($OutsideArtifactPaths) {
+        Copy-Item -LiteralPath (Join-Path $dir "requirements.md") -Destination (Join-Path (Split-Path -Parent $dir) "__outside-requirements.md") -Force
+        Copy-Item -LiteralPath (Join-Path $dir "execution-prompt.md") -Destination (Join-Path (Split-Path -Parent $dir) "__outside-execution-prompt.md") -Force
+    }
 
     if ($ExternalWorkers -and $CreateWorkPackage) {
         $wpDir = Join-Path $dir "work-packages"
@@ -316,6 +454,76 @@ try {
     & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__workflow_valid" plan *> $null
     Add-Result "S04" "valid-task-packet-plan-pass" "allowed" $(if ($LASTEXITCODE -eq 0) { "allowed" } else { "blocked" }) ($LASTEXITCODE -eq 0)
     Remove-TestDir $valid
+
+    $stateInitDir = Join-Path $Root ".trae\tasks\_shared\__requirements_state_init"
+    Remove-TestDir $stateInitDir
+    New-Item -ItemType Directory -Path $stateInitDir -Force | Out-Null
+    $TaskState = Join-Path $PSScriptRoot "task-state.ps1"
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskState init "_shared/__requirements_state_init" full *> $null
+    $stateYaml = Get-Content -LiteralPath (Join-Path $stateInitDir ".task.yaml") -Raw
+    $stateFieldsPresent =
+        ($stateYaml -match "(?m)^requirements_gate_version:\s*1\s*$") -and
+        ($stateYaml -match "(?m)^change_profile:\s*unclassified\s*$") -and
+        ($stateYaml -match "(?m)^requirements_status:\s*pending\s*$") -and
+        ($stateYaml -match "(?m)^requirements_doc:\s*null\s*$") -and
+        ($stateYaml -match "(?m)^execution_prompt:\s*null\s*$") -and
+        ($stateYaml -match "(?m)^fast_track_reason:\s*null\s*$")
+    Add-Result "RQ01" "new-task-initializes-requirement-gate-metadata" "all fields present" $(if ($stateFieldsPresent) { "present" } else { "missing" }) $stateFieldsPresent
+    Remove-TestDir $stateInitDir
+
+    $deepMissingRequirements = New-TaskPacket -Name "__requirements_deep_missing_doc" -RequirementProfile deep -MissingRequirementsDocument $true
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__requirements_deep_missing_doc" plan *> $null
+    Add-Result "RQ02" "deep-task-missing-requirements-blocks" "blocked" $(if ($LASTEXITCODE -ne 0) { "blocked" } else { "allowed" }) ($LASTEXITCODE -ne 0)
+    Remove-TestDir $deepMissingRequirements
+
+    $deepMissingPrompt = New-TaskPacket -Name "__requirements_deep_missing_prompt" -RequirementProfile deep -MissingExecutionPrompt $true
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__requirements_deep_missing_prompt" plan *> $null
+    Add-Result "RQ03" "deep-task-missing-execution-prompt-blocks" "blocked" $(if ($LASTEXITCODE -ne 0) { "blocked" } else { "allowed" }) ($LASTEXITCODE -ne 0)
+    Remove-TestDir $deepMissingPrompt
+
+    $deepValid = New-TaskPacket -Name "__requirements_deep_valid" -RequirementProfile deep
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__requirements_deep_valid" plan *> $null
+    Add-Result "RQ04" "complete-deep-requirement-packet-passes" "allowed" $(if ($LASTEXITCODE -eq 0) { "allowed" } else { "blocked" }) ($LASTEXITCODE -eq 0)
+    Remove-TestDir $deepValid
+
+    $fastMissingReason = New-TaskPacket -Name "__requirements_fast_missing_reason" -RequirementProfile fast -MissingFastTrackReason $true
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__requirements_fast_missing_reason" plan *> $null
+    Add-Result "RQ05" "fast-task-missing-reason-blocks" "blocked" $(if ($LASTEXITCODE -ne 0) { "blocked" } else { "allowed" }) ($LASTEXITCODE -ne 0)
+    Remove-TestDir $fastMissingReason
+
+    $fastValid = New-TaskPacket -Name "__requirements_fast_valid" -RequirementProfile fast
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__requirements_fast_valid" plan *> $null
+    Add-Result "RQ06" "complete-fast-requirement-packet-passes" "allowed" $(if ($LASTEXITCODE -eq 0) { "allowed" } else { "blocked" }) ($LASTEXITCODE -eq 0)
+    Remove-TestDir $fastValid
+
+    $outsideArtifacts = New-TaskPacket -Name "__requirements_outside_artifacts" -RequirementProfile deep -OutsideArtifactPaths $true
+    & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__requirements_outside_artifacts" plan *> $null
+    Add-Result "RQ07" "requirement-artifacts-outside-task-packet-block" "blocked" $(if ($LASTEXITCODE -ne 0) { "blocked" } else { "allowed" }) ($LASTEXITCODE -ne 0)
+    Remove-TestDir $outsideArtifacts
+    Remove-Item -LiteralPath (Join-Path $Root ".trae\tasks\_shared\__outside-requirements.md") -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $Root ".trae\tasks\_shared\__outside-execution-prompt.md") -Force -ErrorAction SilentlyContinue
+
+    $smartRequirements = Get-Content -LiteralPath (Join-Path $Root "skills\smart-requirements\SKILL.md") -Raw
+    $jinliPlannerPath = Get-ChildItem -LiteralPath (Join-Path $Root "skills") -Directory |
+        ForEach-Object {
+            $candidate = Join-Path $_.FullName "SKILL.md"
+            if (Test-Path -LiteralPath $candidate) {
+                $candidateContent = Get-Content -LiteralPath $candidate -Raw
+                if ($candidateContent -match "Plan Agent" -and $candidateContent -match "soul_auto" -and $candidateContent -match "Mature Solution Evidence") {
+                    $candidate
+                }
+            }
+        } |
+        Select-Object -First 1
+    $jinliPlanner = if ($jinliPlannerPath) { Get-Content -LiteralPath $jinliPlannerPath -Raw } else { "" }
+    $skillContractPresent =
+        ($smartRequirements -match "one-question-per-turn") -and
+        ($smartRequirements -match "no-fixed-round-limit") -and
+        ($smartRequirements -match "execution-prompt\.md") -and
+        ($jinliPlanner -match "deep-discovery") -and
+        ($jinliPlanner -match "fast-track") -and
+        ($jinliPlanner -match "teach-back")
+    Add-Result "RQ08" "planner-skills-contain-conversational-contract" "contract present" $(if ($skillContractPresent) { "present" } else { "missing" }) $skillContractPresent
 
     $weak = New-TaskPacket -Name "__workflow_missing_arch" -WeakAnalysis $true
     & $PowerShellExe -NoProfile -ExecutionPolicy Bypass -File $TaskGuard "_shared/__workflow_missing_arch" plan *> $null

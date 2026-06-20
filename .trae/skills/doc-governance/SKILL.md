@@ -70,6 +70,10 @@ Every task needs `doc-impact.md`:
 | "放到根 Docs 更容易找到" | 项目文档先归项目，根 Docs 只放跨项目 AI 工作流和全局规则。 |
 | "DOCS_TREE 以后再整理" | 文档树是导航入口，文档变动必须同步更新。 |
 
+## Reference
+
+- `references/docs-only-task-flow.md` — Complete flow for docs-only tasks (no code changes): gate sequence, implementation steps, verification commands, and common pitfalls.
+
 ## Verification
 
 Run:

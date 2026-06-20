@@ -1,0 +1,33 @@
+# Handover: Lead -> DS4 Flash Worker
+
+## Task Identity
+- Task: jinli/2026-06-21-knowledge-graph-runtime-implementation
+- Project type: other
+- Worker profile: ds4-flash
+- State file: .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\.task.yaml
+
+## Assigned Work Packages
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP01-runtime-foundation.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP02-local-worker-gateway.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP03-video-source-adapters.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP04-segmentation-enrichment-search.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP05-graph-obsidian-export.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP06-obra-index-mcp-bridge.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP07-visual-candidate-extension.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP08-soul-core-integration.md
+- .trae\tasks\jinli\2026-06-21-knowledge-graph-runtime-implementation\work-packages\WP09-operations-docs-e2e.md
+
+## Worker Contract
+1. Start a fresh context for one work package.
+2. Read only the assigned package and its Read First files.
+3. Modify only Allowed Paths and honor Forbidden Paths.
+4. Work on the package Root Cause ID only; do not redesign the architecture.
+5. Run the exact Required Verification command.
+6. Write the exact Return Report, including raw command results and Worker Authority.
+7. Do not edit tests, acceptance criteria, task state, verification evidence, or Review/Verify results.
+8. If blocked, stop and report the smallest reproducible blocker.
+
+## Completion Boundary
+- DS4 Flash may report implementation results only.
+- Codex lead independently performs Review and Verify.
+- A failed lead verification is repackaged through worker-repair-loop.ps1; the worker does not reopen the full plan.

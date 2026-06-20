@@ -6,6 +6,14 @@
 | S02 | 33 indexed | indexed | PASS |  |
 | S03 | skill exists | exists | PASS |  |
 | S04 | allowed | allowed | PASS |  |
+| RQ01 | all fields present | present | PASS |  |
+| RQ02 | blocked | blocked | PASS |  |
+| RQ03 | blocked | blocked | PASS |  |
+| RQ04 | allowed | allowed | PASS |  |
+| RQ05 | blocked | blocked | PASS |  |
+| RQ06 | allowed | allowed | PASS |  |
+| RQ07 | blocked | blocked | PASS |  |
+| RQ08 | contract present | present | PASS |  |
 | S05 | blocked | blocked | PASS |  |
 | S06 | blocked | blocked | PASS |  |
 | S07 | blocked | blocked | PASS |  |

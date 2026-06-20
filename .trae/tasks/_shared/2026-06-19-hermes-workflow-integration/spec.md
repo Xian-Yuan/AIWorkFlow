@@ -2,11 +2,11 @@
 
 ## Quick Status (AI Entry Point)
 
-- **Current Phase**: Plan
-- **Last Updated**: 2026-06-19
-- **Progress**: 0/13 acceptance criteria verified
-- **Next Step**: Pass Plan gate, transition to Implement, then execute WP01-WP03 in parallel.
-- **Blockers**: None for planning. Human credential rotation will be required during implementation.
+- **Current Phase**: Archive ✅
+- **Last Updated**: 2026-06-20
+- **Progress**: 13/13 acceptance criteria verified; 7/7 scenarios complete
+- **Next Step**: Use the archived integration through the documented Hermes launch commands.
+- **Blockers**: None. Provider-key revocation remains an external human action if the previously exposed key is still active.
 
 ## GIVEN
 
@@ -25,7 +25,7 @@
 
 ### S01: Planner entrypoint
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T2, T5, T6  
 **Linked AC**: AC01, AC04, AC09, AC12
 
@@ -35,7 +35,7 @@ THEN it communicates in Simplified Chinese, loads the shared project context and
 
 ### S02: Shared Skill consistency
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T2  
 **Linked AC**: AC02, AC03, AC04
 
@@ -45,7 +45,7 @@ THEN shared Skills are discovered through `skills.external_dirs`, role adapters 
 
 ### S03: Authorized implementation
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T3, T4, T5  
 **Linked AC**: AC05, AC06, AC07, AC09
 
@@ -55,7 +55,7 @@ THEN it resolves exactly one claim/report contract and may mutate only the work 
 
 ### S04: Failed authorization
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T3, T4, T5  
 **Linked AC**: AC05, AC07, AC09
 
@@ -65,7 +65,7 @@ THEN launch or tool execution is blocked with a concise reason and required next
 
 ### S05: Safe synchronization and credentials
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T2, T5  
 **Linked AC**: AC08, AC10
 
@@ -75,7 +75,7 @@ THEN repository-owned files converge, user-owned `.env`/memory/session/log state
 
 ### S06: Worker evidence and independent verification
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T3, T5, T7  
 **Linked AC**: AC06, AC11, AC13
 
@@ -85,7 +85,7 @@ THEN the report alone is insufficient; deterministic checks are rerun, AC eviden
 
 ### S07: Failure containment
 
-**Status**: [ ] pending  
+**Status**: [x] verified
 **Tasks**: T3, T4, T5, T7  
 **Linked AC**: AC05, AC07, AC08, AC11
 
@@ -148,13 +148,13 @@ THEN mutation remains blocked, diagnostics are recorded without secrets, and no 
 
 | Task ID | Description | Scenario | Status | Completed |
 |---|---|---|---|---|
-| T1 | Plan authorization | All | [ ] | — |
-| T2 | Profiles, Skills, policy, sync | S01, S02, S05 | [ ] | — |
-| T3 | Workflow MCP | S03, S04, S06, S07 | [ ] | — |
-| T4 | Guard plugin | S03, S04, S07 | [ ] | — |
-| T5 | Launcher and E2E regression | S01, S03, S04, S05, S07 | [ ] | — |
-| T6 | Runtime profile verification | S01, S02, S05 | [ ] | — |
-| T7 | Independent Review and Verify | S06, S07 | [ ] | — |
+| T1 | Plan authorization | All | [x] Done | 2026-06-19 |
+| T2 | Profiles, Skills, policy, sync | S01, S02, S05 | [x] Done | 2026-06-19 |
+| T3 | Workflow MCP | S03, S04, S06, S07 | [x] Done | 2026-06-19 |
+| T4 | Guard plugin | S03, S04, S07 | [x] Done | 2026-06-19 |
+| T5 | Launcher and E2E regression | S01, S03, S04, S05, S07 | [x] Done | 2026-06-19 |
+| T6 | Runtime profile verification | S01, S02, S05 | [x] Done | 2026-06-19 |
+| T7 | Independent Review and Verify | S06, S07 | [x] Done | 2026-06-20 |
 
 ## Key Decisions
 
@@ -173,16 +173,21 @@ THEN mutation remains blocked, diagnostics are recorded without secrets, and no 
 | 2026-06-19 | `Docs/superpowers/specs/2026-06-19-hermes-workflow-integration-design.md` | Added | approved architecture |
 | 2026-06-19 | `Docs/superpowers/plans/2026-06-19-hermes-workflow-integration-plan.md` | Added | implementation plan |
 | 2026-06-19 | task packet files | Added | runtime planning and work packages |
+| 2026-06-20 | archive consistency hotfix | Updated | synchronized final archive state and evidence |
 
 ## Verification Status
 
 | Check | Status | Detail |
 |---|---|---|
-| Plan gate | pending | run after packet publication |
-| Unit tests | pending | implementation not started |
-| Integration tests | pending | implementation not started |
-| Hermes doctor | pending | profiles not created |
-| Verify gate | pending | implementation not started |
+| Plan gate | ✅ Passed | transitioned to Implement |
+| Unit tests | ✅ 23/23 | MCP + Guard + stdio subprocess tests |
+| Integration tests | ✅ 14/14 | E2E integration suite |
+| Hermes doctor | ✅ 2/2 | both profiles pass |
+| Compatibility tests | ✅ 27/27 | skill compatibility |
+| Sync checks | ✅ 2/2 | both profiles valid with no drift |
+| Review gate | ✅ Passed | review_result: pass |
+| Verify gate | ✅ Passed | verify_result: pass |
+| Archive gate | ✅ Passed | phase: archive; archived: true |
 
 ## Non-Goals
 
@@ -192,4 +197,3 @@ THEN mutation remains blocked, diagnostics are recorded without secrets, and no 
 - Give Workers architecture or final verification authority.
 - Copy task truth into Hermes memory.
 - Modify application projects.
-

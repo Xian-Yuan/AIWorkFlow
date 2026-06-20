@@ -108,16 +108,21 @@ foreach ($profile in $profiles) {
     }
 }
 
-# === 5. Profile config uses skills.external_dirs ===
-Write-Host "`n--- 5. Profile external_dirs ---" -ForegroundColor Yellow
+# === 5. Profile config paths and shared Skills ===
+Write-Host "`n--- 5. Profile config paths and shared Skills ---" -ForegroundColor Yellow
 foreach ($profile in $profiles) {
     $configFile = Join-Path (Join-Path (Join-Path $hermesRoot "profiles") $profile) "config.overlay.yaml"
-    if (Test-Path -LiteralPath $configFile) {
+    $mcpFile = Join-Path (Join-Path (Join-Path $hermesRoot "profiles") $profile) "mcp.json"
+    if ((Test-Path -LiteralPath $configFile) -and (Test-Path -LiteralPath $mcpFile)) {
         $config = Get-Content -LiteralPath $configFile -Raw
+        $mcp = Get-Content -LiteralPath $mcpFile -Raw
         $hasExternal = $config -match "external_dirs" -and $config -match "E:/UEGameDevelopment/skills"
-        Write-Test "external_dirs configured: $profile" $hasExternal "Checked $configFile"
+        $expectedMcpCwd = 'cwd:\s*"E:/UEGameDevelopment/\.trae/hermes/mcp"'
+        $expectedMcpJsonCwd = '"cwd"\s*:\s*"E:/UEGameDevelopment/\.trae/hermes/mcp"'
+        $pathsAgree = $config -match $expectedMcpCwd -and $mcp -match $expectedMcpJsonCwd
+        Write-Test "profile config paths: $profile" ($hasExternal -and $pathsAgree) "Checked external_dirs and MCP cwd"
     } else {
-        Write-Test "external_dirs configured: $profile" $false "Config not found: $configFile"
+        Write-Test "profile config paths: $profile" $false "Config or MCP file missing"
     }
 }
 

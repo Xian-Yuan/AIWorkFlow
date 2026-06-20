@@ -1,0 +1,48 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-20-verification-truth-closure",
+    "packet_version":  1,
+    "authority_profile":  "issuer-worker-v1",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "issued_at":  "2026-06-20T01:48:34.3876012+08:00",
+    "core_files":  [
+                       {
+                           "path":  "analysis.md",
+                           "sha256":  "d5742ae602eb82743b16076b514c53552cc31aeb0a5e65ea090ab76d1a62016e"
+                       },
+                       {
+                           "path":  "doc-impact.md",
+                           "sha256":  "fec14ff6d88017ec9ce1c7dde974186e21a8c3768b8ffe19af3563b9a7aec909"
+                       },
+                       {
+                           "path":  "routing.md",
+                           "sha256":  "fa738a72c5a7ce26b759912721ef674c5bb7c3f08b0fe2679920b1166a338dbf"
+                       },
+                       {
+                           "path":  "spec.md",
+                           "sha256":  "928f7c956bdc3b90fbdc2d4d1235af65fed321a3ce7105138309739ec921a7f7"
+                       },
+                       {
+                           "path":  "tasks.md",
+                           "sha256":  "ec48f49bea9b50b14b906fe1f2b4bca23943fd2d69417c8b8dba6ab2d1e10e75"
+                       },
+                       {
+                           "path":  "work-packages/WP01-character-id-contract.md",
+                           "sha256":  "179351b2f6b2c53215b7be924ccd8e9e6b80ddb4172cd2d73053812a16af260b"
+                       },
+                       {
+                           "path":  "work-packages/WP02-injection-and-test-entry.md",
+                           "sha256":  "4277ea7eeffa9cc5ef194eff9f53975f041af4892ff6234d4bf2de75289eaa8d"
+                       },
+                       {
+                           "path":  "work-packages/WP03-document-truth.md",
+                           "sha256":  "b993af53a4bdf3c550d1550a1887ee0ceeb205f9c8305a6e7b8b10f8d1a662da"
+                       },
+                       {
+                           "path":  "work-packages/WP04-independent-verification.md",
+                           "sha256":  "21f7ea117b4ea20a2ada9120c42c38ccac2da3f87096341499498d0ee23bd8fd"
+                       }
+                   ],
+    "packet_digest":  "7e594380ca4c26343824c772f1d75e0187542191cd9d8487e4c9cb7aa1db4c30"
+}

@@ -103,15 +103,15 @@
 | Phase | Status | Detail |
 |-------|--------|--------|
 | Plan | ✅ Completed v2.1 | 3 步生成 + 15 条规则 + 15 AC + 注入接口 |
-| Implement | 🚧 In Progress | 核心 3 步模块、Schema、验证器和 CLI 已落地；交互输出与 v2.1 注入仍缺失 |
-| Verify | ❌ Failed | 单元测试通过，但 AC14/AC15 与真实 LLM E2E 无证据 |
+| Implement | 🚧 In Progress | 核心 3 步模块、Schema、验证器、CLI 与 v2.1 注入消费链已落地；交互输出仍缺失 |
+| Verify | ❌ Failed | AC14/AC15 有本地 Prompt 消费测试，但真实 LLM E2E 与其他开放任务仍无证据 |
 
 ## Current Progress Audit (2026-06-19)
 
 - **Current Phase**: Implement
-- **Verified AC**: 10/15（以 19 个本地测试覆盖的 Schema、引用、时长和字段校验为主）。
+- **Verified AC**: 12/15（新增 AC14/AC15 的注入加载、CLI 与 Step 1/2/3 Prompt 消费测试）。
 - **Completed foundation**: 3 步模块、10 风格预设、JSON Schema、9 个验证器、CLI 包入口。
 - **Open behavior**: 增量修改、`script_summary.md`、`feasibility_report.md`、`tts_plan.json`。
-- **v2.1 blocker**: CLI 与生成链路没有 `style_injection.json`、`character_archetypes.json` 输入参数，AC14/AC15 未实现。
+- **v2.1 injection**: `--style-injection` 已实现，并支持同目录自动加载或显式指定 `character_archetypes.json`、`shot_pacing_reference.json`、`voice_style_reference.json`。
 - **E2E blocker**: 尚无真实 LLM Quick/Review Mode 端到端证据。
-- **Next Step**: 补齐 WP07 输出、AC14/AC15 注入与真实生成验证。
+- **Next Step**: 补齐 WP07 输出与真实生成验证；任务包保持 Implement。

@@ -399,6 +399,164 @@ function Test-NoTemplatePlaceholders {
     return $true
 }
 
+function Resolve-TaskArtifactPath {
+    param([string]$Value)
+    if (-not $Value) { return $null }
+    $taskRoot = [System.IO.Path]::GetFullPath($TASK_DIR).TrimEnd("\","/")
+    $candidate = if ([System.IO.Path]::IsPathRooted($Value)) {
+        [System.IO.Path]::GetFullPath($Value)
+    }
+    else {
+        [System.IO.Path]::GetFullPath((Join-Path $TASK_DIR ($Value -replace "/", "\")))
+    }
+    $taskPrefix = $taskRoot + [System.IO.Path]::DirectorySeparatorChar
+    if (-not $candidate.StartsWith($taskPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $null
+    }
+    return $candidate
+}
+
+function Test-MarkdownSectionBody {
+    param(
+        [string]$Content,
+        [string]$Section,
+        [string]$Label
+    )
+    $escaped = [regex]::Escape($Section)
+    $match = [regex]::Match($Content, "(?ms)^##\s+$escaped\s*$\s*(?<body>.*?)(?=^##\s+|\z)")
+    if (-not $match.Success -or [string]::IsNullOrWhiteSpace($match.Groups["body"].Value)) {
+        Write-Red "$Label has empty section: ## $Section"
+        return $false
+    }
+    return $true
+}
+
+function Test-RequirementUnderstandingGate {
+    $version = Get-YamlField "requirements_gate_version"
+    if (-not $version) {
+        return $true
+    }
+    if ($version -ne "1") {
+        Write-Red "Unsupported requirements_gate_version: $version"
+        return $false
+    }
+
+    $profile = Get-YamlField "change_profile"
+    if ($profile -notin @("deep","fast")) {
+        Write-Red "change_profile must be deep or fast for requirement-gate version 1"
+        return $false
+    }
+
+    $routingPath = Join-Path $TASK_DIR "routing.md"
+    if (-not (Test-FileNonEmpty $routingPath)) {
+        Write-Red "routing.md missing for requirement-understanding gate"
+        return $false
+    }
+    $routing = Get-Content -LiteralPath $routingPath -Raw
+
+    $promptPath = Resolve-TaskArtifactPath (Get-YamlField "execution_prompt")
+    if (-not $promptPath -or -not (Test-FileNonEmpty $promptPath)) {
+        Write-Red "execution_prompt must point to a non-empty file"
+        return $false
+    }
+    $prompt = Get-Content -LiteralPath $promptPath -Raw
+    if (-not (Test-NoTemplatePlaceholders $prompt "execution prompt")) { return $false }
+    $promptSections = @(
+        "Role",
+        "Goal",
+        "Task Packet Truth Sources",
+        "Confirmed Decisions",
+        "Accepted Architecture",
+        "Allowed Paths",
+        "Forbidden Paths",
+        "Non-Goals",
+        "Acceptance Criteria",
+        "Verification Commands",
+        "Stop Conditions",
+        "Evidence Rule"
+    )
+    if (-not (Test-MarkdownSections $prompt $promptSections "execution prompt")) { return $false }
+    foreach ($section in $promptSections) {
+        if (-not (Test-MarkdownSectionBody $prompt $section "execution prompt")) { return $false }
+    }
+
+    $status = Get-YamlField "requirements_status"
+    if ($profile -eq "deep") {
+        if ($status -ne "confirmed") {
+            Write-Red "deep task requires requirements_status: confirmed"
+            return $false
+        }
+        if ((Get-YamlField "clarification_status") -ne "answered") {
+            Write-Red "deep task cannot use clarification_status: not_needed"
+            return $false
+        }
+        if ($routing -notmatch "(?mi)^##\s+Requirement Discovery Gate\s*$" -or
+            $routing -notmatch "(?mi)^\s*-\s*Plain-language summary confirmed:\s*yes\s*$" -or
+            $routing -notmatch "(?mi)^\s*-\s*Unresolved high-impact questions:\s*none\s*$") {
+            Write-Red "routing.md deep discovery evidence is incomplete"
+            return $false
+        }
+
+        $requirementsPath = Resolve-TaskArtifactPath (Get-YamlField "requirements_doc")
+        if (-not $requirementsPath -or -not (Test-FileNonEmpty $requirementsPath)) {
+            Write-Red "deep task requirements_doc must point to a non-empty file"
+            return $false
+        }
+        $requirements = Get-Content -LiteralPath $requirementsPath -Raw
+        if (-not (Test-NoTemplatePlaceholders $requirements "requirements document")) { return $false }
+        $requirementsSections = @(
+            "Desired Outcome",
+            "Intended User and Context",
+            "End-to-End Experience",
+            "Confirmed Decisions",
+            "Implicit Requirements",
+            "Boundaries and Non-Goals",
+            "Success Experience",
+            "Open Questions",
+            "Teach-Back Summary",
+            "User Confirmation Evidence"
+        )
+        if (-not (Test-MarkdownSections $requirements $requirementsSections "requirements document")) { return $false }
+        foreach ($section in $requirementsSections) {
+            if (-not (Test-MarkdownSectionBody $requirements $section "requirements document")) { return $false }
+        }
+        $openQuestions = [regex]::Match($requirements, "(?ms)^##\s+Open Questions\s*$\s*(?<body>.*?)(?=^##\s+|\z)")
+        if (-not $openQuestions.Success -or $openQuestions.Groups["body"].Value.Trim() -notmatch "^(None|None\.)$") {
+            Write-Red "deep task must resolve Open Questions before implementation"
+            return $false
+        }
+    }
+    else {
+        if ($status -ne "not_required") {
+            Write-Red "fast task requires requirements_status: not_required"
+            return $false
+        }
+        $fastReason = Get-YamlField "fast_track_reason"
+        if ([string]::IsNullOrWhiteSpace($fastReason) -or $fastReason -match "<[^>\r\n]+>") {
+            Write-Red "fast task requires a concrete fast_track_reason"
+            return $false
+        }
+        $fastPatterns = @(
+            "(?mi)^##\s+Fast Track Assessment\s*$",
+            "(?mi)^\s*-\s*Expected behavior is concrete:\s*yes\s*$",
+            "(?mi)^\s*-\s*Change is bounded:\s*yes\s*$",
+            "(?mi)^\s*-\s*Architecture or data ownership change:\s*no\s*$",
+            "(?mi)^\s*-\s*User journey redesign:\s*no\s*$",
+            "(?mi)^\s*-\s*Unresolved high-impact implicit requirements:\s*none\s*$",
+            "(?mi)^\s*-\s*Verification is bounded:\s*yes\s*$",
+            "(?mi)^\s*-\s*Fast-track reason:\s*\S.+$"
+        )
+        foreach ($pattern in $fastPatterns) {
+            if ($routing -notmatch $pattern) {
+                Write-Red "routing.md fast-track assessment is incomplete: $pattern"
+                return $false
+            }
+        }
+    }
+
+    return $true
+}
+
 function Get-WorkPackages {
     $workPackageDir = Join-Path $TASK_DIR "work-packages"
     if (-not (Test-Path $workPackageDir)) { return @() }
@@ -672,6 +830,7 @@ function Guard-Plan {
     Test-Check "mature solution evidence and quality gate present" { Test-MatureSolutionEvidence }
     Test-Check "architecture context, acceptance criteria, automated verification, and work package policy present" { Test-ArchitectureVerificationAndWorkPackagePolicy }
     Test-Check "issuer-worker authority policy is complete" { Test-AuthorityPolicy }
+    Test-Check "requirement understanding and execution prompt are complete" { Test-RequirementUnderstandingGate }
     Test-Check "clarification_status resolved" { (Get-YamlField "clarification_status") -in @("not_needed","answered") }
     Test-Check "user_confirmed_plan is true" { (Get-YamlField "user_confirmed_plan") -eq "true" }
     Test-Check "router_skill_loaded is true" { (Get-YamlField "router_skill_loaded") -eq "true" }
@@ -685,6 +844,7 @@ function Guard-Implement {
         ((Get-YamlField "user_confirmed_plan") -eq "true") -and
         ((Get-YamlField "router_skill_loaded") -eq "true")
     }
+    Test-Check "requirement understanding remains valid" { Test-RequirementUnderstandingGate }
     Test-Check "all tasks checked" { Tasks-All-Done }
     Test-Check "tasks.md exists" { Test-FileNonEmpty (Join-Path $TASK_DIR "tasks.md") }
     Test-Check "authority packet seal is current" { Test-AuthorityPacketReady }

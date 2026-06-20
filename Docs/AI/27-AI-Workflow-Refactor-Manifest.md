@@ -15,7 +15,8 @@ Read order for workflow work:
 3. This manifest
 4. `Docs/AI/29-Mature-Solution-First-Workflow.md`
 5. `Docs/AI/33-Multi-Agent-Task-Packet-Workflow.md`
-6. Task-specific `routing.md`, `spec.md`, `tasks.md`, `analysis.md`, and `doc-impact.md`
+6. `Docs/AI/45-Conversational-Requirements-Discovery-Workflow.md`
+7. Task-specific `requirements.md`, `execution-prompt.md`, `routing.md`, `spec.md`, `tasks.md`, `analysis.md`, and `doc-impact.md`
 
 ## Active Workflow Components
 
@@ -34,6 +35,7 @@ Read order for workflow work:
 | Issuer-worker authority | `Docs/AI/41-Issuer-Worker-Authority-Separation.md`, `.trae/scripts/authority-core.psm1`, `.trae/scripts/issuer-*.ps1` | Proves publisher/reviewer/archive authority using Windows SID, non-exportable CNG signatures, and bound hashes |
 | GitHub SSH publication | `Docs/AI/42-GitHub-SSH-Publish-Workflow.md` | Publishes reviewed root-workflow commits through the protected-origin/writable-gh remote model with worktree isolation and remote SHA verification |
 | Codex workflow adapter | `skills/codex-project-router/SKILL.md` | Makes Codex use shared task packets, architecture evidence, and gates |
+| Conversational requirements gate | `Docs/AI/45-Conversational-Requirements-Discovery-Workflow.md`, `skills/smart-requirements/SKILL.md` | Separates deep discovery from fast fixes and requires confirmed intent plus an agent-authored execution prompt |
 | Workflow regression | `.trae/scripts/test-workflow-regression.ps1` | Mechanical regression checks |
 
 ## Deprecated Compatibility Components
@@ -77,12 +79,14 @@ Each active task should contain:
 | `tasks.md` | implementation checklist |
 | `analysis.md` | analysis and constraints |
 | `doc-impact.md` | documentation governance |
+| `requirements.md` | confirmed human-readable intent for version-1 deep tasks |
+| `execution-prompt.md` | planner-authored execution contract for version-1 deep and fast tasks |
 
 ## Phase Gates
 
 | Transition | Required Evidence |
 |---|---|
-| plan -> implement | routing, tasks, Living Spec, analysis, doc-impact, mature solution evidence, architecture context, acceptance criteria, automated verification plan, work package policy, quality gate, clarification resolved, user plan confirmation, router proof |
+| plan -> implement | routing, tasks, Living Spec, analysis, doc-impact, mature solution evidence, architecture context, acceptance criteria, automated verification plan, work package policy, quality gate, requirement profile, confirmed requirement evidence or fast-track assessment, execution prompt, clarification resolved, user plan confirmation, router proof |
 | implement -> review | tasks complete, edit auth still valid, project checks, doc governance, Living Spec progress |
 | review -> verify | review pass and evidence |
 | verify -> archive | verification report, tasks complete, verification pass |
@@ -100,6 +104,7 @@ Each active task should contain:
 9. Multi-model collaboration must go through task packets and work packages; worker models do not own architecture or final verification.
 10. Codex must use `skills/codex-project-router/SKILL.md` for project work until a native `.codex/tasks` adapter exists.
 11. Worker models may append progress and submit one result only; task mutation, Review, Verify, repair publication, and Archive are original-Issuer capabilities.
+12. New version-1 task packets must classify the change as deep or fast. Deep tasks require confirmed `requirements.md`; both profiles require `execution-prompt.md`.
 
 ## Verification Commands
 

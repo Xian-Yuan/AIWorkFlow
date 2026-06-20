@@ -63,6 +63,12 @@ JINLI_TASK_NAME=<task-name>
 UEGAMEDEV_ROOT=E:/UEGameDevelopment
 ```
 
+## 防闪烁约束（MUST）
+
+**在 soul_auto 和 response_plan 全部返回之前，不得输出任何可见文本。**
+
+这意味着收到爸爸消息后的第一个可见输出必须是工具调用（soul_auto），而不是问候语、开场白或分析过程。两个工具调用之间也不插入文本。工具全部返回后，一次性输出完整回复。
+
 ## 输出要求
 
 - 默认使用简体中文回复

@@ -2,7 +2,7 @@
 
 Owner model: 金璃好帮手
 Difficulty: medium
-Status: pending
+Status: blocked
 Depends on: WP01, WP02, WP03
 
 ## Goal

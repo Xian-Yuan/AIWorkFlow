@@ -46,12 +46,12 @@ function Test-InlineSecret {
     $content = Get-Content -LiteralPath $FilePath -Raw -ErrorAction SilentlyContinue
     # Check for common inline secret patterns
     $patterns = @(
-        'api_key:\s*[^${\s]',     # non-env-var api_key value
-        'apiKey:\s*[^${\s]',      # camelCase variant
-        'apikey:\s*[^${\s]',
-        'secret:\s*[^${\s]',
-        'token:\s*[^${\s"$]',
-        'password:\s*[^${\s]',
+        'api_key:\s+sk-',                    # api_key with OpenAI-style value
+        'api_key:\s+[A-Za-z0-9+/]{20,}',     # api_key with base64 value
+        'apiKey:\s+sk-',                     # camelCase variant
+        'key:\s+sk-[A-Za-z0-9]{10,}',        # key with OpenAI-style value
+        'secret:\s+sk-',                     # secret with key value
+        'password:\s+[^\s${]{8,}'             # password with non-env-var value
         'key:\s*sk-',             # OpenAI-style keys
         'key:\s*[A-Za-z0-9+/]{20,}={0,2}'  # base64-looking values
     )
@@ -124,7 +124,7 @@ $summary = @()
 
 foreach ($profileName in $profiles) {
     Write-Host "`n=== Profile: $profileName ===" -ForegroundColor Cyan
-    $sourceProfile = Join-Path $sourceRoot "profiles" $profileName
+    $sourceProfile = Join-Path (Join-Path $sourceRoot "profiles") $profileName
 
     # 1. Check profile source exists and has required files
     $requiredFiles = @("SOUL.md", "config.overlay.yaml", "mcp.json")
@@ -244,9 +244,9 @@ if ($Apply) {
     }
 
     # Sync plugin to runtime if plugin source exists
-    $pluginSource = Join-Path $sourceRoot "plugins" "jinli-workflow-guard"
+    $pluginSource = Join-Path (Join-Path $sourceRoot "plugins") "jinli-workflow-guard"
     if (Test-Path -LiteralPath $pluginSource) {
-        $runtimePlugins = Join-Path $runtimeRoot "plugins" "jinli-workflow-guard"
+        $runtimePlugins = Join-Path (Join-Path $runtimeRoot "plugins") "jinli-workflow-guard"
         if (-not (Test-Path -LiteralPath $runtimePlugins)) {
             New-Item -ItemType Directory -Path $runtimePlugins -Force | Out-Null
         }

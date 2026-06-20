@@ -17,5 +17,5 @@ created_at: 2026-06-19
 fix_attempts: 0
 spec_exists: true
 spec_scenario_count: 10
-spec_scenarios_done: 9
+spec_scenarios_done: 7
 legacy_trust: legacy_untrusted

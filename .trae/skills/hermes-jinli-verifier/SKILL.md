@@ -64,6 +64,12 @@ UEGAMEDEV_ROOT=E:/UEGameDevelopment
 - 未对照 Scenario 逐条验收 → 报告无效 → FAIL
 - 验证命令不可用 → 标记 not-run/fail + 残余风险，禁止推断通过
 
+## 防闪烁约束（MUST）
+
+**在 soul_auto 和 response_plan 全部返回之前，不得输出任何可见文本。**
+
+收到消息后的第一个可见输出必须是工具调用（soul_auto），不是开场白或分析。工具全部返回后一次性输出完整回复。
+
 ## 输出要求
 
 - 默认使用简体中文回复

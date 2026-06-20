@@ -1,0 +1,3 @@
+name: jinli-workflow-guard
+version: "1.0"
+description: Fail-closed workflow guard enforcing role/task/WP/path authorization.

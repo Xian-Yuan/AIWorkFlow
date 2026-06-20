@@ -51,14 +51,14 @@
 - **WHEN** 检查每个 task 的 checkbox
 - **THEN** 已实现的任务标记为 `[x]`
 - **THEN** 每个 WP 有对应的 worker report（work-packages/*.md 末尾追加完成记录）
-- **Status**: ✅ 已完成。已实现的 tasks 已勾选，未实现的保留 [ ] 并注明原因。
+- **Status**: ❌ 未完成。原始任务包仍有未实现任务，且 Work Package 要求的 worker reports 不存在。
 
 ### AC09: Verify 门禁通过
 - **GIVEN** 修复完成
 - **WHEN** 运行 `task-guard.ps1 <task-name> verify`
 - **THEN** 返回 exit code 0
-- **THEN** `.task.yaml` 中 `review_result: passed`, `verify_result: passed`
-- **Status**: ⚠️ 已运行 verify 门禁，输出已记录。但因原始 task packet 有未实现任务（真实 AI 后端、E2E 测试等），verify 返回 BLOCKED。提交流程等待爸爸批准。
+- **THEN** `.task.yaml` 中使用规范值 `review_result: pass`, `verify_result: pass`
+- **Status**: ❌ 未完成。四个相关 Verify 门禁均返回 exit 1；人工批准不能覆盖机械门禁。
 
 ### AC10: Verification Report 有实际命令输出
 - **GIVEN** verification-report.md
@@ -84,20 +84,20 @@
 ## Current Progress Audit (2026-06-19 15:45)
 
 - **Current Phase**: Implement
-- **Verified AC**: 9/10（AC01-AC08 ✅, AC10 ✅, AC09 ⚠️ 待批准）
+- **Verified AC**: 7 PASS / 1 PARTIAL / 2 FAIL
 - **AC01 (包结构)**: ✅ 9 个模块 import 通过，python -m 全部 exit 0
 - **AC02 (真实 Handler)**: ✅ 7 个 phase 全为非 lambda 真实函数，Phase 2 调用 Scriptwriter cmd_quick
-- **AC03 (角色追踪)**: ✅ _detect_characters 使用 char_map + regex 回退，不返回空数组
+- **AC03 (角色追踪)**: ✅ 映射模式返回 known_ids 子集；无映射时保留 regex 名称回退
 - **AC04 (TTS-first)**: ✅ duration_source != "tts_measured" → ValueError
 - **AC05 (SRT 多对白)**: ✅ 音频 consumption 修复，不重复使用第一段
-- **AC06 (资产复制)**: ✅ shutil.copy2 复制文件到项目目录
-- **AC07 (测试覆盖)**: ✅ 95 tests 全通过（56 新增 + 39 已有）
-- **AC08 (任务勾选)**: ✅ 3 个 task packet 已根据实际完成情况勾选
-- **AC09 (Verify 门禁)**: ⚠️ 已运行并记录输出，但因原始 task 有未实现功能，verify 返回 BLOCKED。需爸爸批准才能设 passed
+- **AC06 (资产复制)**: ⚠️ `shutil.copy2` 行为可手工复现，但原报告引用的测试未覆盖跨项目全局命中
+- **AC07 (测试覆盖)**: ✅ 默认根测试入口 106 tests 全通过
+- **AC08 (任务勾选)**: ❌ 原始任务和 worker reports 未完成
+- **AC09 (Verify 门禁)**: ❌ 四个相关门禁均 BLOCKED，不能人工覆盖
 - **AC10 (Verification Report)**: ✅ 3 份报告全部重写，含 py.test 输出、pipeline run、import 验证等实际证据
 - **WP01**: ✅ 完成
 - **WP02**: ✅ 完成；Scriptwriter 管线调用 + known_ids 修复 + 全 7 阶段 E2E 通过
 - **WP03**: ✅ 完成；联网环境 `95 passed`（+2 新增 known_ids 测试）
 - **WP05**: ✅ 完成；资产复制 + PLACEHOLDER 替换
-- **WP04**: ✅ 主要任务完成；T4.3/T4.4/T4.5/T4.6 已完成，T4.2 等待爸爸批准
-- **Next Step**: 等待爸爸审查结果，决定是否批准归档
+- **WP04**: ❌ 文档证据已更新，但原始任务与门禁仍未完成
+- **Next Step**: 由 `2026-06-20-verification-truth-closure` 修复事实缺口；原始产品任务继续保持开放

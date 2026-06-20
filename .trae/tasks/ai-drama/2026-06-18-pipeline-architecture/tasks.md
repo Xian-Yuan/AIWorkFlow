@@ -95,8 +95,9 @@ WP01 (项目骨架 + 配置)
 - [ ] T9.9: Verify AC07 (视频时长偏差 < 5%) — 无最终视频可测
 - [x] T9.10: Verify AC08 (字幕一致性)
 - [ ] T9.11: Verify AC09 (TTS-first 音画同步 < 200ms) — 未做媒体级同步测量
-- [x] T9.12: Verify AC10 (长文本章节事件图谱) — known_ids 角色追踪已修复（char_map + regex 回退）
+- [x] T9.12: Verify AC10 (长文本章节事件图谱) — 映射模式返回 known_ids，未提供映射时保留 regex 名称回退
 - [x] T9.13: Verify AC11 (跨项目资产复用) — 全局命中复制文件到项目目录（shutil.copy2）
 - [x] T9.14: Verify selected mature path was implemented and no rejected shortcut was introduced.
 - [x] T9.15: Run automated verification and record command output in verification-report.md.
 - [x] T9.16: Map implementation result to Acceptance Criteria in verification-report.md.
+- [ ] T9.17: Verify AC12 (真实参考 URL → Viral Analysis → 注入 Scriptwriter → 风格一致性证据) — 本地注入消费链已实现，但真实 URL 与风格一致性 E2E 尚未执行

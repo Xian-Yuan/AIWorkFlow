@@ -1,0 +1,31 @@
+# Hermes config for jinli-implementer profile
+# Repository-owned source — credentials are in .env (NOT here).
+# Sync target: .tools/hermes-worker/profiles/jinli-implementer/config.yaml
+
+terminal:
+  backend: local
+  cwd: E:/UEGameDevelopment
+
+skills:
+  external_dirs:
+    - E:/UEGameDevelopment/skills
+
+agent:
+  max_iterations: 90
+  # Implementer may need more iterations for compile/test cycles
+
+display:
+  skin: default
+
+# Implement role: bounded edits, compile/test cycles.
+# MCP server configured in mcp.json (limited workflow tools only).
+# Guard plugin enforces work-package Allowed/Forbidden Paths.
+
+toolsets:
+  enabled:
+    - terminal
+    - file
+    - search
+    - skills
+    - todo
+    - delegation

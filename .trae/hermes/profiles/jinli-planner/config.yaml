@@ -1,0 +1,31 @@
+# Hermes config for jinli-planner profile
+# Repository-owned source — credentials are in .env (NOT here).
+# Sync target: .tools/hermes-worker/profiles/jinli-planner/config.yaml
+
+terminal:
+  backend: local
+  cwd: E:/UEGameDevelopment
+
+skills:
+  external_dirs:
+    - E:/UEGameDevelopment/skills
+
+agent:
+  max_iterations: 60
+
+display:
+  skin: default
+
+# Plan role: read-heavy, document creation only.
+# MCP server configured in mcp.json (workflow tools only).
+# Guard plugin enforces role boundaries in .trae/hermes/plugins/.
+
+toolsets:
+  enabled:
+    - terminal
+    - file
+    - search
+    - skills
+    - todo
+    - memory
+    - delegation

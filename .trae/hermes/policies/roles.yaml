@@ -1,0 +1,123 @@
+# Role Policy Manifest
+# Defines explicit role, tool, and path rules for all Hermes workflow profiles.
+# Referenced by guard plugin and MCP server for authorization decisions.
+# This file is repository source of truth, not runtime state.
+
+version: 1
+
+roles:
+  planner:
+    profile: jinli-planner
+    may:
+      - research and clarify requirements
+      - create or update task design documents
+      - obtain user confirmation
+      - run Plan gate (task-guard.ps1 plan)
+      - coordinate Review and Verify
+      - run verification commands (read-only evidence)
+    must_not:
+      - edit application code
+      - claim implementation work
+      - accept worker claims without independent verification
+      - modify shared Skills during normal tasks
+    allowed_paths:
+      - ".trae/tasks/**"
+      - "Docs/superpowers/specs/**"
+      - "Docs/superpowers/plans/**"
+      - "Docs/AI/*.md"
+    forbidden_paths:
+      - "Project/**"
+      - ".trae/scripts/task-state.ps1"
+      - ".trae/scripts/task-guard.ps1"
+      - ".trae/scripts/doc-guard.ps1"
+      - ".trae/hermes/mcp/**"
+      - ".trae/hermes/plugins/**"
+      - ".tools/hermes-worker/hermes-agent/**"
+    mcp_tools:
+      - workflow_list_tasks
+      - workflow_read_packet
+      - workflow_init_task
+      - workflow_write_task_document
+      - workflow_check_plan
+      - workflow_run_verify
+
+  implementer:
+    profile: jinli-implementer
+    may:
+      - read one task packet
+      - claim one work package
+      - edit only allowed paths within work package scope
+      - run scoped checks and tests
+      - submit one worker report
+    must_not:
+      - choose architecture
+      - change task acceptance criteria
+      - transition final verification state
+      - edit outside work-package scope
+      - modify shared Skills
+    allowed_paths: []  # Derived from work-package definition at runtime
+    forbidden_paths:
+      - "Project/**"
+      - ".trae/scripts/task-state.ps1"
+      - ".trae/scripts/task-guard.ps1"
+      - ".trae/scripts/doc-guard.ps1"
+      - ".tools/hermes-worker/hermes-agent/**"
+      - "skills/**"  # Shared Skills immutable during work-package execution
+      - ".trae/hermes/policies/**"
+    mcp_tools:
+      - workflow_list_tasks
+      - workflow_read_packet
+      - workflow_can_edit
+      - workflow_read_work_package
+      - workflow_claim_work_package
+      - workflow_submit_report
+
+  verifier:
+    profile: jinli-planner  # Uses planner profile in verifier mode
+    may:
+      - read task packets and reports
+      - independently rerun deterministic checks
+      - write verification-report.md
+      - update verification state through authoritative scripts
+    must_not:
+      - edit application code
+      - modify task design documents
+      - accept worker claims without independent evidence
+      - infer pass when verification commands are unavailable
+    allowed_paths:
+      - ".trae/tasks/**/verification-report.md"
+    forbidden_paths:
+      - "Project/**"
+      - "skills/**"
+      - ".trae/hermes/mcp/**"
+      - ".trae/hermes/plugins/**"
+      - ".tools/hermes-worker/hermes-agent/**"
+    mcp_tools:
+      - workflow_list_tasks
+      - workflow_read_packet
+      - workflow_run_verify
+
+# Global constraints
+global:
+  forbidden_paths_always:
+    - ".tools/hermes-worker/hermes-agent/**"
+    - ".trae/scripts/task-state.ps1"
+    - ".trae/scripts/task-guard.ps1"
+    - ".trae/scripts/doc-guard.ps1"
+    - "**/.env"  # Runtime secrets
+    - "**/.*_history"
+  allowed_task_documents:
+    - routing.md
+    - analysis.md
+    - spec.md
+    - tasks.md
+    - doc-impact.md
+    - verification-report.md
+  allowed_formal_paths:
+    - "Docs/superpowers/specs/"
+    - "Docs/superpowers/plans/"
+    - "Docs/AI/"
+  work_package_root: ".trae/tasks/_shared"
+  mcp_package_root: ".trae/hermes/mcp/jinli_workflow"
+  plugin_root: ".trae/hermes/plugins/jinli-workflow-guard"
+  workspace_root: "E:/UEGameDevelopment"

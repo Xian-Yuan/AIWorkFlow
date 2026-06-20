@@ -2,7 +2,7 @@
 
 Owner model: 金璃好帮手
 Difficulty: high（涉及 5 个模块的修复）
-Status: pending
+Status: done
 Depends on: WP01
 
 ## Goal

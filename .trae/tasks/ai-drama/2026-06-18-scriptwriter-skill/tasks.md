@@ -108,8 +108,8 @@ WP01 (Skill 骨架 + 配置)
 - [x] T8.5: 验证 mature path 被实现，无 rejected shortcut 被引入
 - [x] T8.6: 收集所有验证证据，写入 verification-report.md
 - [x] T8.7: Map implementation result to Acceptance Criteria
-- [ ] T8.8: 实现 AC14 style_injection.json CLI 与生成链路注入 — 未实现（超出本次修复范围）
-- [ ] T8.9: 实现 AC15 character_archetypes.json 与 voice_profile 注入 — 未实现（超出本次修复范围）
+- [x] T8.8: 实现 AC14 style_injection.json CLI 与生成链路注入 — `--style-injection` 已接入 Quick Mode，注入值进入 Step 1/2/3 Prompt
+- [x] T8.9: 实现 AC15 character_archetypes.json 与 voice_profile 注入 — 支持同目录自动加载及显式 `--character-archetypes/--voice-style`
 
 ## Final Verification
 

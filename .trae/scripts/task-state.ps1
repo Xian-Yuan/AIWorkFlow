@@ -95,6 +95,12 @@ isolation: $isolation
 clarification_status: pending
 user_confirmed_plan: false
 router_skill_loaded: false
+requirements_gate_version: 1
+change_profile: unclassified
+requirements_status: pending
+requirements_doc: null
+execution_prompt: null
+fast_track_reason: null
 review_result: pending
 verify_result: pending
 verification_report: null
@@ -129,6 +135,87 @@ function Require-FileExists {
     if (-not (Test-Path $Path)) { Write-Red "ERROR: Required file missing: $Path"; exit 1 }
 }
 
+function Resolve-TaskArtifactPath {
+    param([string]$Value)
+    if (-not $Value) { return $null }
+    $taskRoot = [System.IO.Path]::GetFullPath($TASK_DIR).TrimEnd("\","/")
+    $candidate = if ([System.IO.Path]::IsPathRooted($Value)) {
+        [System.IO.Path]::GetFullPath($Value)
+    }
+    else {
+        [System.IO.Path]::GetFullPath((Join-Path $TASK_DIR ($Value -replace "/", "\")))
+    }
+    $taskPrefix = $taskRoot + [System.IO.Path]::DirectorySeparatorChar
+    if (-not $candidate.StartsWith($taskPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $null
+    }
+    return $candidate
+}
+
+function Test-RequirementGateReady {
+    param([string]$FilePath, [bool]$WriteEvidence)
+    $version = Get-YamlField "requirements_gate_version" $FilePath
+    if (-not $version) {
+        if ($WriteEvidence) { Write-Host "  [PASS] legacy requirement gate compatibility" -ForegroundColor Green }
+        return $true
+    }
+    if ($version -ne "1") {
+        if ($WriteEvidence) { Write-Host "  [FAIL] unsupported requirements_gate_version=$version" -ForegroundColor Red }
+        return $false
+    }
+
+    $profile = Get-YamlField "change_profile" $FilePath
+    $status = Get-YamlField "requirements_status" $FilePath
+    $requirementsPath = Resolve-TaskArtifactPath (Get-YamlField "requirements_doc" $FilePath)
+    $promptPath = Resolve-TaskArtifactPath (Get-YamlField "execution_prompt" $FilePath)
+    $clarification = Get-YamlField "clarification_status" $FilePath
+    $fastReason = Get-YamlField "fast_track_reason" $FilePath
+    $ready = $true
+
+    if ($profile -notin @("deep","fast")) {
+        if ($WriteEvidence) { Write-Host "  [FAIL] change_profile=$profile (expected: deep|fast)" -ForegroundColor Red }
+        $ready = $false
+    }
+    elseif ($WriteEvidence) { Write-Host "  [PASS] change_profile=$profile" -ForegroundColor Green }
+
+    if (-not $promptPath -or -not (Test-Path -LiteralPath $promptPath)) {
+        if ($WriteEvidence) { Write-Host "  [FAIL] execution_prompt missing" -ForegroundColor Red }
+        $ready = $false
+    }
+    elseif ($WriteEvidence) { Write-Host "  [PASS] execution_prompt exists" -ForegroundColor Green }
+
+    if ($profile -eq "deep") {
+        if ($status -ne "confirmed") {
+            if ($WriteEvidence) { Write-Host "  [FAIL] deep task requirements_status=$status (expected: confirmed)" -ForegroundColor Red }
+            $ready = $false
+        }
+        elseif ($WriteEvidence) { Write-Host "  [PASS] requirements_status=confirmed" -ForegroundColor Green }
+        if ($clarification -ne "answered") {
+            if ($WriteEvidence) { Write-Host "  [FAIL] deep task requires clarification_status=answered" -ForegroundColor Red }
+            $ready = $false
+        }
+        if (-not $requirementsPath -or -not (Test-Path -LiteralPath $requirementsPath)) {
+            if ($WriteEvidence) { Write-Host "  [FAIL] deep task requirements_doc missing" -ForegroundColor Red }
+            $ready = $false
+        }
+        elseif ($WriteEvidence) { Write-Host "  [PASS] requirements_doc exists" -ForegroundColor Green }
+    }
+    elseif ($profile -eq "fast") {
+        if ($status -ne "not_required") {
+            if ($WriteEvidence) { Write-Host "  [FAIL] fast task requirements_status=$status (expected: not_required)" -ForegroundColor Red }
+            $ready = $false
+        }
+        elseif ($WriteEvidence) { Write-Host "  [PASS] requirements_status=not_required" -ForegroundColor Green }
+        if ([string]::IsNullOrWhiteSpace($fastReason)) {
+            if ($WriteEvidence) { Write-Host "  [FAIL] fast_track_reason missing" -ForegroundColor Red }
+            $ready = $false
+        }
+        elseif ($WriteEvidence) { Write-Host "  [PASS] fast_track_reason recorded" -ForegroundColor Green }
+    }
+
+    return $ready
+}
+
 function Test-PlanReady {
     param([string]$FilePath)
     $cs = Get-YamlField "clarification_status" $FilePath
@@ -137,6 +224,7 @@ function Test-PlanReady {
     if ($cs -notin @("not_needed","answered")) { Write-Red "ERROR: clarification_status must be not_needed/answered, got '$cs'"; exit 1 }
     if ($ucp -ne "true") { Write-Red "ERROR: user_confirmed_plan must be true"; exit 1 }
     if ($rsl -ne "true") { Write-Red "ERROR: router_skill_loaded must be true"; exit 1 }
+    if (-not (Test-RequirementGateReady $FilePath $false)) { Write-Red "ERROR: requirement-understanding gate is not ready"; exit 1 }
 }
 
 function Test-ImplementChecks {
@@ -156,6 +244,7 @@ function Test-ImplementChecks {
     $rsl = Get-YamlField "router_skill_loaded" $FilePath
     if ($rsl -eq "true") { Write-Host "  [PASS] router_skill_loaded=true" -ForegroundColor Green }
     else { Write-Host "  [FAIL] router_skill_loaded=$rsl" -ForegroundColor Red; $localBlocked = $true }
+    if (-not (Test-RequirementGateReady $FilePath $true)) { $localBlocked = $true }
     $authorityProfile = Get-YamlField "authority_profile" $FilePath
     $issuerSid = Get-YamlField "issuer_sid" $FilePath
     if ($authorityProfile -eq "issuer-worker-v1" -and $issuerSid) {
@@ -201,7 +290,7 @@ switch ($Command) {
     "set" {
         Require-FileExists $YAML_FILE
         $field = $Arg1; $value = $Arg2
-        $validFields = @("workflow","implement_mode","isolation","clarification_status","user_confirmed_plan","router_skill_loaded","design_doc","created_at","verified_at","base_ref","project_type","fix_attempts","worker_profile","lead_verifier","repair_loop_status","active_root_cause","active_repair_package","spec_exists","spec_scenario_count","spec_scenarios_done")
+        $validFields = @("workflow","implement_mode","isolation","clarification_status","user_confirmed_plan","router_skill_loaded","requirements_gate_version","change_profile","requirements_status","requirements_doc","execution_prompt","fast_track_reason","design_doc","created_at","verified_at","base_ref","project_type","fix_attempts","worker_profile","lead_verifier","repair_loop_status","active_root_cause","active_repair_package","spec_exists","spec_scenario_count","spec_scenarios_done")
         if ($field -notin $validFields) { Write-Red "ERROR: Unknown field '$field'. Valid: $($validFields -join ', ')"; exit 1 }
         $enumMap = @{
             "workflow"=@("full","hotfix")
@@ -210,6 +299,9 @@ switch ($Command) {
             "clarification_status"=@("pending","not_needed","asked","answered")
             "user_confirmed_plan"=@("true","false")
             "router_skill_loaded"=@("true","false")
+            "requirements_gate_version"=@("1")
+            "change_profile"=@("unclassified","deep","fast")
+            "requirements_status"=@("pending","confirmed","not_required")
             "project_type"=@("ue5","web","other")
             "worker_profile"=@("none","ds4-flash")
             "repair_loop_status"=@("idle","repair_required","architecture_review","resolved")

@@ -46,6 +46,8 @@ Every non-trivial task must be represented by a runtime task packet:
   .task.yaml
   routing.md
   analysis.md
+  requirements.md          # required for version-1 deep discovery
+  execution-prompt.md
   spec.md
   tasks.md
   doc-impact.md
@@ -99,6 +101,12 @@ phase: plan | implement | review | verify | archived
 clarification_status: not_needed | asked | answered
 user_confirmed_plan: true | false
 router_skill_loaded: true | false
+requirements_gate_version: 1
+change_profile: unclassified | deep | fast
+requirements_status: pending | confirmed | not_required
+requirements_doc: null | requirements.md
+execution_prompt: null | execution-prompt.md
+fast_track_reason: null | <concrete bounded-change reason>
 review_result: pending | pass | fail
 verify_result: pending | pass | fail
 verification_report: null | <path>
@@ -140,6 +148,27 @@ Required `Work Package Policy` format:
 ```
 
 If `External workers: yes`, at least one complete `work-packages/*.md` file must exist before Plan can move to Implement. Placeholder-only work packages are blocked.
+
+For requirement-gate version 1, routing must also contain either:
+
+- `## Requirement Discovery Gate` for deep tasks, including confirmed plain-language summary and no unresolved high-impact questions; or
+- `## Fast Track Assessment` proving the change is concrete, bounded, architecture-neutral, journey-neutral, free of unresolved high-impact implicit requirements, and easy to verify.
+
+### `requirements.md`
+
+Required for version-1 `change_profile: deep`.
+
+This is the human-readable source of intent. It must include desired outcome, user/context, end-to-end experience, confirmed decisions, implicit requirements, boundaries/non-goals, success experience, resolved open questions, teach-back summary, and confirmation evidence.
+
+It is not a technical design document. It lets a non-technical user recognize and correct what the planner believes should be built.
+
+### `execution-prompt.md`
+
+Required for both deep and fast version-1 packets.
+
+The lead planner writes it after requirement confirmation. It must contain role, goal, task-packet truth sources, decisions, accepted architecture, allowed/forbidden paths, non-goals, acceptance criteria, verification commands, stop conditions, and the evidence rule.
+
+Workers execute from this prompt plus the packet. They do not reinterpret the original chat request.
 
 ### `analysis.md`
 
@@ -354,6 +383,11 @@ Codex-specific rules:
 - if external workers are enabled, `work-packages/*.md` exists
 - if external workers are enabled, every work package has required sections and no unresolved placeholders
 - tasks include automated verification and acceptance mapping
+- version-1 packets declare `change_profile: deep|fast`
+- deep packets contain confirmed, complete `requirements.md` and `clarification_status: answered`
+- fast packets contain a concrete reason and complete fast-track assessment
+- both profiles contain a complete, non-templated `execution-prompt.md`
+- requirement and prompt paths resolve inside the current task packet
 
 `task-guard.ps1 implement` must check:
 
@@ -414,4 +448,5 @@ The workflow is working when:
 - Codex can discover the same packet through `AGENTS.md` and `skills/codex-project-router`
 - no model can enter Implement without architecture, quality, and verification evidence
 - no task can archive without an evidence-based verification report
+- no new meaningful feature can enter Implement from a raw, unconfirmed user sentence
 - simple models can contribute without changing architecture decisions

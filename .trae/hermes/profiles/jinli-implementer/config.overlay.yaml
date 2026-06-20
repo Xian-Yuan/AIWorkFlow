@@ -1,0 +1,46 @@
+# Jinli-Implementer Profile Config Overlay
+# Merged with Hermes runtime config (config.yaml).
+# Uses env vars from .env for credentials — no inline secrets.
+# _config_version: 27 prevents Hermes from auto-migrating and overwriting.
+
+_config_version: 27
+
+terminal:
+  cwd: "E:/UEGameDevelopment"
+
+skills:
+  external_dirs:
+    - "E:/UEGameDevelopment/skills"
+
+plugins:
+  enabled:
+    - jinli-workflow-guard
+  jinli-workflow-guard:
+    source: "E:/UEGameDevelopment/.trae/hermes/plugins/jinli-workflow-guard"
+
+mcp_servers:
+  jinli-workflow:
+    command: "python"
+    args: ["-m", "jinli_workflow"]
+    cwd: "E:/UEGameDevelopment/.trae/hermes/mcp"
+    tools:
+      include:
+        - workflow_list_tasks
+        - workflow_read_packet
+        - workflow_can_edit
+        - workflow_read_work_package
+        - workflow_claim_work_package
+        - workflow_submit_report
+
+# model section: env vars resolved from profile .env at runtime
+# Inherits the user's XF-Coding (讯飞星火) configuration.
+# GLM_API_KEY and GLM_BASE_URL are set in .tools/hermes-worker/.env
+model:
+  provider: custom
+  base_url: "${GLM_BASE_URL}"
+  api_key: "${GLM_API_KEY}"
+  default: astron-code-latest
+  api_mode: chat_completions
+
+fallback_providers:
+  - deepseekv4pro

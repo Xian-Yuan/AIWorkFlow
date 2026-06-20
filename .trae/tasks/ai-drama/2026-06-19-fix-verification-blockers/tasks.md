@@ -117,7 +117,7 @@ WP01 (包结构修复 — 不依赖任何其他修复)
 
 - [x] **T3.2**: 修复 failed tests
   - 根据失败原因修实现或修测试用例
-  - 19 tests all pass
+  - Scriptwriter 当前 28 tests all pass（含 9 个注入消费测试）
 
 ### 7 个 Skill 补充测试
 
@@ -157,7 +157,7 @@ WP01 (包结构修复 — 不依赖任何其他修复)
   - `test_clip_compose`: 单镜头合成
   - `test_concat_videos`: 视频拼接
 
-- [x] **T3.10**: `ai_drama_viral_analyzer/tests/` — 已有 20 tests，确认全部 pass
+- [x] **T3.10**: `ai_drama_viral_analyzer/tests/` — 当前 21 tests，确认全部 pass
 
 **Acceptance Criteria 映射**: AC07
 
@@ -169,38 +169,38 @@ WP01 (包结构修复 — 不依赖任何其他修复)
 
 **依赖**: WP01, WP02, WP03 全部完成
 
-- [x] **T4.1**: 勾选 3 个 task packet 的 tasks.md
+- [ ] **T4.1**: 勾选 3 个 task packet 的 tasks.md — 已实现项已按事实勾选，但原包仍有未完成项，且要求的 worker reports 尚不存在
   - `ai-drama/2026-06-18-pipeline-architecture/tasks.md` — 根据实际完成情况勾选
   - `ai-drama/2026-06-18-scriptwriter-skill/tasks.md`
   - `ai-drama/2026-06-18-viral-analyzer-skill/tasks.md`
   - 未实现的任务标记 `[ ]` 并注明原因
   - 每个 WP 在 work-packages/*.md 末尾追加完成记录（worker report）
 
-- [ ] **T4.2**: 更新 3 个 task packet 的 `.task.yaml` — ⛔ 等待爸爸正式批准后才能设 passed/archived
-  - `review_result: passed` — 暂不可设
-  - `verify_result: passed` — 暂不可设
-  - `archived: true` — 暂不可设
+- [ ] **T4.2**: 更新 3 个 task packet 的 `.task.yaml`
+  - 当前事实为 `phase: implement`, `review_result: fail`, `verify_result: fail`, `archived: false`
+  - 只有全部原始任务、报告和机械门禁通过后，才允许使用规范值 `pass`
+  - 人工批准不能覆盖失败门禁
 
 - [x] **T4.3**: 重写 3 个 verification-report.md — 已全部重写，含实际命令输出
-  - pipeline-architecture: 95 tests、7-phase dry-run、non-dry-run output
-  - scriptwriter-skill: 19 tests、schema、presets、config
-  - viral-analyzer-skill: 20 tests、kb files、config
+  - pipeline-architecture: 106 tests、7-phase dry-run、placeholder non-dry-run output
+  - scriptwriter-skill: 28 tests、schema、presets、config、注入消费链
+  - viral-analyzer-skill: 21 tests、kb files、config、可执行 Scriptwriter 命令
   - 所有报告包含 `python -m pytest` 真实输出、import 验证、Architecture Compliance、Test Evidence、Residual Risk
 
 - [x] **T4.4**: 运行 Verify 门禁记录输出 — 已执行，记录如下：
   - pipeline-architecture: [BLOCKED] Tasks-All-Done ❌ + verify_result=pass ❌
   - scriptwriter-skill: [BLOCKED] Tasks-All-Done ❌ + verify_result=pass ❌
   - viral-analyzer-skill: [BLOCKED] Tasks-All-Done ❌ + verify_result=pass ❌
-  - **原因**: 原始 task packet 有大量未实现任务（真实 AI 后端、真实 URL E2E 等），非本次修复范围
+  - **原因**: 原始 task packet 有未实现任务（真实 AI 后端、真实 URL E2E、媒体质量指标等）
   - **验证报告质量**: 3 份全部通过 quality check ✅
-  - ⛔ verify_result=passed 不能提前设，需爸爸批准
+  - 结论: 失败门禁保持失败，不能通过人工批准改写
 
 - [x] **T4.5**: Verify selected mature path was implemented and no rejected shortcut was introduced
   - ✅ 包名用下划线（PEP 8）：9 个 `ai_drama_*` 目录确认
   - ✅ Orchestrator 注册真实 handler：7 个 phase handler 全为非 lambda
   - ✅ 角色检测用 char_map（非 LLM）：_detect_characters 使用 char_map + regex 回退
   - ✅ TTS-first 合约：duration_source != "tts_measured" → ValueError
-  - ✅ pytest 测试覆盖：95 tests 全通过
+  - ✅ pytest 测试覆盖：默认根入口 106 tests 全通过
   - ✅ 无被拒绝的捷径引入：
     - 没有保留连字符目录名（已重命名）
     - 没有保留空 handler（已集成）
@@ -212,10 +212,10 @@ WP01 (包结构修复 — 不依赖任何其他修复)
 
 ### Automated Verification
 - [x] **T4.6**: Run automated verification and record command output in verification-report.md
-  - ✅ pytest 全量：95 passed in 3.34s（已记录到 3 份报告）
+  - ✅ pytest 全量：106 passed（默认根入口）
   - ✅ pipeline dry-run：7 阶段全通
   - ✅ pipeline non-dry-run：exit 0，产出 script.json/final.mp4/subtitles.srt
-  - ✅ task-guard.ps1 verify：已运行，已记录输出
+  - ✅ task-guard.ps1 verify：已运行并记录真实 BLOCKED 输出；该项不代表门禁通过
 
 ---
 

@@ -1,14 +1,19 @@
 # WP03 Claim: Hermes Workflow Guard Plugin
 
-**Claimed by**: 金璃好帮手 (OpenCode implementer)
-**Claimed at**: 2026-06-19T14:15:00+08:00
-**Work Package**: WP03-hermes-workflow-guard
-**Task**: _shared/2026-06-19-hermes-workflow-integration
+- **Claim ID**: hermes-guard-WP03
+- **Task**: _shared/2026-06-19-hermes-workflow-integration
+- **Claimed by**: 金璃好帮手 (lead model)
+- **Status**: active
 
-## Scope
+## Claim Scope
+
+Implementation of the jinli-workflow-guard Hermes plugin:
+1. Core guard logic (guard.py): role validation, mutation blocking, path enforcement
+2. Secret-safe audit recording (audit.py): credential redaction, audit records
+3. Plugin registration (__init__.py): 5 hooks registered
+4. Plugin metadata (plugin.yaml)
+5. Unit tests (test_workflow_guard.py): 6 tests
+
+## Allowed Paths
 - `.trae/hermes/plugins/jinli-workflow-guard/**`
 - `.trae/hermes/tests/test_workflow_guard.py`
-- Claims and reports within task packet
-
-## Collision Check
-- No prior claim exists for WP03.

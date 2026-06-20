@@ -1,0 +1,11 @@
+# /jinli-implement Skill Bundle
+# Defines the role composition for jinli-implementer profile.
+# Does not duplicate Skill content.
+bundles:
+  /jinli-implement:
+    skills:
+      - hermes-project-router
+      - hermes-jinli-implementer
+      - anti-degradation
+      - anti-duplication
+      - verification-before-completion

@@ -130,6 +130,60 @@ From 24 failure memories:
 - Implications of success
 - ANY communication suggesting completion/correctness
 
+## Multi-package pytest suites
+
+When a project has multiple sibling Python packages under one root directory (e.g. `skills/pkg_a/`, `skills/pkg_b/`), pytest can fail in subtle ways:
+
+### Pitfall: Stale `__pycache__` causes false test failures
+
+Renamed test methods or modules leave old `.pyc` files behind. pytest may load the cached bytecode instead of the new source, causing `AssertionError` on old test names or missing new tests.
+
+**Fix:** Before investigating test failures, clear `__pycache__`:
+```bash
+find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null
+find . -name "*.pyc" -delete 2>/dev/null
+```
+Then re-run. If failures disappear, the root cause was stale bytecode, not a code bug.
+
+### Pitfall: `subprocess.run([sys.executable, "-m", <module>])` loses sys.path
+
+Tests that launch a child Python process to verify CLI entrypoints (e.g. `python -m my_package validate`) fail with `ModuleNotFoundError` because the child process does not inherit pytest's `sys.path`.
+
+**Fix:** Pass `PYTHONPATH` explicitly:
+```python
+import os
+from pathlib import Path
+
+skills_dir = str(Path(__file__).parent.parent.parent)  # adjust to project layout
+env = {**os.environ, "PYTHONPATH": skills_dir}
+result = subprocess.run(
+    [sys.executable, "-m", "my_package", "validate", arg],
+    capture_output=True, text=True, check=False, env=env,
+)
+```
+
+### Pitfall: Root `conftest.py` needed for multi-package imports
+
+When pytest's `rootdir` contains sibling packages, a root-level `conftest.py` is needed for:
+1. Adding rootdir to `sys.path` so `from my_package import ...` works
+2. `collect_ignore` to exclude non-test files (e.g. `test_real_run.txt`)
+
+```python
+# conftest.py at rootdir level
+import sys
+from pathlib import Path
+
+collect_ignore = ["test_real_run.txt"]
+
+_SKILLS_DIR = str(Path(__file__).parent)
+if _SKILLS_DIR not in sys.path:
+    sys.path.insert(0, _SKILLS_DIR)
+```
+
+### Pitfall: `pytest.ini` testpaths must include all new packages
+
+When new packages are added, their test directories must be listed in `testpaths`. Missing entries cause `pytest -q` to skip those tests silently when run from root.
+
 ## The Bottom Line
 
 **No shortcuts for verification.**

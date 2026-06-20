@@ -1,0 +1,10 @@
+# /jinli-plan Skill Bundle
+# Defines the role composition for jinli-planner profile.
+# Does not duplicate Skill content.
+bundles:
+  /jinli-plan:
+    skills:
+      - hermes-project-router
+      - hermes-jinli-planner
+      - doc-governance
+      - failure-memory

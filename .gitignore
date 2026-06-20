@@ -42,6 +42,9 @@
 # Trae shared workflow runtime
 !/.trae/
 /.trae/*
+# Hermes MCP workflow runtime
+!/.trae/hermes/
+!/.trae/hermes/**
 !/.trae/memory/
 !/.trae/memory/**
 !/.trae/references/

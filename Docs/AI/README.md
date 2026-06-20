@@ -71,6 +71,9 @@ Implementation plans belong under:
 | 40 | `40-DS4-Flash-Worker-Repair-Loop.md` | DS4 Flash bounded delegation, independent Codex acceptance, and automatic repair repackaging |
 | 41 | `41-Issuer-Worker-Authority-Separation.md` | Cryptographic issuer authority, bounded worker capabilities, independent approval, and explicit archive |
 | 42 | `42-GitHub-SSH-Publish-Workflow.md` | Root repository SSH publication, protected remotes, worktree isolation, and remote SHA verification |
+| 43 | `43-AI-Workflow-Context-Efficiency-Patterns.md` | Skill-level memory, 2-Action findings, CodeGraph Plan evidence, task-package prompt contract, and evidence-backed claims |
+| 44 | `44-Workflow-Improvement-Roadmap.md` | Prioritized roadmap for workflow memory, gates, CodeGraph, and self-improvement |
+| 45 | `45-Conversational-Requirements-Discovery-Workflow.md` | Deep conversational discovery, fast-track classification, teach-back confirmation, and agent-authored execution prompts |
 
 ## Generated Inventories
 

@@ -1,11 +1,50 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "opencode-go": {
+    "openai": {
+      "models": {
+        "gpt-5.2-codex": {},
+        "gpt-5.1-codex-max": {}
+      }
+    },
+    "nvidia": {
+      "name": "NVIDIA",
+      "api": "openai",
+      "options": {
+        "apiKey": "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",
+        "baseURL": "https://integrate.api.nvidia.com/v1"
+      },
       "models": {
         "deepseek-v4-pro": {
-          "options": {
-            "reasoningEffort": "high"
+          "id": "deepseek-ai/deepseek-v4-pro",
+          "name": "DeepSeek V4 Pro",
+          "family": "deepseek",
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "limit": {
+            "context": 131072,
+            "output": 16384
+          },
+          "modalities": {
+            "input": ["text"],
+            "output": ["text"]
+          }
+        },
+        "glm-5.1": {
+          "id": "z-ai/glm-5.1",
+          "name": "GLM 5.1",
+          "family": "glm",
+          "reasoning": true,
+          "temperature": true,
+          "tool_call": true,
+          "limit": {
+            "context": 131072,
+            "output": 16384
+          },
+          "modalities": {
+            "input": ["text"],
+            "output": ["text"]
           }
         }
       }

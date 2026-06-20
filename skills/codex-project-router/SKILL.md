@@ -19,7 +19,9 @@ Before planning or editing project work, read:
 2. `Docs/AI/27-AI-Workflow-Refactor-Manifest.md`
 3. `Docs/AI/29-Mature-Solution-First-Workflow.md`
 4. `Docs/AI/33-Multi-Agent-Task-Packet-Workflow.md`
-5. task-local `routing.md`, `analysis.md`, `spec.md`, `tasks.md`, `doc-impact.md` if a task already exists
+5. `Docs/AI/45-Conversational-Requirements-Discovery-Workflow.md`
+6. task-local `routing.md`, `analysis.md`, `spec.md`, `tasks.md`, `doc-impact.md` if a task already exists
+7. task-local `requirements.md` and `execution-prompt.md` when declared by `.task.yaml`
 
 ## Runtime Task Root
 
@@ -56,6 +58,23 @@ Codex must not claim a task is complete until:
 ```
 
 passes, or Codex clearly reports why verification could not be run.
+
+## Requirement Understanding Gate
+
+For newly initialized version-1 task packets, Codex must classify the change before technical design:
+
+- `deep-discovery`: new systems, meaningful features, workflow/UI redesigns, architecture or data ownership changes, or unresolved high-impact ambiguity.
+- `fast-track`: only concrete bounded fixes with no architecture, data ownership, full user-journey, or unresolved implicit-requirement impact.
+- Uncertainty defaults to `deep-discovery`.
+
+Deep discovery uses `one-question-per-turn`, plain language, 2-3 concrete choices, a recommendation with reasons, free-form correction, `no-fixed-round-limit`, and a final `teach-back`.
+
+Codex must then create:
+
+- `requirements.md` as the human-readable confirmed intent source for deep tasks.
+- `execution-prompt.md` as the agent-authored implementation contract for both deep and fast tasks.
+
+The raw user message is not the worker execution contract. Workers receive the generated prompt and task packet.
 
 ## Architecture Ability Requirements
 

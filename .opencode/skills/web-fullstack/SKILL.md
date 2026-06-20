@@ -133,3 +133,8 @@ Model/DTO   → 数据结构
 - 禁止 SELECT *
 - 大数据量查询必须分页
 - 复杂查询优先用联表而非多次查询
+
+## 参考文件
+
+- `references/tech-stack-quickref.md` — 技术栈速查
+- `references/typescript6-breaking-changes.md` — TypeScript 6 破坏性变更（useRef 初始值、Vitest 类型指令等）

@@ -2,7 +2,7 @@
 
 Owner model: 金璃好帮手
 Difficulty: high（涉及 7 个新测试套件 + scriptwriter test 修复）
-Status: pending
+Status: done
 Depends on: WP02
 
 ## Goal

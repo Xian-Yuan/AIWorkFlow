@@ -1,0 +1,16 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-20-verification-truth-closure",
+    "packet_version":  2,
+    "packet_digest":  "e75e1c0cf0809c5ab5941675370e693a1b585bc855357d3063448d39999f7781",
+    "review_approval_path":  "approvals/review-v002.json",
+    "review_approval_digest":  "67f7529c2907ead61fde4b255ad791603eedb7bbda7dc3afc2c7ec0225fad6d9",
+    "source_diff_digest":  "6c92a092dd37a621c3cb20a5fd6374a93102a94f392dbee4c6475c31b330dab1",
+    "evidence_manifest_digest":  "6daa048f012c4e0ee3c249fcb69e65bbdd64f866af6d2dcacdfa20a9a2e4a42b",
+    "acceptance_criteria_digest":  "19bbc24243ede0487b1f1508f1ba14a7a5cac60f3a95f0aeac13c354cb1cd58f",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "archived_at":  "2026-06-20T10:03:30.2885373+08:00",
+    "decision":  "archived",
+    "archive_digest":  "a47faea03f9968422417d507754dd008444a47153adb2193de2d0fdc67e11f40"
+}

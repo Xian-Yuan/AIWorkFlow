@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "jinli-workflow": {
+      "command": "python",
+      "args": ["-m", "jinli_workflow"],
+      "cwd": "E:/UEGameDevelopment/.trae/hermes/mcp",
+      "tools": {
+        "include": [
+          "workflow_list_tasks",
+          "workflow_read_packet",
+          "workflow_init_task",
+          "workflow_write_task_document",
+          "workflow_check_plan",
+          "workflow_run_verify"
+        ]
+      }
+    }
+  }
+}

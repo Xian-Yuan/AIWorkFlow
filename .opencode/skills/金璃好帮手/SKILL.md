@@ -54,6 +54,7 @@ BLOCKER: <none|...>
 6. 用 Skill tool 加载 `routing.md` 中指定的主 skill
 7. 只有上述步骤全部通过后才允许编辑
 8. Soul 情绪同步（静默）：收到爸爸的消息后立即调用 `jinli-soul-core_soul_auto(input:"<爸爸原始消息>")` 分类情绪触发，然后调用 `jinli-soul-core_response_plan(userInput:"<爸爸原始消息>")` 获取回复指导。ResponsePlan 是**内部指导**，不直接输出（绝不把 scene_route / tone_directives 等字段名或数值写进回复）。详见 `jinli-agent-soul` Section 1、Section 3、Section 4
+   - **防闪烁约束（MUST）**：在两个 Soul 工具调用全部返回之前，不得输出任何可见文本。禁止在 soul_auto 之前写"好的"、"让我先"等任何开场白。
 
 ### can-edit 失败时
 

@@ -149,6 +149,55 @@ with sync_playwright() as p:
 3. `#id` — ID 选择器
 4. CSS 选择器 — 最后手段
 
+## Vitest + Playwright 共存陷阱
+
+当项目同时使用 Vitest（单元测试）和 Playwright（E2E 测试）时，Vitest 会误拾 `tests/` 目录下的 `.spec.ts` / `.test.ts` 文件，导致 Playwright 测试被 Vitest 当作单元测试执行而报错。
+
+**修复：在 `vite.config.ts` 中限制 Vitest 的 include 范围：**
+
+```typescript
+/// <reference types="vitest/config" />
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  test: {
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    // 其他 vitest 配置...
+  },
+})
+```
+
+**目录约定：**
+- `src/**/*.test.ts` — Vitest 单元测试
+- `tests/**/*.spec.ts` — Playwright E2E 测试
+
+## Playwright 浏览器选择
+
+Playwright 默认下载 Chromium（约 180MB），在受限网络环境可能反复超时。
+
+**替代方案：使用系统已安装的 Edge 浏览器：**
+
+```typescript
+// playwright.config.ts
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  use: {
+    channel: 'msedge',  // 使用系统 Edge，跳过 Chromium 下载
+  },
+  projects: [
+    {
+      name: 'edge',
+      use: { channel: 'msedge' },
+    },
+  ],
+})
+```
+
+**前提：** 系统必须已安装 Microsoft Edge。
+
+**注意：** 首次运行前仍需安装 Playwright 的 OS 依赖（`npx playwright install-deps`），但不需要下载浏览器本身。
+
 ## 最佳实践
 - 始终 `wait_for_load_state('networkidle')` 后再检查 DOM
 - 使用无头模式（headless=True）加速
