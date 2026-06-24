@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-36-post-audit-improvement-plan-5618
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.36-post-audit-improvement-plan.5618
+
+---
+
 ﻿# 审计后改进计划 (Post-Audit Improvement Plan)
 
 > **版本**: v1.0 | **日期**: 2026-06-18 | **来源**: Docs/AI/34 审计报告 + 金璃小天才分析

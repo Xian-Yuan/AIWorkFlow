@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/persona
+kg_node_id: node.doc-ai-ai-38-jinli-agent-soul-architecture-621c
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.38-jinli-agent-soul-architecture.621c
+
+---
+
 # 38 — Jinli Agent Soul 架构
 
 > **日期**: 2026-06-18

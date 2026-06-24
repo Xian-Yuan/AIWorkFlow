@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-40-ds4-flash-worker-repair-loop-e613
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.40-ds4-flash-worker-repair-loop.e613
+
+---
+
 # DS4 Flash Worker Repair Loop
 
 Date: 2026-06-19

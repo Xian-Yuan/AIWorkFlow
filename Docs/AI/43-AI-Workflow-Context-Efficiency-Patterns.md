@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/llm-serving
+kg_node_id: node.doc-ai-ai-43-ai-workflow-context-efficiency-patterns-54b4
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.43-ai-workflow-context-efficiency-patterns.54b4
+
+---
+
 # 43 — AI Workflow Context Efficiency Patterns
 
 > **Status**: Pilot — bounded implementation, not whole-repo migration

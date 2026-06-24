@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/knowledge
+kg_node_id: node.doc-ai-ai-readme-6bfe
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.readme.6bfe
+
+---
+
 # AI Development Docs
 
 This folder is the global AI workflow manual for the workspace. It contains cross-project rules, Agent workflow contracts, task gates, memory guidance, model-tiering rules, and documentation governance.

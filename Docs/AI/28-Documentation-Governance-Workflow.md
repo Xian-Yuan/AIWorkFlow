@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-28-documentation-governance-workflow-3e66
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.28-documentation-governance-workflow.3e66
+
+---
+
 # Documentation Governance Workflow
 
 日期：2026-06-17

@@ -1,3 +1,12 @@
+---
+domain: ue
+domain_path: ue/rendering-content
+kg_node_id: node.doc-ai-ai-04-asset-checklists-9479
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.04-asset-checklists.9479
+
+---
+
 # Asset Checklists
 
 ## 目标

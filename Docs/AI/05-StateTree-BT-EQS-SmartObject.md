@@ -1,3 +1,12 @@
+---
+domain: ue
+domain_path: ue/ai-behavior
+kg_node_id: node.doc-ai-ai-05-statetree-bt-eqs-smartobject-e3bb
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.05-statetree-bt-eqs-smartobject.e3bb
+
+---
+
 # StateTree BT EQS SmartObject
 
 ## 目标

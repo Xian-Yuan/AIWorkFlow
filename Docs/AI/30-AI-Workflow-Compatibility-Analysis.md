@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-30-ai-workflow-compatibility-analysis-1d22
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.30-ai-workflow-compatibility-analysis.1d22
+
+---
+
 # AI Workflow Compatibility Analysis
 
 > **Status note: Historical compatibility report. Partially superseded by Docs/AI/33 and Docs/AI/34. Codex sync scripts now in engine/_experimental/, not .trae/scripts/.**

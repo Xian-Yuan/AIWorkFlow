@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-32-refactoring-spec-28bb
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.32-refactoring-spec.28bb
+
+---
+
 # AI 工作流重构实施 Spec
 
 > **Status note: Target architecture spec. Partially implemented (Phase 1-2 done, Phase 3 in progress). Do NOT read as current state. Current state: Docs/AI/34.**

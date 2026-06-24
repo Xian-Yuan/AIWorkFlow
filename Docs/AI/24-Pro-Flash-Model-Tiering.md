@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-24-pro-flash-model-tiering-ae1d
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.24-pro-flash-model-tiering.ae1d
+
+---
+
 # Pro + Flash 模型分层工作流
 
 ## 目标

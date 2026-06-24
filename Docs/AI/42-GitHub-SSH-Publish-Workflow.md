@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-42-github-ssh-publish-workflow-71e9
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.42-github-ssh-publish-workflow.71e9
+
+---
+
 # GitHub SSH Publish Workflow
 
 Date: 2026-06-20

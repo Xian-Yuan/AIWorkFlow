@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/meta
+kg_node_id: node.doc-ai-ai-document-taxonomy-inventory-510a
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.document-taxonomy-inventory.510a
+
+---
+
 # Document Taxonomy Inventory
 
 Date: 2026-06-18

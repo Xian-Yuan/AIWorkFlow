@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/coding
+kg_node_id: node.doc-ai-ai-15-failsafe-antibloat-3eae
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.15-failsafe-antibloat.3eae
+
+---
+
 ﻿# 失败清理与反冗余机制（Fail-Safe & Anti-Bloat）
 
 ## 概述

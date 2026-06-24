@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/skill-scheduling
+kg_node_id: node.doc-ai-ai-11-skill-routing-workflow-e399
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.11-skill-routing-workflow.e399
+
+---
+
 ﻿# Skill Routing Workflow
 
 ## 目标

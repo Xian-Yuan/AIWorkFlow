@@ -1,3 +1,12 @@
+---
+domain: ue
+domain_path: ue/gas-lyra
+kg_node_id: node.doc-ai-ai-19-unreal-conventions-a8cd
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.19-unreal-conventions.a8cd
+
+---
+
 ﻿# Unreal 特有规范（反射、宏、Blueprint）
 
 ## 反射宏使用

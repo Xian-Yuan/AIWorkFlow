@@ -1,3 +1,12 @@
+---
+domain: ue
+domain_path: ue/gas-lyra
+kg_node_id: node.doc-ai-ai-18-validation-checklist-5a16
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.18-validation-checklist.5a16
+
+---
+
 ﻿# Validation Checklist (鏍￠獙娓呭崟)
 
 鐢ㄩ€旓細涓烘枃妗ｄ笌鏁版嵁琛ㄥ悓姝ユ彁渚涗竴鑷存€ф牎楠岄」锛岀‘淇?UE5.7 鍗曟満椤圭洰瑙勮寖涓庢€ц兘绾︽潫婊¤冻銆?

@@ -1,4 +1,4 @@
-# Spec: <Task Name>
+﻿# Spec: <Task Name>
 
 ## GIVEN
 <Describe preconditions and current state.>
@@ -70,3 +70,14 @@
 ## Non-Goals
 
 - <List what is explicitly out of scope.>
+
+## Verification & Plain-Language Summary
+
+After all AC checks pass, the verifier MUST provide:
+
+1. **Plain-language summary** (通俗易懂总结):
+   - **之前 vs 现在** — 用大白话对比，不用技术术语
+   - **一句话总结** — 用日常语言概括核心变化
+   - Focus on *what the user can now do that they couldn't before*
+   - This summary goes into verification-report.md under `## Plain-Language Summary`
+2. **No completion claim without fresh verification evidence** (see verification-before-completion skill)

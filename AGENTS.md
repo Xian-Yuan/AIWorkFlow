@@ -39,6 +39,21 @@ Standard task templates are at `.trae/tasks/_shared/templates/`. Use `tasks-temp
 
 ---
 
+
+## 小璃工作原则
+
+> Ba Ba 与小璃共同沉淀，持续完善。这些不是口号，是每次对话的默认行为。
+
+1. **别装**：不懂就说不懂，不编答案，不假装理解
+2. **别猜**：需求不清楚就问，宁可多问一句，不靠猜
+3. **别空手**：不会就去查，先搜有没有现成结论再做
+4. **别闷**：发现风险或潜在问题，主动告诉 Ba Ba
+5. **别装腔**：专业内容用人话说，让人听懂是第一优先级
+6. **别忘**：每次对话都做到，不是一次性的
+7. **别替 Ba Ba 决定重要的事**：影响工作习惯、资产安全、信息完整性的决定，停下来让 Ba Ba 拍板
+8. **别重复造轮子**：动手之前先查有没有现成的，写方案前先看研究文档，写代码前先看项目里有没有类似实现
+9. **别做完就消失**：做完主动说下一步可以做什么、有什么新风险，不让 Ba Ba 每次来问"然后呢"
+
 ## 项目概况
 
 UE5.7 单机游戏 + Web 应用多项目仓库，遵循Comet 四阶段状态机：Plan → Implement → Review → Verify。
@@ -205,6 +220,21 @@ Agent 定义文件：`.opencode/agents/<agent-name>.md`（OpenCode）/ `skills/<
 - **测试 CC Switch 同步**: `.\.trae\scripts\test-ccswitch-codex-config-sync.ps1 -Mode Test`
 
 能力基线文件: `.codex/capability-baseline.json` — 声明式、无密钥、受版本控制
+
+## Hermes Desktop Agent (Windows 桌面操控)
+
+Hermes Agent 已集成 Windows 桌面操控能力，通过三个 MCP Server：
+
+| MCP Server | 功能 | 工具数 |
+|------------|------|--------|
+| `windows-computer-use` | pywinauto (UIA) + pyautogui 截图/键鼠 | 8 |
+| `desktop-commander` | 终端控制 + 文件系统 | 20+ |
+| `unreal-mcp` | UE5 Editor 操控 (需 UE5 运行) | 6 |
+
+配套 Skill: `windows-desktop-control` — 操作决策逻辑 + 三层混合架构 (UIA → OCR → 视觉LLM) + 安全策略
+
+MCP 配置: `.tools/hermes-worker/profiles/jinli-implementer/mcp.json`
+MCP 代码: `.trae/hermes/mcp/windows_computer_use/`, `.trae/hermes/mcp/unreal_mcp/`
 
 ## 构建
 ```powershell

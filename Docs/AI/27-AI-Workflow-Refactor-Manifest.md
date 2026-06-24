@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-27-ai-workflow-refactor-manifest-985d
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.27-ai-workflow-refactor-manifest.985d
+
+---
+
 # AI Workflow Refactor Manifest
 
 Date: 2026-06-17

@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/self-evolution
+kg_node_id: node.doc-ai-ai-17-self-improving-framework-4a06
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.17-self-improving-framework.4a06
+
+---
+
 # 框架自主成长机制（Autonomous Growth Framework）
 
 ## 目标

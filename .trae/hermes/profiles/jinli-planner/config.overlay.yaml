@@ -1,6 +1,6 @@
-# Jinli-Planner Profile Config Overlay
+﻿# Jinli-Planner Profile Config Overlay
 # Merged with Hermes runtime config (config.yaml).
-# Uses env vars from .env for credentials — no inline secrets.
+# Uses env vars from .env for credentials 鈥?no inline secrets.
 # _config_version: 27 prevents Hermes from auto-migrating and overwriting.
 
 _config_version: 27
@@ -32,15 +32,44 @@ mcp_servers:
         - workflow_check_plan
         - workflow_run_verify
 
-# model section: env vars resolved from profile .env at runtime
-# Inherits the user's XF-Coding (讯飞星火) configuration.
-# GLM_API_KEY and GLM_BASE_URL are set in .tools/hermes-worker/.env
+# model section: XF-Coding (璁) 鐩磋繛宸查獙璇侀€氳繃銆?
+# provider 蹇呴』鐢?"custom"锛圚ermes 鍙 "custom" 鎴?PROVIDER_REGISTRY 閲岀殑鍚嶅瓧锛夈€?
+# api_key 蹇呴』鍐呰仈锛屽洜涓?provider=custom 鏃?credential pool 鍖归厤涓嶄笂銆?
+# model section: MiniMax M3 (???) ? 1M context
+# provider=minimax-cn ?????API key ? MINIMAX_CN_API_KEY ??
 model:
-  provider: custom
-  base_url: "${GLM_BASE_URL}"
-  api_key: "${GLM_API_KEY}"
-  default: astron-code-latest
+  provider: minimax-cn
+  default: MiniMax-M3
   api_mode: chat_completions
+  context_length: 1000000
+
+compression:
+  enabled: true
+  # 鏂规A: 鏇存棭瑙﹀彂鍘嬬缉锛岄伩鍏?API 鎴柇
+  # 75% of 200K = 150K tokens 瑙﹀彂锛岀暀 50K 浣欓噺
+  threshold: 0.75
+  # 鏂规B: 涓ょ骇鍘嬬缉 鈥?level1 杞诲害 prune, level2 瀹屾暣 LLM 鎽樿
+  # level2_threshold: 0.90 (90% = 180K tokens 鎵嶈Е鍙戝畬鏁存憳瑕?
+  level2_threshold: 0.90
+  # tail_budget = threshold_tokens 脳 target_ratio = 150K 脳 0.30 = 45K tokens
+  target_ratio: 0.30
+  protect_first_n: 3
+  # 浠?60 闄嶅埌 40: 40 鏉℃秷鎭害 30-40K tokens锛岃冻澶熶繚鐣欐渶杩戝伐浣滀笂涓嬫枃
+  protect_last_n: 40
+  hygiene_hard_message_limit: 600
+  # 鎽樿澶辫触鏃朵腑姝㈠帇缂╄€岄潪闈欓粯涓㈠純涓棿涓婁笅鏂?
+  abort_on_summary_failure: true
+  # 鎻愬墠 8K tokens 瑙﹀彂锛岄槻姝?API 杈圭晫鎴柇
+  buffer: 8000
+  # 涓婁笅鏂囦娇鐢ㄧ巼鍛婅闃堝€?
+  usage_warn_threshold: 0.70
+
+auxiliary:
+  compression:
+    provider: minimax-cn
+    model: MiniMax-M3
+    timeout: 120
 
 fallback_providers:
-  - deepseekv4pro
+  - minimax-cn
+  - minimax-cn

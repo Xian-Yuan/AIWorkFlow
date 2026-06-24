@@ -3,6 +3,11 @@
 #   task-state.ps1 init <task-name> <workflow>
 #   task-state.ps1 get <task-name> <field>
 #   task-state.ps1 set <task-name> <field> <value>
+#   task-state.ps1 memory-gate <task-name> --input-json-path <path> [--decision-path <path>]
+#     [T6 patch] Runs the Memory Gate via memory-guard.ps1.
+#     Returns 0 on PASS/SKIP, 1 on FAIL, 2 on internal error.
+#     Auto-invoked before implement-complete and verify-pass transitions
+#     when env var JINLI_MEMORY_GATE_INPUT is set.
 #   task-state.ps1 transition <task-name> <event>
 #   task-state.ps1 check <task-name> <phase>
 #   task-state.ps1 can-edit <task-name>
@@ -227,6 +232,65 @@ function Test-PlanReady {
     if (-not (Test-RequirementGateReady $FilePath $false)) { Write-Red "ERROR: requirement-understanding gate is not ready"; exit 1 }
 }
 
+# T6 patch: Memory Gate helper (spec sec.G.2 + sec.H.1)
+# Runs memory-guard.ps1 and returns $true if gate passes (PASS or SKIP),
+# $false if it FAILs or errors. Decision report is saved to $DecisionPath.
+function Invoke-MemoryGate {
+    param(
+        [string]$TASK_DIR_LOCAL,
+        [string]$InputJsonPath,
+        [string]$DecisionPath = ""
+    )
+
+    if (-not (Test-Path -LiteralPath $InputJsonPath)) {
+        Write-Red "  [MEMORY-GATE] input json not found: $InputJsonPath"
+        return $false
+    }
+
+    # $PSScriptRoot is the directory containing the running script; works for both
+    # dot-sourced and &-invoked cases. Fall back to $MyInvocation.MyCommand.Path
+    # for compat, then to script dir inferred from TASK_DIR_LOCAL.
+    $scriptRoot = $PSScriptRoot
+    if (-not $scriptRoot) {
+        $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+    }
+    if (-not $scriptRoot) {
+        # Last resort: try TASK_DIR_LOCAL parent
+        $scriptRoot = Split-Path -Parent $TASK_DIR_LOCAL
+    }
+    $guardScript = Join-Path $scriptRoot "memory-guard.ps1"
+    if (-not (Test-Path -LiteralPath $guardScript)) {
+        Write-Red "  [MEMORY-GATE] memory-guard.ps1 not found at $guardScript"
+        return $false
+    }
+
+    Write-Yellow "  Running Memory Gate (input=$InputJsonPath)..."
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        # Use a hashtable splat (not array splat) to dodge PowerShell 5.1
+        # [CmdletBinding()] array-splat binding bug (where the 1st named value
+        # gets re-bound positionally to the 2nd positional param).
+        $splat = @{
+            TaskName     = "memory-gate"
+            InputJsonPath = $InputJsonPath
+            Workdir      = (Get-Location).Path
+        }
+        if ($DecisionPath) { $splat.DecisionPath = $DecisionPath }
+        & $guardScript @splat 2>&1 | Out-Null
+        $exit = $LASTEXITCODE
+    } catch {
+        Write-Red "  [MEMORY-GATE] invocation failed: $_"
+        $exit = 2
+    } finally {
+        $ErrorActionPreference = $prevEAP
+    }
+
+    if ($exit -eq 0) { Write-Green "  [MEMORY-GATE] PASS/SKIP"; return $true }
+    if ($exit -eq 1) { Write-Red "  [MEMORY-GATE] FAIL (exit 1)"; return $false }
+    Write-Red "  [MEMORY-GATE] INTERNAL ERROR (exit $exit)"; return $false
+}
+
 function Test-ImplementChecks {
     param([string]$FilePath, [bool]$RequirePhaseMatch)
     $localBlocked = $false
@@ -341,6 +405,20 @@ switch ($Command) {
             "plan-complete" { Require-Phase "plan"; Test-PlanReady $YAML_FILE; Set-YamlField $YAML_FILE "phase" "implement" }
             "implement-complete" {
                 Require-Phase "implement"
+                # T6 patch: run Memory Gate before transitioning (opt-in via env var)
+        if ($env:JINLI_MEMORY_GATE_INPUT -and -not $env:JINLI_MEMORY_GATE_SKIP) {
+            $decisionPath = Join-Path $TASK_DIR "memory-decision.json"
+            $inputPath = $env:JINLI_MEMORY_GATE_INPUT
+            if (-not [System.IO.Path]::IsPathRooted($inputPath)) {
+                $inputPath = Join-Path (Get-Location) $inputPath
+            }
+            $ok = Invoke-MemoryGate -TASK_DIR_LOCAL $TASK_DIR -InputJsonPath $inputPath -DecisionPath $decisionPath
+            if (-not $ok) {
+                Write-Red "  BLOCKED: Memory Gate FAILED -- transition implement-complete aborted"
+                Write-Red "  Fix: set JINLI_MEMORY_GATE_SKIP=1 to bypass, or call Lead.approve() to write memory first"
+                exit 1
+            }
+        }
                 Set-YamlField $YAML_FILE "phase" "review"
                 Set-YamlField $YAML_FILE "review_result" "pending"
                 $specFile = Join-Path $TASK_DIR "spec.md"
@@ -360,11 +438,64 @@ switch ($Command) {
                 }
             }
             "review-fail" { Require-Phase "review"; Set-YamlField $YAML_FILE "review_result" "fail"; Set-YamlField $YAML_FILE "phase" "implement" }
-            "verify-pass" { Require-Phase "verify"; Require-ReviewEvidence; Set-YamlField $YAML_FILE "verify_result" "pass"; Set-YamlField $YAML_FILE "phase" "archive"; Set-YamlField $YAML_FILE "verified_at" (Get-Date -Format "yyyy-MM-dd") }
+            "verify-pass" {
+                Require-Phase "verify"; Require-ReviewEvidence
+                # T6 patch: run Memory Gate before transitioning to archive (opt-in via env var)
+                if ($env:JINLI_MEMORY_GATE_INPUT -and -not $env:JINLI_MEMORY_GATE_SKIP) {
+                    $decisionPath = Join-Path $TASK_DIR "memory-decision.json"
+                    $inputPath = $env:JINLI_MEMORY_GATE_INPUT
+                    if (-not [System.IO.Path]::IsPathRooted($inputPath)) {
+                        $inputPath = Join-Path (Get-Location) $inputPath
+                    }
+                    $ok = Invoke-MemoryGate -TASK_DIR_LOCAL $TASK_DIR -InputJsonPath $inputPath -DecisionPath $decisionPath
+                    if (-not $ok) {
+                        Write-Red "  BLOCKED: Memory Gate FAILED -- transition verify-pass aborted"
+                        Write-Red "  Fix: set JINLI_MEMORY_GATE_SKIP=1 to bypass, or call Lead.approve() to write memory first"
+                        exit 1
+                    }
+                }
+                Set-YamlField $YAML_FILE "verify_result" "pass"
+                Set-YamlField $YAML_FILE "phase" "archive"
+                Set-YamlField $YAML_FILE "verified_at" (Get-Date -Format "yyyy-MM-dd")
+            }
             "verify-fail" { Require-Phase "verify"; Set-YamlField $YAML_FILE "verify_result" "fail"; Set-YamlField $YAML_FILE "phase" "implement" }
-            "archived" { Require-Phase "archive"; Set-YamlField $YAML_FILE "archived" "true" }
+            "archived" {
+                Require-Phase "archive"
+                # T6 patch: also gate the final archive step (opt-in)
+                if ($env:JINLI_MEMORY_GATE_INPUT -and -not $env:JINLI_MEMORY_GATE_SKIP) {
+                    $decisionPath = Join-Path $TASK_DIR "memory-decision.json"
+                    $inputPath = $env:JINLI_MEMORY_GATE_INPUT
+                    if (-not [System.IO.Path]::IsPathRooted($inputPath)) {
+                        $inputPath = Join-Path (Get-Location) $inputPath
+                    }
+                    $ok = Invoke-MemoryGate -TASK_DIR_LOCAL $TASK_DIR -InputJsonPath $inputPath -DecisionPath $decisionPath
+                    if (-not $ok) {
+                        Write-Red "  BLOCKED: Memory Gate FAILED -- transition archived aborted"
+                        exit 1
+                    }
+                }
+                Set-YamlField $YAML_FILE "archived" "true"
+            }
         }
         Write-Green "[TRANSITION] $event"
+    }
+    "memory-gate" {
+        # T6 patch: standalone memory-gate subcommand (sec.G.2)
+        # Usage: task-state.ps1 memory-gate <task> --input-json-path <path> [--decision-path <path>]
+        # Or via env var: set JINLI_MEMORY_GATE_INPUT=<path> then call transition (auto-invoked).
+        Require-FileExists $YAML_FILE
+        $inputPath = $Arg1
+        $decisionPath = $Arg2
+        if (-not $inputPath) { Write-Red "ERROR: memory-gate requires --input-json-path <path>"; exit 1 }
+        # Resolve to absolute paths so memory-guard.ps1 doesn't depend on CWD
+        if (-not [System.IO.Path]::IsPathRooted($inputPath)) {
+            $inputPath = Join-Path (Get-Location) $inputPath
+        }
+        if ($decisionPath -and -not [System.IO.Path]::IsPathRooted($decisionPath)) {
+            $decisionPath = Join-Path (Get-Location) $decisionPath
+        }
+        $ok = Invoke-MemoryGate -TASK_DIR_LOCAL $TASK_DIR -InputJsonPath $inputPath -DecisionPath $decisionPath
+        if ($ok) { exit 0 } else { exit 1 }
     }
     "check" {
         Require-FileExists $YAML_FILE

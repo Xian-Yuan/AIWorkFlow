@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-31-architecture-analysis-62f9
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.31-architecture-analysis.62f9
+
+---
+
 # AI 工作流架构深度分析报告
 
 > **Status note: Historical architecture analysis. Some facts have changed (e.g. .opencode/agents now pointer layer). Retained as historical input for refactoring. Current state: Docs/AI/34.**

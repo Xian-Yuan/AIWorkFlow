@@ -1,4 +1,4 @@
-# Tasks: Jinli Knowledge Graph Runtime Implementation
+﻿# Tasks: Jinli Knowledge Graph Runtime Implementation
 
 ## Dependency Graph
 
@@ -60,3 +60,5 @@ WP01 contracts/config
 - [ ] Map implementation result to Acceptance Criteria in `verification-report.md`.
 - [ ] Confirm every worker report declares `Status: done` and `Extra scope taken: no`.
 - [ ] Confirm Codex independently reran worker commands and did not accept worker success claims without verification.
+- [ ] R01: Repair RC01 attempt 1 using work-packages/WP10-fix-rc01-a1.md.
+

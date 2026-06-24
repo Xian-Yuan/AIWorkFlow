@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-37-agent-reach-integration-0412
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.37-agent-reach-integration.0412
+
+---
+
 # Agent-Reach Integration Guide
 
 > **状态：🟡 待网络环境就绪后激活**

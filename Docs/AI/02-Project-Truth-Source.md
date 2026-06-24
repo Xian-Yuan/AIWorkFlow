@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/knowledge
+kg_node_id: node.doc-ai-ai-02-project-truth-source-2b71
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.02-project-truth-source.2b71
+
+---
+
 # Project Truth Source
 
 ## 目标

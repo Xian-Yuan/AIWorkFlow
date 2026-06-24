@@ -1,3 +1,12 @@
+---
+domain: ue
+domain_path: ue/gas-lyra
+kg_node_id: node.doc-ai-ai-03-singleplayer-lyra-gas-rules-83a1
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.03-singleplayer-lyra-gas-rules.83a1
+
+---
+
 # Singleplayer Lyra GAS Rules
 
 ## 目标

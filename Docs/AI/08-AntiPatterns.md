@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/coding
+kg_node_id: node.doc-ai-ai-08-antipatterns-9b89
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.08-antipatterns.9b89
+
+---
+
 # AntiPatterns
 
 ## 目标

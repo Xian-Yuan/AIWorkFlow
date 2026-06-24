@@ -1,3 +1,12 @@
+---
+domain: ue
+domain_path: ue/gas-lyra
+kg_node_id: node.doc-ai-ai-14-coding-standards-b500
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.14-coding-standards.b500
+
+---
+
 # C++编码规范与命名约定（Coding Standards）
 
 ## 语言与命名

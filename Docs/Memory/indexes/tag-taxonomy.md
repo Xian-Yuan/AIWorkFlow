@@ -34,6 +34,7 @@
 | `mod:reviewer` | Code reviewer failure |
 | `mod:skill` | Skill definition/configuration failure |
 | `mod:script` | Automation script failure |
+| `mod:cc-switch` | CC Switch configuration/usage |
 
 ## Category 3: Domain (project/technology area)
 
@@ -102,6 +103,9 @@
 | `sys:behavior-tree` | Behavior Tree |
 | `sys:eqs` | EQS queries |
 | `sys:smart-object` | SmartObject |
+| `sys:cc-switch` | CC Switch desktop app |
+| `sys:opencode` | OpenCode IDE (cli + agents) |
+| `sys:codex` | Codex Desktop App |
 
 ## Retrieval Scoring
 

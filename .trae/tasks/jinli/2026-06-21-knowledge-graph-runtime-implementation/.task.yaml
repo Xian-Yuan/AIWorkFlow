@@ -1,4 +1,4 @@
-workflow: full
+﻿workflow: full
 phase: implement
 project_type: other
 implement_mode: subagent
@@ -6,7 +6,7 @@ isolation: worktree
 clarification_status: answered
 user_confirmed_plan: true
 router_skill_loaded: true
-review_result: pending
+review_result: fail
 verify_result: pending
 verification_report: null
 archived: false
@@ -14,12 +14,12 @@ design_doc: Project/Jinli/docs/02-Design/General/soul-core-phase2.5-knowledge-ev
 base_ref: 7911c6c3bcabbba50090d37e0d91d20dbad06855
 created_at: 2026-06-21
 verified_at: null
-fix_attempts: 0
+fix_attempts: 1
 worker_profile: ds4-flash
 lead_verifier: codex
-repair_loop_status: idle
-active_root_cause: null
-active_repair_package: null
+repair_loop_status: repair_required
+active_root_cause: RC01
+active_repair_package: work-packages/WP10-fix-rc01-a1.md
 authority_profile: none
 authority_status: legacy
 issuer_key_id: null

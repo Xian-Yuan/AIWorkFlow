@@ -1,3 +1,12 @@
+---
+domain: ai
+domain_path: ai/workflow
+kg_node_id: node.doc-ai-ai-36-research-index-1af7
+t13_retro_classified_at: "2026-06-24T04:47:04Z"
+kg_id: doc.ai.ai.36-research-index.1af7
+
+---
+
 # Ecosystem Research & Survey Index
 
 > 本文档索引 `Docs/AI/research/` 目录下的所有研究工作。
