@@ -94,9 +94,10 @@ UEGAMEDEV_ROOT=E:/UEGameDevelopment
 ### Python 多包项目检查清单
 
 实现 Python 多包项目时，在写测试前必须确认：
-- 每个包目录都有 `__init__.py`（包括子包如 `modules/`, `renderers/`）
+- 每个包目录都有 `__init__.py`（包括子包如 `modules/`, `renderers/`, `sources/`）
 - 使用相对导入（`from ..screenwriter.story_architect import Episode`）
 - 测试中的 import 路径与实际包结构一致
+- **所有 import 放在文件顶部** — 不要在文件底部追加 import（会导致 `NameError` 在测试收集阶段触发，即使运行时能解析）
 
 ## 管道扩展一致性检查（Pipeline Extension Consistency）
 
@@ -196,7 +197,86 @@ find . -name "*.pyc" -delete 2>/dev/null
 
 **参考**：`references/aidrama-workbench-user-feedback-2026-06-21.md`
 
-### Jinli Knowledge Graph 实现参考
+### Spec 锁定外部依赖的部署模式
+
+当 spec 已锁定外部工具（如 vsummary、obra/knowledge-graph）及其固定版本时，遵循以下部署模式：
+
+1. **确认锁定版本**：从 `analysis.md` 的 Dependency map 或 spec 中读取工具名和 commit hash
+2. **Clone 到指定目录**：`E:\Obsidian\tools\<tool-name>`（spec 建议的外部工具根目录）
+3. **Checkout 固定版本**：`git checkout <pinned-hash>`（detached HEAD 是预期行为）
+4. **创建 venv 而非 conda**：项目可能默认用 conda（`environment.yml`），但 Windows 上 venv 更轻量。从 `environment.yml` 的 pip 段提取依赖列表，加上 CUDA 包（如需要）
+5. **创建启动脚本**：写 `start-venv.bat` 替代 `start.bat`（后者通常依赖 conda）
+6. **配置 .env**：复制 `.env.example` → `.env`，填写本地 Ollama 或云端 LLM 配置
+7. **验证健康**：`curl -s http://127.0.0.1:<port>/api/health` 或等价端点
+8. **记录到 references**：部署细节写入 `references/<tool>-deployment.md`
+
+**参考**：`references/vsummary-deployment.md`（完整 worked example）
+
+### jsonschema 缺失必填字段的 field_path 行为
+
+`jsonschema.Draft202012Validator.iter_errors()` 在报告缺失必填字段时，`error.path` 为空（即 `field_path` 报告为 `(root)`），字段名出现在 `error.message` 字符串中。测试缺失字段错误时，必须同时匹配 `e.field_path` 和 `e.message`：
+
+```python
+# 正确
+assert any("provenance" in e.message or "provenance" in e.field_path for e in result.errors)
+
+# 错误 — 对缺失字段永远匹配不到
+assert any("provenance" in e.field_path for e in result.errors)
+```
+
+### Project/Jinli Python 包的 PYTHONPATH 设置
+
+运行 `Project/Jinli/services/knowledge/tests/` 下的测试时，需要将 `services/` 目录加入 PYTHONPATH，否则 `from knowledge.xxx import ...` 会失败：
+
+```bash
+cd E:\UEGameDevelopment\Project\Jinli
+PYTHONPATH="E:/UEGameDevelopment/Project/Jinli/services:$PYTHONPATH" python -m pytest services/knowledge/tests/ -q
+```
+
+### vsummary 部署与集成
+
+vsummary 是 Jinli KG spec 锁定的外部视频总结工具（固定版本 `4de6dbb`），部署在 `E:\Obsidian\tools\vsummary`。
+
+当实现 WP03 视频源适配器、调试 vsummary 集成、或用户要求验证 vsummary 可用时，参考 `references/vsummary-deployment.md`，其中包含：
+- 部署路径、启动命令、.env 配置
+- 关键 API 端点（B站解析、视频摘要、Markdown 导出、ASR/RAG 模型管理）
+- 与 Jinli KG 的集成边界（adapter 模式，不 fork 代码）
+- B站 Cookie 配置注意事项（需完整 Cookie，不能只填 SESSDATA；推荐用 `/api/linked/bilibili/cookie/init` 自动获取）
+- 无 conda 环境的 venv 替代方案
+- **HuggingFace GFW 下载方案**：`huggingface_hub` 的 `HF_ENDPOINT` 不可靠，需手动 curl 从 `hf-mirror.com` 下载模型文件
+- **本地视觉模型 UI 检查**：用 Ollama minicpm-v4.6 + PowerShell 截屏替代云端视觉 API
+- **端到端测试流程**：B站视频 → resolve → download → generate → summary 完整 API 链（见 `references/vsummary-deployment.md`）
+- **用户偏好**：爸爸偏好直接给视频链接让 agent 通过 API 处理，不需要自己在前端网页操作
+- **Workspace 产物格式**：`transcript.cleaned.json`（主源，含 title/language/duration/segments）、`summary.json`（章节+关键结论）、`.cache/whisper/transcript.raw.json`（回退源）。适配器优先级：cleaned → raw → UNAVAILABLE（见 `references/vsummary-deployment.md` 完整格式）
+
+**参考**：`references/vsummary-deployment.md`
+
+### 确定性分段与富化编排（WP04 模式）
+
+WP04 引入 `segmentation.py` / `enrichment.py` / `summary.py` / `evidence_search.py`，核心模式：
+
+**确定性分段（无 LLM）**：
+- `compute_segment_id(video_id, start_seconds)` — SHA-256 前16位，`start_seconds` 格式化为 `.3f`
+- 切分条件：时间间隔 > `gap_threshold_seconds`、合并后 > `max_segment_seconds`、章节边界
+- 重复文本检测：连续相同文本跳过但更新结束时间
+- 短段（< `min_segment_seconds`）合并到前一段
+
+**富化编排**：
+- Gateway=None 时所有段标记 `enrichment_pending=True`，原始段完整保留
+- Gateway 异常时同上 — **绝不删除或替换源数据**
+- `create_bounded_job()` 截断输入文本到 `max_input_chars`（默认 4000）
+
+**摘要编译**：
+- 每个段生成带时间戳的源链接（YouTube: `&t=`，Bilibili: `&t=`，通用: `#t=`）
+- pending 段标记 `[unverified]` + `⏳ *pending*`
+- 底部汇总 pending 数量
+
+**证据搜索**：
+- 纯关键词 AND 查询，不依赖 LLM
+- `SearchConfig.max_results` 和 `max_char_budget` 双重限制
+- 结果按 `match_count` 降序
+
+### Jinli Knowledge Graph WP 实现参考
 
 当实现 Jinli KG/视频摄取相关任务时，参考 `references/jinli-kg-schema-patterns.md`，其中包含：
 - Schema 命名约定和 ID 模式
@@ -207,6 +287,144 @@ find . -name "*.pyc" -delete 2>/dev/null
 - First slice 边界（in-scope / out-of-scope）
 
 **参考**：`references/jinli-kg-schema-patterns.md`
+
+### write_file Windows 超时回退
+
+`write_file` 在 Windows 上偶发 5s 超时（即使文件仅 3KB）。回退方案：用 `terminal` 的 heredoc 语法写入文件：
+
+```bash
+cat > /e/path/to/file.py << 'PYEOF'
+<content>
+PYEOF
+```
+
+注意：heredoc 内容不会触发 lint 检查，写入后应手动验证语法。
+
+### GraphNode/GraphEdge 的 created_at 必填字段
+
+`GraphNode` 和 `GraphEdge` dataclass 的 `created_at` 是必填字段（非默认值）。在测试或 `graph_store.py` 内部构造 `GraphNode` 时，必须传入 `created_at`：
+
+```python
+# 正确
+GraphNode(..., created_at="2026-06-21T00:00:00+00:00", provenance={"source": "test"})
+
+# 错误 — TypeError: missing 1 required positional argument: 'created_at'
+GraphNode(..., provenance={"source": "test"})
+```
+
+`graph_store.accept_candidate()` 内部构造 `GraphNode` 时也必须传 `created_at`（用 `datetime.now(timezone.utc).isoformat()`）。
+
+### WP05 图存储/去重/Obsidian 导出模式
+
+WP05 引入 `graph_store.py` / `deduplication.py` / `obsidian_export.py` / `migrations/`，核心模式：
+
+**SQLite 图存储（graph_store.py）**：
+- 7 张表：sources, evidence, candidates, nodes, edges, exports, review_decisions
+- 迁移版本管理：`schema_version` 表 + `migrations/V1__initial_schema.sql`
+- `insert_node` / `insert_edge` 拒绝空 provenance（ValueError）
+- `accept_candidate` 事务：候选→节点→审查决定，失败回滚
+- 所有测试用 SQLite `:memory:` 数据库
+
+**确定性去重链（deduplication.py）**：
+- 优先级：精确ID > 标题slug > 别名 > 源重叠 > 文本相似度 > 低置信度
+- 返回 `DeduplicationResult(action='merge'|'new'|'review')`
+- `normalize_slug()` — 小写+连字符+去标点+合并连续连字符+空格
+- 文本相似度用 Jaccard 词集合（对中文不精确，可后续替换为 embedding）
+
+**Obsidian 幂等导出（obsidian_export.py）**：
+- `GEN_START = "<!-- kg-gen-start -->"` / `GEN_END = "<!-- kg-gen-end -->"` 稳定标记
+- 重复导出时：替换生成区内容，保留标记外用户编辑
+- `stable_slug()` = 归一化标题.lower() + SHA256[:6] 后缀（跨标题变更稳定）
+- `_ensure_vault_containment()` 防路径逃逸
+- 导出类型：视频源笔记 / 概念笔记 / 候选笔记 / 审查队列索引
+- 不触碰 `.obsidian` 配置目录
+
+**参考**：`references/jinli-kg-wp-implementation-patterns.md`
+
+### Jinli Knowledge Graph WP 实现模式
+
+知识运行时任务包有 9 个顺序 WP（WP01-WP09），每个 WP 有严格的 Allowed/Forbidden Paths。
+
+**实现步骤（每个 WP）**：
+1. 读工作包 `.md`，确认 Allowed Paths 和 Read First 列表
+2. 检查前置 WP 的报告是否已完成
+3. 创建包目录和 `__init__.py`（如果是新子包）
+4. 实现源代码模块
+5. 创建 JSON Schema 文件（如果 WP 涉及 schemas/）
+6. 创建 fixtures 目录和测试数据（如果测试需要离线数据）
+7. 写测试（先写会失败的断言，再实现让它们通过）
+8. 运行验证命令：`PYTHONPATH=.../services python -m pytest services/knowledge/tests/test_*.py -q`
+9. 修复测试失败后重跑
+10. 跑全量回归确认不破坏已有 WP：`python -m pytest services/knowledge/tests/ -q`
+11. 写 Worker 报告 `reports/ds4-WP0x-result.md`
+
+**pytest 路径配置**：
+```bash
+cd E:/UEGameDevelopment/Project/Jinli
+PYTHONPATH="E:/UEGameDevelopment/Project/Jinli/services:$PYTHONPATH" python -m pytest services/knowledge/tests/ -q
+```
+knowledge 包在 `services/knowledge/` 下，pytest 需要 `services/` 在 PYTHONPATH 中才能 `import knowledge.*`。
+
+**当前测试统计**：601 tests（WP01-WP09 + Pipeline + KnowledgeDB），全部通过。
+
+### WP06 Obra Index & MCP Bridge 模式
+
+WP06 实现 obra/knowledge-graph 的安全包装器，复用其索引/搜索/路径/邻居/节点查找/MCP启动能力。
+
+**核心约束**：
+- 不实现图算法或自定义 MCP server — 复用 obra
+- 不修改全局 npm 状态 — 所有 npm 操作必须 local/project-scoped
+- `KG_VAULT_PATH` 必须匹配配置的 vault — 拒绝路径不匹配
+- Process runner 注入 — 测试用 fake process runner；安装/索引/搜索才用真实子进程
+- MCP startup 命令暴露但不自动启动
+- obra CLI JSON 归一化为紧凑记录（node ID, title, path, score, links, evidence excerpt）
+
+**Pinned revision**: `1d2481ece87807f2f695b8853a790b8c8aa62b29`（已在 `KnowledgeConfig.obra_revision` 中定义，不要重复硬编码）
+
+**已有 fixture vault** 满足 WP06 要求（1 source + 3 concepts + 内部链接），位于 `tests/fixtures/obsidian_vault/`。
+
+**Allowed Paths**: `obra_bridge.py`, `test_obra_bridge.py`, `tests/fixtures/obsidian_vault/`, `scripts/knowledge-tools.ps1`
+
+**AC10**: obra/knowledge-graph 能索引 fixture vault 并通过 wrapper 返回 keyword/semantic 或 graph traversal 结果。
+
+**参考**：`references/jinli-kg-wp06-obra-bridge-context.md`、`references/obra-cli-commands.md`（obra CLI 完整命令参考）
+
+### WP07 Visual Candidate Extension 模式
+
+WP07 实现视觉候选增强：keyframes.py（FFmpeg帧提取）+ visual_enrichment.py（candidate-only观察）。
+
+**核心约束**：
+- 视觉分析默认禁用（`KeyframeConfig(enabled=False)`）
+- 所有输出只能是 candidate evidence，不能直接 accept 到图
+- `VisualEnricher._PROHIBITED_METHODS` 列表明确禁止 accept_candidate 和 export 方法
+- Fake FFmpeg runner 必须创建 PIL 可解析的有效图片（PGM格式推荐）
+- perceptual hash 使用 PIL `getdata()`（Pillow 14 中已废弃，需迁移到 `get_flattened_data()`）
+
+### WP08 Soul Core Integration 模式
+
+WP08 实现知识服务门面（service.py）+ CLI（cli.py）+ PowerShell桥接 + soul-core命令路由。
+
+**核心约束**：
+- `soul_init_retrieve` 必须 query-driven 且 character-budgeted（不加载整个vault）
+- `soul_end_promote` 只能"queued_for_review"，永远不能直接 accept 低置信度知识
+- 知识服务故障不应阻止 Soul Core 正常启动/结束
+- soul-core.ps1 新增 `k-ingest` 和 `k-search` 命令（bounded，不修改persona/emotion）
+
+**GraphStore API 签名陷阱**：
+- `insert_source(metadata: VideoMetadata)` — 接受对象，不是关键字参数
+- `insert_candidate(candidate: GraphCandidate)` — 接受对象，不是关键字参数
+- `accept_candidate(candidate_id: str, reviewer, reason)` — 接受字符串ID，不是候选对象
+- 必须先调用 `store.connect()` 才能使用 GraphStore（不会自动连接）
+
+### WP09 Operations & E2E 模式
+
+WP09 实现离线E2E测试 + 环境脚本 + 项目文档。
+
+**E2E 离线管道**：transcript → segments → graph candidates → accept → Obsidian export → verify vault
+**knowledge-env.ps1 apply** 必须要求 `-Confirm` 开关
+**Live test** 必须要求 `JINLI_KG_TEST_VIDEO_URL` 环境变量
+
+**当前测试统计**：601 tests（WP01-WP09 + Pipeline + KnowledgeDB），全部通过。
 
 ### TypeScript 6 + Vite 8 + Vitest 4 修复模式
 
@@ -416,6 +634,68 @@ Extra scope taken: no    ← 门禁不认这个
 - 优先使用 `patch` 工具逐个修改，而非 read-then-write 整文件替换
 
 **参考**：`references/worker-report-format.md`（含完整模板和门禁正则）
+
+## Git 提交策略
+
+### 大批量提交时的范围意识
+
+当工作区积累了多个任务的改动时，`git add -A` 会把所有改动混入一个 commit。这虽然可行，但会：
+
+1. **模糊任务边界** — commit message 无法精确描述每个任务的变更
+2. **回滚风险** — 如果某个任务的改动需要 revert，会影响其他任务的文件
+3. **审查困难** — 305 个文件的 diff 难以按任务分组审查
+
+**推荐做法**：
+- 如果工作区只有当前任务的改动 → `git add -A && git commit` 即可
+- 如果工作区混有多个任务的改动 → 考虑按任务分批 `git add <paths> && git commit`，或至少在 commit message 中列出所有包含的任务
+- 爸爸明确说"全部提交"时 → `git add -A` 执行，commit message 列出主要任务
+
+### Commit Message 格式
+
+```
+feat/fix/docs: <主要任务简述>
+
+- <任务1关键变更>
+- <任务2关键变更>
+- ...
+```
+
+### Hermes 会话历史故障诊断
+
+当用户报告对话历史异常（内容消失、出现重复会话、对话自动停掉）时，参考 `references/hermes-session-diagnosis.md`，其中包含：
+
+- 三大根因：压缩过于激进、API 断连导致会话分叉、幽灵会话（0 消息空壳）
+- `state.db` SQLite 诊断查询（压缩链、多子会话分支、幽灵会话检测）
+- 修复命令（调整 compression 配置、配置专用压缩模型、设置 context_length、清理幽灵会话）
+- 关键陷阱（metadata 消息数为 0 但实际有消息的会话不能删、配置变更需重启）
+
+**快速诊断路径**：
+1. 查 `agent.log` 中 `APITimeoutError` 次数和 `Failed to generate context summary` 错误
+2. 查 `state.db` 中 `end_reason='compression'` 的会话压缩比
+3. 查 `state.db` 中同一 parent 有多个子会话的分叉情况
+4. 查 `state.db` 中 `message_count=0` 的幽灵会话（需交叉验证 messages 表）
+
+**参考**：`references/hermes-session-diagnosis.md`
+
+### Hermes 能力边界与 Windows 桌面操控路径
+
+当用户问"你怎么还不能操控 XX 应用"或规划 Hermes 扩展方向时，参考以下文件：
+
+- `references/hermes-capability-audit-windows-control-path.md` — 全量 toolset/MCP/Plugin/Profile 状态审计、五层能力差距分析、`windows-computer-use` MCP 技术方案、四阶段路线图
+- `references/desktop-agent-ecosystem-research.md` — 桌面 Agent 生态关键项目（含验证 star 数）、三种技术路线对比、三层混合 MCP 实现方案、即刻可用行动项
+
+**核心结论**：Hermes 架构优势最完整，唯一致命短板是 Windows 桌面操控。
+
+**已发现的关键项目**：
+- **agent-desktop** (870★, Rust) — a11y tree 操控，97% token 节省。⚠️ **npm 包不含 Windows 二进制**，源码标注 "Windows support coming in Phase 2"，Windows 环境下不可用
+- **windows-computer-use** (自建) — pywinauto (UIA) + pyautogui 截图/键鼠的 Windows 原生 MCP Server，8 工具，已替代 agent-desktop
+- **unreal-mcp** (2,000★, C++) — MCP 直接控制 UE5 Editor，我们的项目杀手级集成
+- **DesktopCommanderMCP** (6,188★, TypeScript) — 最流行桌面 MCP，终端+文件+diff，今天就能装（注意：MCP 启动用 `node dist/index.js`，不是 npm bin）
+- **microsoft/UFO** (9,067★, Python) — Windows Agent 标杆，UFO³ Galaxy 多设备架构参考
+
+**最快路径**：windows-computer-use MCP 已安装（替代 agent-desktop），DesktopCommanderMCP 已安装，unreal-mcp MCP Client 已创建（UE Plugin 待 UE5 项目就绪后安装）。三层混合架构已就绪。
+
+**参考**：`references/hermes-capability-audit-windows-control-path.md`、`references/desktop-agent-ecosystem-research.md`，以及 `windows-desktop-control` Skill
 
 ## 禁止事项
 

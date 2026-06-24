@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: enhanced-subagent
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - enhanced
+  - subagent
+  tier: sub-agent

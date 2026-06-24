@@ -1,0 +1,16 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: Web 实现智能体 — 负责 Web 项目的 Implement 阶段落地，强制 can-edit 门禁与真实 skill 加载
+  domain: []
+  frequency_class: cold
+  name: web-implementer
+  owner_agent: web-engineer
+  routing_keywords:
+  - implement
+  - can-edit
+  - skill
+  tags:
+  - web
+  - implementer
+  tier: sub-agent

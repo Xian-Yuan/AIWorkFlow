@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 7
+  deprecated: false
+  description: 提示词生成与压缩引擎。将结构化约束转换为自然流畅的角色描述，自动生成负向提示词，压缩冗余文本，输出生图可用的角色提示词。
+  domain: []
+  frequency_class: cold
+  name: prompt-compressor
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - prompt
+  - compressor
+  tier: sub-agent

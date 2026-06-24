@@ -1,0 +1,19 @@
+skill:
+  cost_kb: 19
+  deprecated: false
+  description: 金璃好帮手 — 实现智能体。负责按 spec 实现代码、编译验证、重复检测、对照 spec 自检。通过动态加载 skill 切换领域知识（UE5/Web）。合并了原
+    ue-lyra-gas-implementer、web-implementer、ue-ai-validator、code-quality-reviewer
+    的职责。
+  domain: []
+  frequency_class: cold
+  name: 金璃好帮手
+  owner_agent: general-engineer
+  routing_keywords:
+  - spec
+  - skill
+  - ue-lyra-gas-implementer
+  - web-implementer
+  - ue-ai-validator
+  - code-quality-reviewer
+  tags: []
+  tier: sub-agent

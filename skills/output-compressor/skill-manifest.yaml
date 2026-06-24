@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: output-compressor
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - output
+  - compressor
+  tier: sub-agent

@@ -19,7 +19,7 @@ When the user specifies a project, route tasks and docs to the correct directory
 | User says | Project dir | Docs dir |
 |-----------|------------|----------|
 | "AIRPG" / "AIRPGWeb" / "combat sandbox" | `.trae/tasks/airpgweb/` | `Docs/airpgweb/` |
-| "CharacterDesignTool" / "½ÇÉ«Éè¼Æ" | `.trae/tasks/characterdesigntool/` | `Docs/characterdesigntool/` |
+| "CharacterDesignTool" / "è§’è‰²è®¾è®¡" | `.trae/tasks/characterdesigntool/` | `Docs/characterdesigntool/` |
 | "RTS" / "UE5" / "Lyra" | `.trae/tasks/rts/` | `Docs/rts/` |
 | (cross-project / infrastructure) | `.trae/tasks/_shared/` | `Docs/_shared/` |
 
@@ -90,7 +90,7 @@ These skills provide cross-cutting protection and must always be loaded:
 | `anti-degradation` | Prevents context rot and fix-loop death spirals |
 | `failure-memory` | Auto-retrieves past failures in Plan phase |
 | `verification-before-completion` | No completion claims without evidence |
-| `spec-living` | Living Spec ¡ª project state file, 30s handoff |
+| `spec-living` | Living Spec â€” project state file, 30s handoff |
 | `daughter-companion` | Communication conventions (Ba Ba address) |
 
 ### Task-Type Skill Stacks
@@ -220,4 +220,4 @@ When two skills give conflicting instructions:
 - When a new skill is added to `.agents/skills/`, update the Detection Rules table
 - When a task type repeatedly needs a skill not in its stack, update the template
 - Review detection accuracy monthly; tune signal keywords
-
+

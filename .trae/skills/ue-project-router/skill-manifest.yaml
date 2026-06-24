@@ -1,0 +1,18 @@
+skill:
+  cost_kb: 14
+  deprecated: false
+  description: 当前项目的 UE 需求路由智能体。先判断主链路、选择主 skill/次 skill、指定必读文档，再决定是否启用多智能体协作。已整合
+    Qoder 的 Plan 阶段完整流程 + 反降智协议。
+  domain: []
+  frequency_class: cold
+  name: ue-project-router
+  owner_agent: null
+  routing_keywords:
+  - skill
+  - qoder
+  - plan
+  tags:
+  - ue
+  - project
+  - router
+  tier: main-agent

@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: Use when completing tasks, implementing major features, or before merging
+    to verify work meets requirements
+  domain: []
+  frequency_class: cold
+  name: requesting-code-review
+  owner_agent: null
+  routing_keywords:
+  - when
+  - completing
+  - tasks
+  - implementing
+  - major
+  - features
+  - before
+  - merging
+  tags:
+  - requesting
+  - code
+  - review
+  tier: shared

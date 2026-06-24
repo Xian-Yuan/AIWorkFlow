@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 9
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: verification-before-completion
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - verification
+  - before
+  - completion
+  tier: shared

@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 7
+  deprecated: false
+  description: Living Spec 生命周期管理——把 spec.md 从静态设计文档升级为活着的项目状态文件。任何 AI 打开它就能在 30 秒内理解项目全貌。
+  domain: []
+  frequency_class: cold
+  name: spec-living
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - spec
+  - living
+  tier: shared

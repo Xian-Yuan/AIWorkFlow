@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: Universal Unreal Engine 5 assistant. Invoke for any UE5 gameplay, Blueprint,
+    UI, save/load, PCG, performance, architecture, or debugging request.
+  domain: []
+  frequency_class: cold
+  name: ue5-auto-assistant
+  owner_agent: ue-engineer
+  routing_keywords:
+  - universal
+  - unreal
+  - engine
+  - invoke
+  - gameplay
+  - blueprint
+  - save
+  - load
+  tags:
+  - ue5
+  - auto
+  - assistant
+  tier: sub-agent

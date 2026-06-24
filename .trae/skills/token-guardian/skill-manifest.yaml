@@ -1,0 +1,16 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: Token 消耗优化——合并 squeez/token-optimizer/governor 的 token 节省最佳实践
+  domain: []
+  frequency_class: cold
+  name: token-guardian
+  owner_agent: null
+  routing_keywords:
+  - squeez
+  - token-optimizer
+  - governor
+  tags:
+  - token
+  - guardian
+  tier: shared

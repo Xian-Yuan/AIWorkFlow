@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 7
+  deprecated: false
+  description: Use when facing 2+ independent tasks that can be worked on without
+    shared state or sequential dependencies
+  domain: []
+  frequency_class: cold
+  name: dispatching-parallel-agents
+  owner_agent: null
+  routing_keywords:
+  - when
+  - facing
+  - independent
+  - tasks
+  - that
+  - worked
+  - without
+  - shared
+  tags:
+  - dispatching
+  - parallel
+  - agents
+  tier: shared

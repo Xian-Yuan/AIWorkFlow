@@ -1,0 +1,25 @@
+skill:
+  cost_kb: 6
+  deprecated: false
+  description: UE5.6/UE5.7 save/load and multiplayer replication workflow for gameplay
+    systems. Use when requests involve SaveGame schema design, serialization, restore
+    pipelines, RepNotify handling, RPC entry points, and server-authoritative validation.
+  domain: []
+  frequency_class: cold
+  name: ue5-save-load-replication
+  owner_agent: ue-engineer
+  routing_keywords:
+  - multiplayer
+  - workflow
+  - gameplay
+  - systems
+  - when
+  - requests
+  - involve
+  - savegame
+  tags:
+  - ue5
+  - save
+  - load
+  - replication
+  tier: sub-agent

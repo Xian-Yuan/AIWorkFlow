@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 11
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: daughter-companion
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - daughter
+  - companion
+  tier: shared

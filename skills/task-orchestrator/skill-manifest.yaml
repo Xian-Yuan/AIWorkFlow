@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 10
+  deprecated: false
+  description: Auto-detect task type from user request and activate the optimal Skill
+    combination. Use when starting any new task to avoid manual Skill selection. Reduces
+    cognitive overhead and ensures consistent Skill activation across sessions.
+  domain: []
+  frequency_class: cold
+  name: task-orchestrator
+  owner_agent: null
+  routing_keywords:
+  - auto-detect
+  - type
+  - from
+  - user
+  - request
+  - activate
+  - optimal
+  - skill
+  tags:
+  - task
+  - orchestrator
+  tier: shared

@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 6
+  deprecated: false
+  description: Use when a user asks for a new system, meaningful feature, workflow
+    or UI redesign, or describes an outcome with uncertain boundaries, users, behavior,
+    or success criteria.
+  domain: []
+  frequency_class: cold
+  name: smart-requirements
+  owner_agent: null
+  routing_keywords:
+  - when
+  - user
+  - asks
+  - system
+  - meaningful
+  - feature
+  - workflow
+  - redesign
+  tags:
+  - smart
+  - requirements
+  tier: shared

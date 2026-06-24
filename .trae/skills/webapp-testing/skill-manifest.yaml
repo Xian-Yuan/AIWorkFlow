@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 6
+  deprecated: false
+  description: Web应用测试工具包。用Playwright进行本地Web应用自动化测试，包括截图、元素发现、控制台日志捕获、服务器生命周期管理。适用于前端功能验证、回归测试、UI调试。
+  domain: []
+  frequency_class: cold
+  name: webapp-testing
+  owner_agent: web-engineer
+  routing_keywords:
+  - playwright
+  tags:
+  - webapp
+  - testing
+  tier: sub-agent

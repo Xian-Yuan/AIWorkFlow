@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: Use when changing project code, creating or moving project documents,
+    writing specs or plans, or when documentation placement, document trees, docs-impact,
+    or doc-guard are relevant
+  domain: []
+  frequency_class: cold
+  name: doc-governance
+  owner_agent: null
+  routing_keywords:
+  - when
+  - changing
+  - project
+  - code
+  - creating
+  - moving
+  - documents
+  - writing
+  tags:
+  - doc
+  - governance
+  tier: shared

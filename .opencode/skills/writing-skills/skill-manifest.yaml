@@ -1,0 +1,22 @@
+skill:
+  cost_kb: 23
+  deprecated: false
+  description: Use when creating new skills, editing existing skills, or verifying
+    skills work before deployment
+  domain: []
+  frequency_class: cold
+  name: writing-skills
+  owner_agent: null
+  routing_keywords:
+  - when
+  - creating
+  - editing
+  - existing
+  - verifying
+  - work
+  - before
+  - deployment
+  tags:
+  - writing
+  - skills
+  tier: shared

@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 13
+  deprecated: false
+  description: Use when executing implementation plans with independent tasks in the
+    current session
+  domain: []
+  frequency_class: cold
+  name: subagent-driven-development
+  owner_agent: null
+  routing_keywords:
+  - when
+  - executing
+  - implementation
+  - plans
+  - with
+  - independent
+  - tasks
+  - current
+  tags:
+  - subagent
+  - driven
+  - development
+  tier: shared

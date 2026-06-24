@@ -1,0 +1,15 @@
+skill:
+  cost_kb: 2
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: ai-drama-viral-analyzer
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - ai
+  - drama
+  - viral
+  - analyzer
+  tier: sub-agent

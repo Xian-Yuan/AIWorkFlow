@@ -1,0 +1,17 @@
+skill:
+  cost_kb: 4
+  deprecated: false
+  description: UI/UX设计智能体。为Web应用、移动端、桌面端提供专业级UI/UX设计指导。涵盖React/Vue组件设计、Tailwind/CSS布局、可访问性、响应式设计、设计系统。需要设计前端界面时调用。
+  domain: []
+  frequency_class: cold
+  name: ui-ux-pro-max
+  owner_agent: web-engineer
+  routing_keywords:
+  - react
+  - tailwind
+  tags:
+  - ui
+  - ux
+  - pro
+  - max
+  tier: sub-agent

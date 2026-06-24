@@ -1,0 +1,24 @@
+skill:
+  cost_kb: 2
+  deprecated: false
+  description: UE5.6/UE5.7 architecture planning and module boundary design for Unreal
+    projects. Use when requests involve module layout, Build.cs dependencies, reflection
+    exposure strategy, Public/Private API boundaries, naming conventions, and preventing
+    circular dependencies.
+  domain: []
+  frequency_class: cold
+  name: ue5-architecture
+  owner_agent: ue-engineer
+  routing_keywords:
+  - planning
+  - module
+  - boundary
+  - design
+  - unreal
+  - projects
+  - when
+  - requests
+  tags:
+  - ue5
+  - architecture
+  tier: sub-agent

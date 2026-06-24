@@ -1,0 +1,26 @@
+skill:
+  cost_kb: 15
+  deprecated: false
+  description: UE C++ course reference. Covers containers (TArray/TMap/TSet), delegates,
+    multithreading, HTTP/WebSocket/TCP networking, smart pointers, Subsystems, GAS,
+    Enhanced Input, Slate standalone programs, and plugin/third-party library integration.
+    Use when user asks about UE C++, API, container selection, multithreading, or
+    network protocols.
+  domain: []
+  frequency_class: cold
+  name: xg-uecpp-course
+  owner_agent: ue-engineer
+  routing_keywords:
+  - reference
+  - covers
+  - containers
+  - tarray
+  - tmap
+  - tset
+  - delegates
+  - multithreading
+  tags:
+  - xg
+  - uecpp
+  - course
+  tier: sub-agent

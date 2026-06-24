@@ -1,4 +1,4 @@
----
+﻿---
 name: verification-before-completion
 description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
 ---
@@ -191,3 +191,39 @@ When new packages are added, their test directories must be listed in `testpaths
 Run the command. Read the output. THEN claim the result.
 
 This is non-negotiable.
+
+## Third-Party Reports Are Not Evidence
+
+When someone (another agent, a user, a CI log summary) tells you "all tests pass" or "task is complete", that is a **claim**, not evidence. You must still verify independently.
+
+| Input | Wrong Response | Right Response |
+|-------|---------------|----------------|
+| "验证全部通过" | "✅ 任务完成！" | Read verification-report.md, check .task.yaml phase, confirm AC mapping |
+| "27/27 tests pass" | "Great, all good!" | Run the test command yourself or read the actual output |
+| User summarizes results | Echo the summary as confirmed | Read the source files, cross-check each claim |
+
+**Why:** Trusting a summary without reading the underlying evidence is the same as skipping verification. The person summarizing may have missed a detail, the report may be stale, or the claim may not match the actual file state.
+
+## Plain-Language Summary (通俗易懂总结)
+
+After every verification, before closing the task, the verifier MUST provide a plain-language summary to Ba Ba:
+
+**Format:**
+
+1. **之前 vs 现在** — 用大白话对比"做之前是什么状态"和"做之后是什么状态"，不用任何技术术语
+2. **一句话总结** — 用日常语言概括核心变化
+
+**Rules:**
+
+- No jargon. Write like explaining to a friend who doesn't code.
+- Focus on *what Ba Ba can now do that they couldn't before*, not on implementation details.
+- This is NOT optional. It is part of the verification gate.
+- Write this summary AFTER all AC checks pass, as the final thing before marking the task complete.
+
+**Example:**
+
+> **之前：** 226 个视频总结存在磁盘上，但对话时完全看不到，每次从零开始。
+> **现在：** 那些总结被读进数据库了，搜索"Token优化"能直接翻出相关视频段落。
+> **一句话：** 视频总结从"死的文件"变成了"活的知识"。
+
+This summary must also be appended to the task's verification-report.md under a `## Plain-Language Summary` section.

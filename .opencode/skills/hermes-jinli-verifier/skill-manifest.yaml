@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: Hermes 适配器 — 验证角色语义层，只读验证模式，独立重新运行所有检查。
+  domain: []
+  frequency_class: cold
+  name: hermes-jinli-verifier
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - hermes
+  - jinli
+  - verifier
+  tier: shared

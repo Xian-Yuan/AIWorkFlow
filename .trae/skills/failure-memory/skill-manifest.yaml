@@ -1,0 +1,16 @@
+skill:
+  cost_kb: 4
+  deprecated: false
+  description: 跨会话失败经验记忆与检索。Review/Verify 失败时记录，Plan 阶段自动检索相关教训，只注入摘要不注入全文。
+  domain: []
+  frequency_class: cold
+  name: failure-memory
+  owner_agent: null
+  routing_keywords:
+  - review
+  - verify
+  - plan
+  tags:
+  - failure
+  - memory
+  tier: shared

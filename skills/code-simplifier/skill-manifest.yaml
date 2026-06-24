@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: 代码简化专家。在保持行为不变的前提下降低代码复杂度。用于代码Review后发现可读性问题、需要消除深层嵌套、逻辑可合并、或实现后清理时调用。
+  domain: []
+  frequency_class: cold
+  name: code-simplifier
+  owner_agent: null
+  routing_keywords:
+  - review
+  tags:
+  - code
+  - simplifier
+  tier: shared

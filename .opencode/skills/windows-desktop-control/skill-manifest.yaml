@@ -1,0 +1,19 @@
+skill:
+  cost_kb: 9
+  deprecated: false
+  description: Windows 桌面操控能力。通过 pywinauto (UIA) + pyautogui (截图/键鼠) + unreal-mcp
+    (UE5 Editor) 实现三层混合桌面操控。
+  domain: []
+  frequency_class: cold
+  name: windows-desktop-control
+  owner_agent: general-engineer
+  routing_keywords:
+  - pywinauto
+  - pyautogui
+  - unreal-mcp
+  - editor
+  tags:
+  - windows
+  - desktop
+  - control
+  tier: sub-agent

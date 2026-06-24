@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 24
+  deprecated: false
+  description: 金璃小天才 — Plan 阶段智能体。负责需求澄清、设计文档检索、隐性需求推导、依赖链推导、成熟方案搜索、任务拆分和 spec 生成。不负责实现代码。
+  domain: []
+  frequency_class: cold
+  name: 金璃小天才
+  owner_agent: general-engineer
+  routing_keywords:
+  - plan
+  - spec
+  tags: []
+  tier: sub-agent

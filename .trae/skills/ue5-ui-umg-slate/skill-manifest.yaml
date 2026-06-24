@@ -1,0 +1,25 @@
+skill:
+  cost_kb: 9
+  deprecated: false
+  description: UE5.6/UE5.7 UI development workflow using UMG and Slate integration.
+    Use when requests involve Widget Blueprint setup, Slate host widgets, lifecycle
+    binding, input and focus handling, tooltip behavior, or viewport clamping logic.
+  domain: []
+  frequency_class: cold
+  name: ue5-ui-umg-slate
+  owner_agent: ue-engineer
+  routing_keywords:
+  - development
+  - workflow
+  - using
+  - integration
+  - when
+  - requests
+  - involve
+  - widget
+  tags:
+  - ue5
+  - ui
+  - umg
+  - slate
+  tier: sub-agent

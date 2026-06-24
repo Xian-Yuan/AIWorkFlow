@@ -1,0 +1,19 @@
+skill:
+  cost_kb: 6
+  deprecated: false
+  description: 当前项目的 AI 与验证收口智能体。负责检查 StateTree/BT/EQS/SmartObject 选型、编译风险、资产接线与回归验证。已整合独立验证规则
+    + Memory Candidate 输出。
+  domain: []
+  frequency_class: cold
+  name: ue-ai-validator
+  owner_agent: ue-engineer
+  routing_keywords:
+  - statetree
+  - smartobject
+  - memory
+  - candidate
+  tags:
+  - ue
+  - ai
+  - validator
+  tier: sub-agent

@@ -1,0 +1,15 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: GitHub方案搜索。用户需要搜索开源项目、参考实现、技术方案时，使用GitHub MCP工具进行多维度搜索（仓库/代码/Issue），输出结构化对比报告。
+  domain: []
+  frequency_class: cold
+  name: github-project-search
+  owner_agent: null
+  routing_keywords:
+  - issue
+  tags:
+  - github
+  - project
+  - search
+  tier: shared

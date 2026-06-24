@@ -1,0 +1,22 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: Use when you have a written implementation plan to execute in a separate
+    session with review checkpoints
+  domain: []
+  frequency_class: cold
+  name: executing-plans
+  owner_agent: null
+  routing_keywords:
+  - when
+  - have
+  - written
+  - implementation
+  - plan
+  - execute
+  - separate
+  - session
+  tags:
+  - executing
+  - plans
+  tier: shared

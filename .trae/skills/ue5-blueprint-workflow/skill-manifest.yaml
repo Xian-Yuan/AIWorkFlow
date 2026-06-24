@@ -1,0 +1,24 @@
+skill:
+  cost_kb: 3
+  deprecated: false
+  description: Implements or modifies Blueprint features with a validate-first workflow.
+    Invoke when user asks about Blueprints, nodes, Enhanced Input, interactions, or
+    UMG wiring.
+  domain: []
+  frequency_class: cold
+  name: ue5-blueprint-workflow
+  owner_agent: ue-engineer
+  routing_keywords:
+  - implements
+  - modifies
+  - features
+  - with
+  - validate-first
+  - invoke
+  - when
+  - user
+  tags:
+  - ue5
+  - blueprint
+  - workflow
+  tier: sub-agent

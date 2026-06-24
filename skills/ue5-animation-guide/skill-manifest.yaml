@@ -1,0 +1,18 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: 动画蓝图模式。速度采样/四向方向/CardinalAnimSet/线程安全UpdateAnimation/RootMotion/动画混合。AnimBlueprint/状态机/RootMotion时调用。
+  domain: []
+  frequency_class: cold
+  name: ue5-animation-guide
+  owner_agent: ue-engineer
+  routing_keywords:
+  - cardinalanimset
+  - updateanimation
+  - rootmotion
+  - animblueprint
+  tags:
+  - ue5
+  - animation
+  - guide
+  tier: sub-agent

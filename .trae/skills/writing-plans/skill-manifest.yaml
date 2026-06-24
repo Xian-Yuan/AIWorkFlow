@@ -1,0 +1,22 @@
+skill:
+  cost_kb: 6
+  deprecated: false
+  description: Use when you have a spec or requirements for a multi-step task, before
+    touching code
+  domain: []
+  frequency_class: cold
+  name: writing-plans
+  owner_agent: null
+  routing_keywords:
+  - when
+  - have
+  - spec
+  - requirements
+  - multi-step
+  - task
+  - before
+  - touching
+  tags:
+  - writing
+  - plans
+  tier: shared

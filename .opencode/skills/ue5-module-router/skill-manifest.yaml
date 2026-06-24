@@ -1,0 +1,24 @@
+skill:
+  cost_kb: 2
+  deprecated: false
+  description: Route UE5.6/UE5.7 questions to the most precise skill using module
+    names, aliases, intent keywords, and layer context. Works for explicit module
+    prompts (RenderCore, AIModule, AssetRegistry) and natural language requests.
+  domain: []
+  frequency_class: cold
+  name: ue5-module-router
+  owner_agent: null
+  routing_keywords:
+  - route
+  - questions
+  - most
+  - precise
+  - skill
+  - using
+  - names
+  - aliases
+  tags:
+  - ue5
+  - module
+  - router
+  tier: main-agent

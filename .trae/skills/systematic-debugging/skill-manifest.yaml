@@ -1,0 +1,22 @@
+skill:
+  cost_kb: 10
+  deprecated: false
+  description: Use when encountering any bug, test failure, or unexpected behavior,
+    before proposing fixes
+  domain: []
+  frequency_class: cold
+  name: systematic-debugging
+  owner_agent: null
+  routing_keywords:
+  - when
+  - encountering
+  - test
+  - failure
+  - unexpected
+  - behavior
+  - before
+  - proposing
+  tags:
+  - systematic
+  - debugging
+  tier: shared

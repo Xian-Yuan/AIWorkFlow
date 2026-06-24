@@ -1,0 +1,15 @@
+skill:
+  cost_kb: 2
+  deprecated: false
+  description: Hermes 适配器 — 为 Hermes Profile 提供项目入口识别和任务包路由，桥接 Hermes 工具语义与共享工作流。
+  domain: []
+  frequency_class: cold
+  name: hermes-project-router
+  owner_agent: null
+  routing_keywords:
+  - profile
+  tags:
+  - hermes
+  - project
+  - router
+  tier: main-agent

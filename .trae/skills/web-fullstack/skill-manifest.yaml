@@ -1,0 +1,18 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: 通用网页全栈开发。覆盖前后端（React/Vue + Node/Java/Go/Python）、RESTful API设计、数据库操作、项目架构、部署。非UE项目开发时调用。
+  domain: []
+  frequency_class: cold
+  name: web-fullstack
+  owner_agent: web-engineer
+  routing_keywords:
+  - react
+  - node
+  - java
+  - python
+  - restful
+  tags:
+  - web
+  - fullstack
+  tier: sub-agent

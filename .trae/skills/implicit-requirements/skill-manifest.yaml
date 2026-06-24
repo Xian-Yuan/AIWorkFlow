@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: implicit-requirements
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - implicit
+  - requirements
+  tier: shared

@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 10
+  deprecated: false
+  description: 上下文腐烂检测与修复循环中断。检测 Agent 退化信号，强制中断无效修复循环，防止假阳性通过。
+  domain: []
+  frequency_class: cold
+  name: anti-degradation
+  owner_agent: null
+  routing_keywords:
+  - agent
+  tags:
+  - anti
+  - degradation
+  tier: shared

@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 7
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: anti-duplication
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - anti
+  - duplication
+  tier: shared

@@ -14,6 +14,22 @@ description: "GitHub方案搜索。用户需要搜索开源项目、参考实现
 - "帮我找一下 XXX 相关的项目"
 - "搜索/查找 GitHub"
 
+## Phase 0: Spec Lock Check（前置检查）
+
+在搜索 GitHub 之前，**必须先检查项目 spec/任务包是否已锁定依赖**：
+
+1. 搜索项目文档中的 `vsummary`、`obra`、`yt-dlp` 等外部工具名称及其固定版本号
+2. 检查 `.trae/tasks/` 下相关任务包的 `analysis.md` 和 `work-packages/*.md`，查看 Dependency map
+3. 如果 spec 已锁定工具和版本，**直接部署锁定版本**，不要推荐替代项目
+4. 如果 spec 未锁定或用户明确要求评估替代方案，才进入三阶段搜索
+
+**陷阱**：忽略 spec 锁定依赖而推荐热门替代品（如推荐 BibiGPT 替代 vsummary），会导致：
+- 与项目架构不兼容（本地优先 vs 云端 API）
+- 违反 adapter 边界设计
+- 浪费搜索和对比时间
+
+**正确做法**：先读 spec → 发现锁定依赖 → 直接部署锁定版本 → 仅在用户要求时才搜索替代品。
+
 ## 搜索策略
 
 ### 三阶段搜索法

@@ -1,0 +1,23 @@
+skill:
+  cost_kb: 10
+  deprecated: false
+  description: Use when implementing any feature or bugfix, before writing implementation
+    code
+  domain: []
+  frequency_class: cold
+  name: test-driven-development
+  owner_agent: null
+  routing_keywords:
+  - when
+  - implementing
+  - feature
+  - bugfix
+  - before
+  - writing
+  - implementation
+  - code
+  tags:
+  - test
+  - driven
+  - development
+  tier: shared

@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 10
+  deprecated: false
+  description: 对话式游戏角色设计智能体。17步设计、约束库(71个)、别名映射、硬软分级、25条冲突规则、成长日志、模版自检。
+  domain: []
+  frequency_class: cold
+  name: character-designer
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - character
+  - designer
+  tier: sub-agent

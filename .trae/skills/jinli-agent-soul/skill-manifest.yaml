@@ -1,0 +1,24 @@
+skill:
+  cost_kb: 13
+  deprecated: false
+  description: Use when Jinli Plan or Implement agents participate in a session that
+    requires Soul Core lifecycle, response planning, emotional event triggers, or
+    graceful fallback.
+  domain: []
+  frequency_class: cold
+  name: jinli-agent-soul
+  owner_agent: null
+  routing_keywords:
+  - when
+  - plan
+  - implement
+  - agents
+  - participate
+  - session
+  - that
+  - requires
+  tags:
+  - jinli
+  - agent
+  - soul
+  tier: shared

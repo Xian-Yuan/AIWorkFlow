@@ -1,0 +1,19 @@
+skill:
+  cost_kb: 36
+  deprecated: false
+  description: Hermes 适配器 — 金璃好帮手 Implement Agent 语义层，翻译 Hermes MCP/Plugin/Bundle
+    约束为共享工作流行为。
+  domain: []
+  frequency_class: cold
+  name: hermes-jinli-implementer
+  owner_agent: null
+  routing_keywords:
+  - implement
+  - agent
+  - plugin
+  - bundle
+  tags:
+  - hermes
+  - jinli
+  - implementer
+  tier: shared

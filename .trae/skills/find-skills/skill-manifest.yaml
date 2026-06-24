@@ -1,0 +1,13 @@
+skill:
+  cost_kb: 1
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: find-skills
+  owner_agent: null
+  routing_keywords: []
+  tags:
+  - find
+  - skills
+  tier: shared

@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: ai-drama-scriptwriter
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - ai
+  - drama
+  - scriptwriter
+  tier: sub-agent

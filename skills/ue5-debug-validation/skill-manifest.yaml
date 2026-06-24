@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: UE5 项目质量与调试助手。用于方案检测、代码质量审查、编译/运行错误定位与修复，并沉淀错误预防规则。
+  domain: []
+  frequency_class: cold
+  name: ue5-debug-validation
+  owner_agent: ue-engineer
+  routing_keywords: []
+  tags:
+  - ue5
+  - debug
+  - validation
+  tier: sub-agent

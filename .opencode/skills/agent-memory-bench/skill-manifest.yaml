@@ -1,0 +1,14 @@
+skill:
+  cost_kb: 5
+  deprecated: false
+  description: ''
+  domain: []
+  frequency_class: cold
+  name: agent-memory-bench
+  owner_agent: general-engineer
+  routing_keywords: []
+  tags:
+  - agent
+  - memory
+  - bench
+  tier: sub-agent

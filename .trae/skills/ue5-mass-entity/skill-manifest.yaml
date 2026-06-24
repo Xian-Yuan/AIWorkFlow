@@ -1,0 +1,19 @@
+skill:
+  cost_kb: 18
+  deprecated: false
+  description: Mass Entity大规模实体框架。ECS架构/EntityConfig/Processor/Trait/StateTree集成/Blueprint配置。100+单位场景使用。
+  domain: []
+  frequency_class: cold
+  name: ue5-mass-entity
+  owner_agent: ue-engineer
+  routing_keywords:
+  - entityconfig
+  - processor
+  - trait
+  - statetree
+  - blueprint
+  tags:
+  - ue5
+  - mass
+  - entity
+  tier: sub-agent
