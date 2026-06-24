@@ -1,0 +1,5 @@
+﻿task_name: test-memory-gate
+project: jinli
+phase: implement
+workflow: hotfix
+created_at: 2026-06-24
