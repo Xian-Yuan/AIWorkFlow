@@ -1,0 +1,41 @@
+﻿skill:
+  cost_kb: 12
+  deprecated: false
+  description: 'Six-stage AI video creation pipeline: Inspiration → Project Brief → Script → Character Prompts → Storyboard/Director Prompts → AI Video Generation Prompts. Supports style injection from Bilibili creator distillation.'
+  domain:
+  - ai
+  - video
+  - content-creation
+  - drama
+  - storyboard
+  frequency_class: warm
+  name: ai-video-creator
+  owner_agent: xiaoli
+  routing_keywords:
+  - video
+  - AI视频
+  - 视频
+  - 剧本
+  - 分镜
+  - storyboard
+  - director
+  - script
+  - 提示词
+  - prompt
+  - 短剧
+  - 漫剧
+  - seedance
+  - kling
+  - 灵感
+  - 创作视频
+  tags:
+  - ai
+  - video
+  - pipeline
+  - drama
+  - storyboard
+  - prompt-generation
+  - bilibili
+  tier: sub-agent
+  entry_point: 'Project/Jinli/services/ai-video-creator/cli.py'
+  code_root: 'Project/Jinli/services/ai-video-creator/'

@@ -1,14 +1,28 @@
-skill:
+﻿skill:
   cost_kb: 5
   deprecated: false
-  description: ''
-  domain: []
+  description: 'AI drama scriptwriter - generates structured scripts with characters, scenes, shots, and storyboard from story input. Now integrated into ai-video-creator pipeline as S2+S3+S4 stages.'
+  domain:
+  - ai
+  - drama
+  - content-creation
   frequency_class: cold
   name: ai-drama-scriptwriter
-  owner_agent: general-engineer
-  routing_keywords: []
+  owner_agent: xiaoli
+  routing_keywords:
+  - 编剧
+  - 剧本
+  - script
+  - 漫剧
+  - 分镜脚本
   tags:
   - ai
   - drama
   - scriptwriter
+  - integrated
   tier: sub-agent
+  entry_point: 'Project/Jinli/services/ai-video-creator/cli.py'
+  code_root: 'Project/Jinli/services/ai-video-creator/'
+  upstream_of:
+  - ai-video-director
+  note: 'S2+S3+S4 stages of ai-video-creator pipeline now cover scriptwriter functionality. This skill remains for documentation reference and specialized script-only tasks.'

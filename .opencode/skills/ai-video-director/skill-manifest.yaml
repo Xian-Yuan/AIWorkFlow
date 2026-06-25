@@ -1,0 +1,33 @@
+﻿skill:
+  cost_kb: 8
+  deprecated: false
+  description: 'AI Video Director - translates storyboard scripts into platform-specific video generation prompts (Seedance/Kling/Hailuo/PixVerse/Veo/Runway). Now integrated into ai-video-creator pipeline as S5 stage.'
+  domain:
+  - video
+  - ai
+  - director
+  frequency_class: warm
+  name: ai-video-director
+  owner_agent: xiaoli
+  routing_keywords:
+  - video
+  - director
+  - storyboard
+  - prompt
+  - seedance
+  - kling
+  - 视频提示词
+  - 平台适配
+  tags:
+  - ai
+  - video
+  - director
+  - storyboard
+  - prompt-generation
+  - integrated
+  tier: sub-agent
+  entry_point: 'Project/Jinli/services/ai-video-creator/cli.py'
+  code_root: 'Project/Jinli/services/ai-video-creator/'
+  downstream_of:
+  - ai-drama-scriptwriter
+  note: 'S5 stage of ai-video-creator pipeline now covers director functionality. This skill remains for documentation reference and single-shot prompt generation tasks.'

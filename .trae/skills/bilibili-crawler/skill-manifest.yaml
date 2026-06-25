@@ -1,0 +1,32 @@
+﻿skill:
+  cost_kb: 4
+  deprecated: false
+  description: 'Bilibili video crawler + creator style distillation. Scans channels, downloads metadata, distills creative DNA into style_injection.json for AI video pipeline.'
+  domain:
+  - video
+  - bilibili
+  - content-creation
+  frequency_class: warm
+  name: bilibili-crawler
+  owner_agent: xiaoli
+  routing_keywords:
+  - B站
+  - bilibili
+  - 爬
+  - 爬取
+  - 博主
+  - 蒸馏
+  - distill
+  - scan
+  - 风格分析
+  - 频道扫描
+  tags:
+  - bilibili
+  - crawler
+  - distillation
+  - style-injection
+  tier: sub-agent
+  entry_point: 'Project/Jinli/services/bilibili-crawler/crawler.py'
+  code_root: 'Project/Jinli/services/bilibili-crawler/'
+  upstream_of:
+  - ai-video-creator

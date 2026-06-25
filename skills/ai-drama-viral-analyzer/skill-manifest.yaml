@@ -1,15 +1,36 @@
-skill:
-  cost_kb: 2
+﻿skill:
+  cost_kb: 5
   deprecated: false
-  description: ''
-  domain: []
-  frequency_class: cold
+  description: 'Bilibili video/channel distillation + style injection for AI video creation. Extracts creator DNA, signature moves, viral mechanics, and generates style_injection.json for downstream pipeline.'
+  domain:
+  - ai
+  - video
+  - content-creation
+  - bilibili
+  frequency_class: warm
   name: ai-drama-viral-analyzer
-  owner_agent: general-engineer
-  routing_keywords: []
+  owner_agent: xiaoli
+  routing_keywords:
+  - 爆款
+  - viral
+  - 博主
+  - B站
+  - bilibili
+  - 蒸馏
+  - distill
+  - 风格注入
+  - style injection
+  - 频道分析
+  - 视频分析
   tags:
   - ai
   - drama
   - viral
   - analyzer
+  - bilibili
+  - distillation
   tier: sub-agent
+  entry_point: 'Project/Jinli/services/bilibili-crawler/crawler.py'
+  code_root: 'Project/Jinli/services/bilibili-crawler/'
+  upstream_of:
+  - ai-video-creator
