@@ -1,0 +1,74 @@
+{
+  "wp_id": "WP01-runtime-daemon-foundation",
+  "task": "jinli/2026-06-27-runtime-daemon-unified-ide",
+  "phase": "implement",
+  "claimant": "金璃好帮手 (Implement Agent)",
+  "claimed_at": "2026-06-27T12:00:00Z",
+  "status": "in_progress",
+  "scope": {
+    "primary_scenarios": ["S01", "S07"],
+    "secondary_scenarios": ["S02"],
+    "done_definition": [
+      "JinliDaemon is single-instance on Windows: PID/endpoint/log/lock files written under services/runtime/daemon-state/",
+      "Duplicate start does not create a second process and reports existing PID/endpoint",
+      "Stop is graceful (poll stop flag) with timeout-based TerminateProcess fallback",
+      "Stale lock recovery: if PID file holds a non-alive PID, claim succeeds and replaces stale files",
+      ".trae/scripts/jinli-system.ps1 start|stop|status|doctor work end-to-end",
+      "status -Json emits daemon_state + per-service health, doctor surfaces required-service blocking",
+      "Service registry skeleton provides register/get/list/health_all; one health-check cycle exercises it",
+      "All new tests pass; existing 51 tests still pass (AC14)"
+    ]
+  },
+  "allowed_paths": [
+    "Project/Jinli/services/runtime/**",
+    "Project/Jinli/services/jinli_service.py",
+    "Project/Jinli/services/jinli_daemon.py",
+    ".trae/scripts/jinli-system.ps1",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/**",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/**"
+  ],
+  "forbidden_paths": [
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/.task.yaml",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/routing.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/analysis.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/spec.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/tasks.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/requirements.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/execution-prompt.md",
+    "C:/Users/87372/.codex/**",
+    "C:/Users/87372/plugins/jinli-soul-core/**",
+    ".opencode/**",
+    "Project/RTS/**",
+    "Project/CharacterDesignTool/**"
+  ],
+  "out_of_scope_for_this_wp": [
+    "Real HTTP/IPC server (WP03)",
+    "Full service registration for EventBus/Memory/Dreamer/Evolution/Proactive/Emotion/Relationship/MCP adapter (WP02)",
+    "MCP tool migration to daemon client (WP04)",
+    "IDE registry sync to Codex/OpenCode/Trae (WP05)",
+    "Compatibility/legacy adapter (WP06)",
+    "voice/avatar/WeChat/mobile/UE editor control (forbidden by spec)"
+  ],
+  "evidence_plan": {
+    "tests": [
+      "python -m pytest Project/Jinli/services/runtime/tests/ -v (must show 51 prior + WP01 new tests passing)"
+    ],
+    "commands": [
+      "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 start",
+      "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 status -Json",
+      "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 doctor",
+      "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 stop"
+    ],
+    "evidence_locations": [
+      "reports/WP01-runtime-daemon-foundation.md (diff + command output)",
+      "Project/Jinli/services/runtime/daemon-state/daemon.log (operational evidence)",
+      "Project/Jinli/services/runtime/daemon-state/daemon.status.json (status evidence)"
+    ]
+  },
+  "stop_conditions_acknowledged": [
+    "Plan/can-edit gate not passed → already passed per handoff",
+    "Required service cannot start with no degradation contract → registry will expose offline state in WP02; WP01 uses a placeholder turn_orchestrator service",
+    "Don't delete data files → state lives in NEW services/runtime/daemon-state/ subdir",
+    "Don't modify workflow gate scripts → jinli-system.ps1 is NEW, not modifying any existing script"
+  ]
+}

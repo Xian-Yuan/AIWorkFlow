@@ -1,25 +1,11 @@
-﻿{
-    "mcpServers":  {
-                       "unreal-mcpython":  {
-                                               "command":  "python",
-                                               "args":  [
-                                                            "G:/UEGameDevelopment/Project/MLCase/Plugins/unreal-mcp/mcp-server/src/unreal_mcp/main.py"
-                                                        ],
-                                               "env":  {
-                                                           "PYTHONPATH":  "G:/UEGameDevelopment/Project/MLCase/Plugins/unreal-mcp/mcp-server/src"
-                                                       }
-                                           },
-                       "sigmap":  {
-                                      "command":  "G:/UEGameDevelopment/Tools/sigmap/sigmap.exe",
-                                      "args":  [
-                                                   "--mcp"
-                                               ]
-                                  },
-                       "jinli_soul_core":  {
-                                               "args":  [
-                                                            "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\server.mjs"
-                                                        ],
-                                               "command":  "D:\\NodeJS\\node.exe"
-                                           }
-                   }
+{
+    "mcpServers": {
+        "jinli_soul_core": {
+            "command": "D:\\NodeJS\\node.exe",
+            "args": [
+                "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\server.mjs"
+            ],
+            "cwd": "C:\\Users\\87372\\plugins\\jinli-soul-core"
+        }
+    }
 }

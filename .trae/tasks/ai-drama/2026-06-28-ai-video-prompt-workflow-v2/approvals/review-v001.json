@@ -1,0 +1,34 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-28-ai-video-prompt-workflow-v2",
+    "packet_version":  1,
+    "packet_digest":  "5615e2e65dddb33293e4f935a931deb407e1f8754ca17a295a7ffafb302f985c",
+    "execution_mode":  "issuer_direct",
+    "work_package_path":  null,
+    "work_package_digest":  null,
+    "capability_path":  null,
+    "capability_digest":  null,
+    "result_path":  null,
+    "result_digest":  null,
+    "source_root":  "workspace",
+    "source_paths":  [
+                         "Project/Jinli/services/ai-video-creator/docs/prompt-spec-checklist.md",
+                         "Project/Jinli/services/ai-video-creator/docs/prompt-template-universal.md",
+                         "Project/Jinli/services/ai-video-creator/docs/prompt-workflow-v2.md"
+                     ],
+    "source_diff_digest":  "02dbdc50c4c0a17a94738498c03a32d6c8d426fcae2d005b6830adb00f0f0aa3",
+    "evidence_paths":  [
+                           "verification-report.md"
+                       ],
+    "evidence_manifest_digest":  "8058a67c50167a4bf6b81bef9677e9a38fc3512baee13ab96163924f0656ad21",
+    "acceptance_criteria_digest":  "fca0df962eb65ef24e2da8ca9835be6b419d6f1fda6b9565c70aaa9caf578f26",
+    "issuer_key_id":  "c32a2c5b25f1cc3a16ed048f4266f9b0a781edeb3252e41d483d15583efdf540",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1001",
+    "review_context_id":  "codex-review-20260628-0249b",
+    "worker_context_id":  null,
+    "reviewed_at":  "2026-06-28T02:50:18.5555546+08:00",
+    "decision":  "accepted",
+    "summary":  "Approved v2 AI short-drama prompt workflow documentation contract with schema, inheritance rules, storyboard PREVIS merge, video prompt fields, and checklist verification.",
+    "root_cause_id":  null,
+    "approval_digest":  "3d526b8ce9812110d36500dda11105a8057d5a99e4c8389484ce0815b5ee8fdd"
+}

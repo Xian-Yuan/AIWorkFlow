@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "task_name": "YYYY-MM-DD-system-feature",
+  "packet_version": 1,
+  "authority_profile": "issuer-worker-v1",
+  "issuer_key_id": "sha256-public-key",
+  "issuer_sid": "S-1-5-...",
+  "issued_at": "ISO-8601",
+  "core_files": [
+    {
+      "path": "routing.md",
+      "sha256": "sha256-file"
+    }
+  ],
+  "packet_digest": "sha256-canonical-manifest"
+}

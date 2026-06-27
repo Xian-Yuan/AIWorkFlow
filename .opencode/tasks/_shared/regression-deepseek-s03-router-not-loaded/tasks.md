@@ -1,0 +1,1 @@
+- [ ] Confirm missing router proof stays blocked

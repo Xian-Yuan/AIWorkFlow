@@ -1,0 +1,48 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-26-runtime-enforcement-layer",
+    "packet_version":  2,
+    "authority_profile":  "issuer-worker-v1",
+    "issuer_key_id":  "7728aa43ef32c5f80480213421629f4b3dc8a7afbc6c52f780f5581a2314b76f",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1001",
+    "issued_at":  "2026-06-26T20:21:46.7216768+08:00",
+    "core_files":  [
+                       {
+                           "path":  "analysis.md",
+                           "sha256":  "744801323e266709bece4bcbc5e25ad517d05408cfe15e3b9ecb2efccab80be4"
+                       },
+                       {
+                           "path":  "doc-impact.md",
+                           "sha256":  "6044d406d350a6e50ef11c9ec2470beda9074afc16ae0520a50a5da835a90a1d"
+                       },
+                       {
+                           "path":  "routing.md",
+                           "sha256":  "7799c4f31ef518232a98518a97cdf9caef589a8959722e2946b53648d8fc7a28"
+                       },
+                       {
+                           "path":  "spec.md",
+                           "sha256":  "d6b751a913477617351414cc0410f3495a403a0bbf0e3e4d3f07e03ad493f33a"
+                       },
+                       {
+                           "path":  "tasks.md",
+                           "sha256":  "9a41f3235454d90e4d0ba286137e9297935165fb689c4e082474982bffcb8bdb"
+                       },
+                       {
+                           "path":  "work-packages/WP01-runtime-contract-response-gate.md",
+                           "sha256":  "64de5fce7df5a785a54cf4b4e32ab3e30f1c62aaf67b59d5f7cb1357be98716f"
+                       },
+                       {
+                           "path":  "work-packages/WP02-route-index-maintenance.md",
+                           "sha256":  "895bd920d5e9aba5de9ea25bfb90e290b413f449472544dae2f85dbba8269299"
+                       },
+                       {
+                           "path":  "work-packages/WP03-existing-service-adapters.md",
+                           "sha256":  "50e7b5c09c1e65aad0e87627cb39a05778e1ad3b922bd29fb22a4f145edf7314"
+                       },
+                       {
+                           "path":  "work-packages/WP04-gates-regression-verification.md",
+                           "sha256":  "879967f469babc258617b6fb3154031c25142403afd1e14119b1648128609e87"
+                       }
+                   ],
+    "packet_digest":  "4115172aa7ea720034b763bdaa17f1454fab41e5f6c5b3fe428ff7a595a42d19"
+}

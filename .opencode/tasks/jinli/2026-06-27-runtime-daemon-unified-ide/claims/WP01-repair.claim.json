@@ -1,0 +1,138 @@
+{
+  "wp_id": "WP01-repair",
+  "task": "jinli/2026-06-27-runtime-daemon-unified-ide",
+  "phase": "implement",
+  "claimant": "金璃好帮手 (Implement Agent)",
+  "claimed_at": "2026-06-28T01:45:00Z",
+  "status": "in_progress",
+  "parent_wp": "WP01-runtime-daemon-foundation",
+  "repair_summary": "Tighten _cli_start to wait for daemon_state to flip to online/degraded (instead of returning started=true on PID-file presence). Rewrite test_cli_start_returns_live_pid_after_worker_up to mock time.sleep against a fake_poll_tick that mirrors real worker disk writes.",
+  "scope": {
+    "primary_scenarios": ["S01"],
+    "secondary_scenarios": ["S07"],
+    "done_definition": [
+      "_cli_start reads daemon.status JSON directly via read_json_or_none(status_path()) — does NOT route through read_status_snapshot (which forces daemon_state=stopped on PID-death and would cause _cli_start to bail out after one poll during a graceful restart)",
+      "Polling loop exits only when daemon_state in (online, degraded); degraded path extracts the first required-service blocker into degraded_reason",
+      "Fast-fail path: when the spawned worker's PID is dead AND state is stopped/offline, the loop breaks immediately instead of waiting out start_timeout_s",
+      "Failure branch returns started=false, reason=start_failed, last_state, pid_alive and exit code 1 (instead of silently returning started=true with a green return code)",
+      "test_cli_start_returns_live_pid_after_worker_up passes; the rest of TestDaemonStopFlagLifecycle remains green",
+      "Full test suite Project/Jinli/services/runtime/tests/ passes 103/103",
+      "detect-duplicates.ps1 -Target Project\\Jinli\\services\\runtime returns CLEAN",
+      "daemon.py (production) and test_daemon.py are the only files touched; WP02/WP03 files unchanged"
+    ]
+  },
+  "allowed_paths": [
+    "Project/Jinli/services/runtime/daemon.py",
+    "Project/Jinli/services/runtime/tests/test_daemon.py",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP01-repair.claim.json",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP01-repair.md"
+  ],
+  "forbidden_paths": [
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/.task.yaml",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/routing.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/analysis.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/spec.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/tasks.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/requirements.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/execution-prompt.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP01-runtime-daemon-foundation.claim.json",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP01-runtime-daemon-foundation.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP02-service-registry-health.claim.json",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP02-service-registry-health.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP03-runtime-api-turn-client.claim.json",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP03-runtime-api-turn-client.md",
+    "Project/Jinli/services/runtime/daemon_state.py",
+    "Project/Jinli/services/runtime/service_registry.py",
+    "Project/Jinli/services/runtime/service_registry_builder.py",
+    "Project/Jinli/services/runtime/client.py",
+    "Project/Jinli/services/runtime/tests/**",
+    "C:/Users/87372/.codex/**",
+    "C:/Users/87372/plugins/jinli-soul-core/**",
+    ".opencode/**",
+    "Project/RTS/**",
+    "Project/CharacterDesignTool/**"
+  ],
+  "evidence": {
+    "tests": {
+      "command_targeted": "python -m pytest Project/Jinli/services/runtime/tests/test_daemon.py::TestDaemonStopFlagLifecycle -v",
+      "result_targeted": "3 passed in 1.81s — test_cli_start_returns_live_pid_after_worker_up + test_stale_stop_flag_is_cleaned_on_start + test_stop_then_immediate_start_succeeds",
+      "command_full": "python -m pytest Project/Jinli/services/runtime/tests/ -v",
+      "result_full": "103 passed in 66.30s (0:01:06)",
+      "per_module": {
+        "test_adapters.py": 15,
+        "test_after_turn_commit.py": 5,
+        "test_client.py": 18,
+        "test_daemon.py": 13,
+        "test_response_gate.py": 14,
+        "test_route_index.py": 7,
+        "test_service_registry_builder.py": 21,
+        "test_turn_manifest.py": 7,
+        "test_turn_orchestrator.py": 3
+      }
+    },
+    "commands": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/detect-duplicates.ps1 -Target Project\\Jinli\\services\\runtime",
+        "result": "CLEAN"
+      }
+    ],
+    "code_evidence": {
+      "daemon.py_lines_1221_1228": "We deliberately do NOT use read_status_snapshot() here ... read the persisted daemon.status JSON directly",
+      "daemon.py_lines_1238_1239": "endpoint_seen = read_json_or_none(endpoint_path()) | persisted = read_json_or_none(status_path()) or {}",
+      "daemon.py_lines_1240_1253": "state_seen = persisted.get('daemon_state') | degraded-reason extraction | break on online/degraded",
+      "daemon.py_lines_1254_1270": "worker_pid_seen tracking + fast-fail when pid_alive==False and state in (stopped, offline)",
+      "daemon.py_lines_1295_1318": "ok=false, started=false, reason=start_failed, exit code 1",
+      "test_daemon.py_lines_552_594": "fake_poll_tick() — atomic writes to pid_path / endpoint_path / status_path on every tick",
+      "test_daemon.py_lines_606_616": "fake_sleep = side_effect that calls fake_poll_tick; mock.patch on daemon_module.time.sleep replaces time.sleep inside the polling loop"
+    },
+    "evidence_locations": [
+      "reports/WP01-repair.md (full report with 4 repair points + code evidence + AC mapping + risks)",
+      "Project/Jinli/services/runtime/daemon.py (modified _cli_start)",
+      "Project/Jinli/services/runtime/tests/test_daemon.py (modified TestDaemonStopFlagLifecycle)"
+    ]
+  },
+  "repair_difficulty_notes": [
+    "First attempt planned fake_poll_tick in thinking but the Edit tool was not actually invoked — the file was unchanged and the failure persisted (this is exactly the failure mode Ba Ba flagged in the re-run prompt).",
+    "Second attempt applied both Edits verbatim after Read-validating oldString, then pytest confirmed the test passes and 103/103 hold.",
+    "Mock contract is now explicit: real disk I/O for PID/endpoint/status writes; only the daemon_state progression is faked (starting on tick 0, online on tick 1)."
+  ],
+  "stop_conditions_acknowledged": [
+    "Did not modify daemon.py beyond the documented 4 repair points in _cli_start; no other helpers touched",
+    "Did not modify daemon_state.py, service_registry.py, service_registry_builder.py, client.py — read_status_snapshot itself is unchanged because its PID-death behaviour is correct for status/doctor reporting",
+    "Did not touch WP01/WP02/WP03 claim/report files; only created new WP01-repair.{md,json}",
+    "Did not run any MCP tools, did not call handoff-to-review, did not archive",
+    "Plan/can-edit gate not passed for an old task packet but this repair is a follow-up of an already-passed WP01 — proceeding per the explicit re-run prompt from Ba Ba"
+  ],
+  "next_wp_unblock": {
+    "wp04_can_start": true,
+    "wp04_unblockers_satisfied": [
+      "_cli_start publishes an honest {ok, started, pid, daemon_state, degraded_reason, waited_ms, reason, message} payload that WP04's MCP tools can consume directly",
+      "daemon_state == degraded is no longer conflated with started failed — MCP callers can distinguish 'daemon is up but required service is offline' from 'worker never came online'",
+      "TestDaemonStopFlagLifecycle is fully green: the start/stop/recovery contract exercised here is the same one the MCP start/stop tools will trigger end-to-end",
+      "Fast-fail path means a crashing worker surfaces in sub-second instead of waiting out start_timeout_s, so MCP tool errors are responsive"
+    ]
+  },
+  "followup_packets": [
+    {
+      "id": "WP01-repair-stale-state",
+      "type": "bug-fix followup",
+      "trigger": "end-to-end smoke test after WP01-repair",
+      "files_changed": [
+        {
+          "path": "Project/Jinli/services/runtime/daemon.py",
+          "status": "modified",
+          "lines_changed_estimate": 20,
+          "purpose": "_cleanup_state_files_after_stop helper + 2 call sites"
+        },
+        {
+          "path": "Project/Jinli/services/runtime/tests/test_daemon.py",
+          "status": "modified",
+          "lines_changed_estimate": 100,
+          "purpose": "2 new tests covering stop cleanup and end-to-end stop→start"
+        }
+      ],
+      "tests_added": 2,
+      "evidence": "pytest 105/105; end-to-end start→stop→start→stop all green; start #2 returns fresh PID"
+    }
+  ]
+}

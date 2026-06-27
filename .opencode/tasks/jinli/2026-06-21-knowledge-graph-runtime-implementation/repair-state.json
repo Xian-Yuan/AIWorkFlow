@@ -1,0 +1,16 @@
+﻿{
+    "schema_version":  1,
+    "status":  "repair_required",
+    "worker_profile":  "ds4-flash",
+    "max_attempts_per_root_cause":  3,
+    "active_root_cause":  "RC01",
+    "attempts_by_root_cause":  {
+                                   "RC01":  1
+                               },
+    "total_attempts_by_root_cause":  {
+                                         "RC01":  1
+                                     },
+    "latest_attempt":  1,
+    "active_package":  "work-packages/WP10-fix-rc01-a1.md",
+    "latest_evidence":  "verification-history/A001-review-rc01.md"
+}

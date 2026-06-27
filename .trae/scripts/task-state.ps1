@@ -24,30 +24,35 @@ $ErrorActionPreference = "Stop"
 
 # --- Project-aware path resolution ---
 $TASKS_ROOT = ".trae\tasks"
-$PROJECTS = @("airpgweb", "characterdesigntool", "rts", "_shared")
+$PROJECTS = @("ai-drama", "airpgweb", "characterdesigntool", "docs-ai", "jinli", "local-llm-survey", "rts", "_shared")
+
+function Write-Red { Write-Host $args[0] -ForegroundColor Red }
+function Write-Green { Write-Host $args[0] -ForegroundColor Green }
+function Write-Yellow { Write-Host $args[0] -ForegroundColor Yellow }
 
 function Resolve-TaskPath {
-    param([string]$Name)
+    param([string]$Name, [bool]$AllowMissing = $false)
     if ($Name -match "^(.+?)/(.+)$") {
         $project = $matches[1]; $task = $matches[2]
         $dir = Join-Path $TASKS_ROOT "$project\$task"
         if (Test-Path $dir) { return @{ Project=$project; Task=$task; Dir=$dir; Yaml=Join-Path $dir ".task.yaml" } }
+        if ($AllowMissing) { return @{ Project=$project; Task=$task; Dir=$dir; Yaml=Join-Path $dir ".task.yaml" } }
         Write-Red "ERROR: Task not found: $Name ($dir)"; exit 1
     }
     foreach ($p in $PROJECTS) {
         $dir = Join-Path $TASKS_ROOT "$p\$Name"
         if (Test-Path $dir) { return @{ Project=$p; Task=$Name; Dir=$dir; Yaml=Join-Path $dir ".task.yaml" } }
     }
+    if ($AllowMissing) {
+        $dir = Join-Path $TASKS_ROOT $Name
+        return @{ Project=""; Task=$Name; Dir=$dir; Yaml=Join-Path $dir ".task.yaml" }
+    }
     Write-Red "ERROR: Task not found: $Name"; exit 1
 }
 
-$resolved = Resolve-TaskPath $TaskName
+$resolved = Resolve-TaskPath -Name $TaskName -AllowMissing:($Command -eq "init")
 $TASK_DIR = $resolved.Dir
 $YAML_FILE = $resolved.Yaml
-
-function Write-Red { Write-Host $args[0] -ForegroundColor Red }
-function Write-Green { Write-Host $args[0] -ForegroundColor Green }
-function Write-Yellow { Write-Host $args[0] -ForegroundColor Yellow }
 
 function Validate-TaskName {
     param([string]$Name)

@@ -74,13 +74,13 @@ OpenCode 采用 **Plan + Implement 双 Agent 架构**。Plan 负责"想清楚做
 
 ### Skill 规则
 
-- Skill 定义在 `.opencode/skills/<name>/SKILL.md`（部分 symlink 到 `.trae/skills/<name>/`）
+- Skill 定义在 `.opencode/skills/<name>/SKILL.md`（junction 共享 `.trae/skills/`，最终指向 `E:\UEGameDevelopment\skills\`）
 - 通过 `skill` 工具加载，**禁止跳过 skill 加载直接实现**
 - 主 skill 选一个，次 skill 选 0-1 个，不加载无关 skill
 
 ### 任务文件结构
 
-任务以 `.opencode/tasks/<task-name>/` 目录组织：
+任务以 `.opencode/tasks/<task-name>/` 目录组织（junction 共享 `.trae/tasks/`，两个 IDE 使用同一套任务包）：
 
 ```
 .opencode/tasks/<task-name>/
@@ -170,7 +170,7 @@ public:
 - ❌ 不使用 `task` 工具 spawn subagent 而手动模拟其职责
 - ❌ 使用已弃用的 UE5 API
 - ❌ 在阶段一中修改代码
-- ❌ 修改 `.trae/` 目录中的文件（独立工作流互不干扰）
+- ❌ 修改 `.trae/` 目录中的文件时需注意两 IDE 共享（scripts/tasks/skills 通过 junction 共享）
 
 ## 操作授权规则
 
@@ -212,7 +212,24 @@ public:
 - 第三方工具: `G:\UEGameDevelopment\.tools\`
 - 临时下载/解压: `G:\UEGameDevelopment\.tmp\`（用后清理）
 - 项目代码: `G:\UEGameDevelopment\Project\`
-- 脚本: `G:\UEGameDevelopment\.trae\scripts\`
-- 文档: `G:\UEGameDevelopment\Docs\`
+- 脚本: `E:\UEGameDevelopment\.trae\scripts\`（通过 .opencode/scripts/ junction 共享）
+- 文档: `E:\UEGameDevelopment\Docs\`
 
 **禁止**: `C:\tmp\`, `C:\Users\...\.codex\tools\`, `C:\Users\...\AppData\`（Codex 自身配置除外）
+
+## Soul Core MCP 集成
+
+OpenCode 通过 `jinli_soul_core` MCP Server 接入金璃灵魂引擎。配置在 `.opencode/mcp.json`。
+
+| 系统 | MCP 工具 | 状态 |
+|------|---------|------|
+| Soul Core 生命周期 | soul_init, soul_auto, soul_turn, soul_end | 已配置 |
+| 情绪引擎 | soul_emotion, soul_status | 已配置 |
+| 记忆检索 | soul_memory, soul_learn | 已配置 |
+| 习惯进化 | soul_evolve, soul_discover | 已配置 |
+| 健康检查 | soul_check | 已配置 |
+| 回复编排 | response_plan | 已配置 |
+| 视觉监控 | vision_start, vision_stop, vision_status | 已配置 |
+| 成长系统 | growth_approve, growth_rollback | 已配置 |
+
+Agent 必须遵循 `jinli-agent-soul` skill 定义的 5 MUST 调用协议。

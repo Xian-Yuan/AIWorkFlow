@@ -1,0 +1,27 @@
+# Handover: Plan -> Implement
+
+## Task Identity
+- Task: 2026-06-18-jinli-persona-language-vision-foundation
+- Project type: other
+- State file: .trae\tasks\_shared\2026-06-18-jinli-persona-language-vision-foundation\.task.yaml
+
+## Current Phase
+- Current: implement (switch to **Flash model**)
+- Previous: plan (done, user confirmed)
+
+## Key Context
+- routing.md: .trae\tasks\_shared\2026-06-18-jinli-persona-language-vision-foundation\routing.md OK
+- tasks.md: .trae\tasks\_shared\2026-06-18-jinli-persona-language-vision-foundation\tasks.md OK
+- spec.md: .trae\tasks\_shared\2026-06-18-jinli-persona-language-vision-foundation\spec.md OK
+
+## Execution Instructions (paste into new Flash session)
+1. Read routing.md for architecture decisions
+2. Execute tasks.md items in order
+3. Check off each task immediately upon completion
+4. Verify compilation before marking done
+5. When all done, run: task-handoff.ps1 2026-06-18-jinli-persona-language-vision-foundation
+
+## Spec progress
+- Total Scenarios: 14
+- Done: 0 | In Progress: 0 | Not Started: 14
+- New Agent reads spec.md -> Quick Status table to understand state

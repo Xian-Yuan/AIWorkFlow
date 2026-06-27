@@ -1,0 +1,112 @@
+{
+  "wp_id": "WP02-service-registry-health",
+  "task": "jinli/2026-06-27-runtime-daemon-unified-ide",
+  "phase": "implement",
+  "claimant": "金璃好帮手 (Implement Agent)",
+  "claimed_at": "2026-06-27T13:00:00Z",
+  "status": "in_progress",
+  "scope": {
+    "primary_scenarios": ["S02", "S07"],
+    "secondary_scenarios": ["S01"],
+    "done_definition": [
+      "JinliDaemon.__init__ invokes build_default_registry() by default and registers two daemon-state probes (daemon_lockfile, daemon_endpoint)",
+      "build_default_registry() registers 9 business services: event_bus, memory, emotion, relationship, turn_orchestrator (required) + legacy_mirror, dreamer, evolution, proactive (optional)",
+      "Every health-check failure produces a message naming the cause; no service silently reports online",
+      "Optional service offline is visible in status -Json but does not block doctor; required service offline flips daemon_state to degraded and surfaces in doctor",
+      "Builder is idempotent: repeated calls replace ServiceSpec by name without raising or duplicating entries",
+      "JinliDaemon(register_real_services=False) opt-out flag still registers daemon-state probes so registry is never empty",
+      "WP01 baseline 61/61 tests still pass; 21 new tests in test_service_registry_builder.py pass; total 82/82",
+      "detect-duplicates.ps1 on Project\\Jinli\\services\\runtime returns CLEAN"
+    ]
+  },
+  "allowed_paths": [
+    "Project/Jinli/services/runtime/**",
+    "Project/Jinli/services/evolution/**",
+    "Project/Jinli/services/memory/**",
+    "Project/Jinli/services/nervous/**",
+    "Project/Jinli/services/persona/**",
+    "Project/Jinli/services/proactive/**",
+    "Project/Jinli/services/knowledge/**",
+    "Project/Jinli/services/jinli_service.py",
+    "Project/Jinli/services/jinli_daemon.py",
+    "Project/Jinli/services/runtime/tests/**",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP02-service-registry-health.claim.json",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP02-service-registry-health.md"
+  ],
+  "forbidden_paths": [
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/.task.yaml",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/routing.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/analysis.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/spec.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/tasks.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/requirements.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/execution-prompt.md",
+    "C:/Users/87372/.codex/**",
+    "C:/Users/87372/plugins/jinli-soul-core/**",
+    ".opencode/**",
+    "Project/RTS/**",
+    "Project/CharacterDesignTool/**"
+  ],
+  "out_of_scope_for_this_wp": [
+    "Real HTTP/IPC server (WP03)",
+    "MCP tool migration to daemon client (WP04)",
+    "IDE registry sync to Codex/OpenCode/Trae (WP05)",
+    "Compatibility/legacy adapter migration (WP06)",
+    "Live instance state of services via daemon-owned JinliService (deferred to WP03)",
+    "voice/avatar/WeChat/mobile/UE editor control (forbidden by spec)"
+  ],
+  "evidence": {
+    "tests": {
+      "command": "python -m pytest Project/Jinli/services/runtime/tests/ -v",
+      "result": "82 passed in 7.94s (61 WP01 baseline + 21 new)",
+      "new_test_module": "Project/Jinli/services/runtime/tests/test_service_registry_builder.py",
+      "new_test_count": 21
+    },
+    "commands": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 start",
+        "result": "{\"ok\": true, \"started\": true, \"already_running\": false, \"pid\": 17560, \"endpoint\": {\"port\": 64820, ...}}"
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 status -Json",
+        "result": "11 services listed: 5 required online + 4 optional online + 2 daemon-state probes online; daemon_state=online, loop_alive=true"
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 doctor",
+        "result": "OK: daemon is healthy and all required services are online."
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 stop",
+        "result": "{\"stopped\": true, \"pid\": 17560, \"escalated\": false, \"timed_out\": false}"
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/detect-duplicates.ps1 -Target Project\\Jinli\\services\\runtime",
+        "result": "CLEAN"
+      }
+    ],
+    "evidence_locations": [
+      "reports/WP02-service-registry-health.md (full report with file manifest, service catalog, AC mapping, design notes, risks)",
+      "Project/Jinli/services/runtime/service_registry_builder.py (new builder, 397 lines)",
+      "Project/Jinli/services/runtime/daemon.py (modified JinliDaemon.__init__ + _register_daemon_services)",
+      "Project/Jinli/services/runtime/tests/test_service_registry_builder.py (new, 21 tests)",
+      "Project/Jinli/services/runtime/daemon-state/daemon.status (live snapshot at end of test run)",
+      "Project/Jinli/services/runtime/daemon-state/daemon.log (operational evidence)"
+    ]
+  },
+  "stop_conditions_acknowledged": [
+    "Plan/can-edit gate not passed → already passed per handoff",
+    "Required service cannot start with no degradation contract → WP02 exposes offline state in status JSON; failure produces a message naming the cause",
+    "Don't delete data files → no data files were deleted; only new files under Project/Jinli/services/runtime/ were created",
+    "Don't modify workflow gate scripts → jinli-system.ps1, task-state.ps1, task-guard.ps1, contract-verify.ps1 untouched",
+    "Health checks must be lightweight → no LLM, no network; import + filesystem + sqlite SELECT 1 only",
+    "Forbidden files not touched → confirmed via git status; only Project/Jinli/services/runtime/** modified"
+  ],
+  "next_wp_unblock": {
+    "wp03_can_start": true,
+    "wp03_unblockers_satisfied": [
+      "Registry is idempotent; WP03 can re-register listener-backed services without conflict",
+      "Status JSON shape is stable; WP03 transport can forward the snapshot unchanged",
+      "JinliService instantiation is still out-of-scope (deferred to WP03); WP02's health checks are static probes, not live instance state"
+    ]
+  }
+}

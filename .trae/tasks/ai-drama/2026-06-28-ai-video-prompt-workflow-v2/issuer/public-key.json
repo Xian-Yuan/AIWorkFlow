@@ -1,0 +1,9 @@
+{
+    "schema_version":  1,
+    "algorithm":  "ECDSA_P256_SHA256",
+    "key_name":  "codex-ai-video-prompt-workflow-v2",
+    "issuer_key_id":  "c32a2c5b25f1cc3a16ed048f4266f9b0a781edeb3252e41d483d15583efdf540",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1001",
+    "public_blob_base64":  "RUNTMSAAAADtlpd5W9xmF4cfpT5mhICijJgmpYoM5URXhi5GD3mXqaPVUi6T7yb4052yoLKG/Q2fjL1je1plkEjOzGOGHici",
+    "private_exportable":  false
+}

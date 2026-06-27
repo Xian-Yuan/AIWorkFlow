@@ -1,0 +1,32 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-19-issuer-worker-authority-separation",
+    "packet_version":  1,
+    "authority_profile":  "issuer-worker-v1",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "issued_at":  "2026-06-19T17:35:29.9477689+08:00",
+    "core_files":  [
+                       {
+                           "path":  "analysis.md",
+                           "sha256":  "e096e0d5d8c7bdd3acfad3c2cb7efd249c55234171088bd46941e9632bb6d28c"
+                       },
+                       {
+                           "path":  "doc-impact.md",
+                           "sha256":  "62c2e2a9a50d7ce6d4bb7a6c5db71f96c76ce497a53a1fb527592194d3f50cac"
+                       },
+                       {
+                           "path":  "routing.md",
+                           "sha256":  "663d69ded5d67d0d0405baef49ee21e81424e698c1287741ae6ab5f437632c58"
+                       },
+                       {
+                           "path":  "spec.md",
+                           "sha256":  "942893d975746689c1f4e39a9e328227f6773b99af7e3b2c27bcb7a52c37e20e"
+                       },
+                       {
+                           "path":  "tasks.md",
+                           "sha256":  "67b883b1adbae259e58be32bb4694fd69e6e56df49853886b671ba0c7168c0cb"
+                       }
+                   ],
+    "packet_digest":  "e94afec707f301b13d68e263631f58ad3be4a8e67bdda9e7267c3d04cd8861e5"
+}

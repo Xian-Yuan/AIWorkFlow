@@ -1,0 +1,32 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-28-ai-video-prompt-workflow-v2",
+    "packet_version":  1,
+    "authority_profile":  "issuer-worker-v1",
+    "issuer_key_id":  "c32a2c5b25f1cc3a16ed048f4266f9b0a781edeb3252e41d483d15583efdf540",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1001",
+    "issued_at":  "2026-06-28T02:49:08.2007012+08:00",
+    "core_files":  [
+                       {
+                           "path":  "analysis.md",
+                           "sha256":  "87f0776f0dd29894c8bac88e3fecbcbcd58b89658165c2b89fda2e55ecbc6f01"
+                       },
+                       {
+                           "path":  "doc-impact.md",
+                           "sha256":  "76739cb9182c08da33abdd61e3fa006097f6c62bdfc61f8fe6413d8eb63e5fd8"
+                       },
+                       {
+                           "path":  "routing.md",
+                           "sha256":  "2de57c6c2970c3c64510649e9a6caf3767831125c7b83cd5ba1cbdbb35685cc6"
+                       },
+                       {
+                           "path":  "spec.md",
+                           "sha256":  "bc24576c8e7b6d71276f0507fc8a6c5f8f1d35c102077bbd1899cc1e02b77f81"
+                       },
+                       {
+                           "path":  "tasks.md",
+                           "sha256":  "03fbdca086ff342576278124dd45a1e7ca7cc5e52aa3100045cc758018bf6b33"
+                       }
+                   ],
+    "packet_digest":  "5615e2e65dddb33293e4f935a931deb407e1f8754ca17a295a7ffafb302f985c"
+}

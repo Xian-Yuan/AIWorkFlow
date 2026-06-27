@@ -1,0 +1,8 @@
+{
+    "schema_version":  1,
+    "algorithm":  "ECDSA_P256_SHA256",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "digest":  "01b0de405b50769eb81e5e13a85ecb46b22d32bb348ddc3294fdb84e30c42e50",
+    "signature_base64":  "9BeS2rMkwqPDREurJTWjLwIfM1FwZ/4KWmZYfEnGqLvveAKji9Bhg+BvlKZzyilK3h+eLuYwFQYfrseMdZn9wQ=="
+}

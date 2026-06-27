@@ -1,0 +1,78 @@
+# Handover: Implement -> Review+Verify
+
+## Task Identity
+- Task: jinli/2026-06-27-runtime-daemon-unified-ide
+- Work package: **WP01-runtime-daemon-foundation**
+- Project type: other (Jinli runtime daemon, Python on Windows)
+- Implement agent: 金璃好帮手 (flash)
+- Implement mode: legacy (no authority_profile, no worker_profile)
+- Phase handed in: implement (DONE)
+- Phase handed out: review+verify (YOU)
+
+## Scope Recap
+WP01 builds the **foundation layer of the Jinli runtime daemon** — single-process daemon lifecycle, service registry placeholder, daemon-state on disk, PowerShell wrapper, tests. WP02 will replace placeholder services with real ones (EventBus, Memory, Dreamer, Evolution, Proactive, Emotion, Relationship, TurnOrchestrator, MCP adapter). WP03 will turn the informational endpoint into live HTTP/IPC.
+
+## Change Summary
+### New Files
+- `Project/Jinli/services/runtime/daemon.py` (580 lines) — JinliDaemon class + CLI
+- `Project/Jinli/services/runtime/tests/test_daemon.py` (320 lines, 10 tests)
+- `.trae/scripts/jinli-system.ps1` (110 lines) — PowerShell wrapper
+- `reports/WP01-runtime-daemon-foundation.md` — completion report (full command outputs, AC mapping)
+
+### Modified Files
+- (none — pre-existing files `paths.py`, `daemon_state.py`, `service_registry.py` were used as-is)
+
+### Note on git tracking
+Root `.gitignore` line 8 (`/*`) intentionally ignores `Project/`. Files under `Project/Jinli/` are not tracked by the root repo by design — the comment at the top of `.gitignore` says "Projects under Project/ own independent repositories". When Jinli's own git is initialized, these files will be tracked there. Do not add `Project/` exceptions to root `.gitignore`.
+
+## Spec / AC Progress
+- Spec exists: NO (legacy mode, no spec.md — read work-package instead)
+- Scenarios defined in `work-packages/WP01-runtime-daemon-foundation.md` (S01-S07)
+- AC mapping per completion report:
+  - **AC01** ✓ Single daemon start, PID/endpoint/log recorded
+  - **AC02** ⚠ Partial — status reports daemon state + per-service health, but core service names are placeholders (WP02 will register real services)
+  - **AC03** ✓ Stop returns `stopped=true, escalated=false`; PID file retained for next-start recovery
+  - **AC14** ✓ 51 pre-existing + 10 new = 61/61 tests pass
+
+## Verification Evidence
+- Test run: `python -m pytest Project/Jinli/services/runtime/tests -q` → **61 passed in ~7-8s** (full output in `reports/test-output.txt`)
+- CLI flow verified live on disk: `start` → `status` → `status -Json` → `doctor` → `start` (already_running) → `stop` → `status` (stopped) — full transcripts in `reports/WP01-runtime-daemon-foundation.md`
+- Python 3.11.15; psutil 7.2.2; pytest 9.1.0
+
+## Design Decisions (carry into review)
+- `is_alive()` requires `loop_alive AND recorded_alive` (tightened so a freshly-claimed daemon does not falsely report alive before health loop starts)
+- Endpoint port is informational only in WP01 (no actual bind); WP03 turns it into live HTTP/IPC
+- `daemon.lock` advisory lock file NOT created; (PID, endpoint) pair is the lock
+- `daemon_state` derivation: `online` if loop_alive and no required blockers, else `degraded`; `stopping`/`stopped` only via explicit transitions; `offline` when no PID file
+- `start()` performs an initial `registry.refresh_all()` synchronously so first `status -Json` is `online` not `starting`
+- `read_status_snapshot()` re-probes PID liveness to override stale `online` snapshot when worker crashed
+- PowerShell wrapper uses `System.Diagnostics.Process` (not `Start-Process -Wait`) to avoid hang on detached worker spawn
+- `_cli_start` uses `DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP` (0x00000008 | 0x00000200) so worker survives controller exit
+- `STOP_FLAG_TIMEOUT_S = 5.0`; `_terminate_windows` is the only escalation path on Windows
+- Test isolation via `JINLI_DAEMON_STATE_DIR` env var (set in `_isolated_state_dir` context manager, restored on teardown)
+
+## Known Limitations / Risks
+1. Core services not yet registered (WP02 scope) — registry works, but `status -Json` shows placeholder `turn_orchestrator` / `daemon_lockfile` / `daemon_endpoint`
+2. Endpoint port is informational, not bound (WP03 scope)
+3. `daemon.status` retains last refresh after stop; `daemon_state` correctly flips to `stopped` but per-service health shows last-known (intentional)
+4. No remote/multi-user scenario (deferred by `analysis.md`)
+5. Windows-only verification — POSIX code paths exist in `_pid_alive` and `_terminate_windows` but were not executed
+
+## What YOU should do (Review+Verify)
+1. **Re-read** `Project/Jinli/services/runtime/daemon.py`, `tests/test_daemon.py`, `.trae/scripts/jinli-system.ps1`, and the completion report at `reports/WP01-runtime-daemon-foundation.md`
+2. **Code review**: check `daemon.py` for cross-file deps (uses `paths.py`, `daemon_state.py`, `service_registry.py`), edge cases (concurrent claim, dead PID takeover, stop-then-start, malformed state files), Python style (PEP 8, type hints, docstrings, logging)
+3. **Re-run pytest** independently: `cd E:\UEGameDevelopment; python -m pytest Project/Jinli/services/runtime/tests -q` — must show 61 passed
+4. **Re-run CLI flow** independently: `cd E:\UEGameDevelopment; powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-system.ps1 start; ... status -Json; ... doctor; ... stop; ... status` — must match the transcripts in the report
+5. **Check for duplicates**: `.\.trae\scripts\detect-duplicates.ps1` against `daemon.py` and `test_daemon.py`
+6. **Decide AC14 sign-off**: if 61/61 still pass and CLI flow is reproducible, accept WP01
+7. **Update claim** at `claims/WP01-runtime-daemon-foundation.claim.json` to `status: done` (only the verifier should do this)
+8. **Run** `.\.trae\scripts\task-handoff.ps1 jinli/2026-06-27-runtime-daemon-unified-ide` to generate the verify->archive handoff
+9. **Archive** the work package (only verifier/issuer with original authority should archive)
+
+## Files YOU should read first
+1. `Project/Jinli/services/runtime/daemon.py` — main implementation
+2. `Project/Jinli/services/runtime/tests/test_daemon.py` — test surface
+3. `.trae/scripts/jinli-system.ps1` — PowerShell wrapper
+4. `.trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP01-runtime-daemon-foundation.md` — completion report
+5. `.trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/work-packages/WP01-runtime-daemon-foundation.md` — original spec
+6. `.trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP01-runtime-daemon-foundation.claim.json` — claim record (do NOT modify during review, only update status to `done` on verify pass)

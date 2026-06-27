@@ -1,0 +1,16 @@
+{
+    "schema_version":  1,
+    "task_name":  "2026-06-20-github-ssh-publish-workflow",
+    "packet_version":  2,
+    "packet_digest":  "106d5392ceaed6b17bfd2428e2765b51b42ef0d0446667f6674e1d8a4ed0c207",
+    "review_approval_path":  "approvals/review-v002.json",
+    "review_approval_digest":  "2c995525bea44eb7ccffabaf8d44e202645a080735dda67cda8331ea9fc15e23",
+    "source_diff_digest":  "b8ea278397ea0932d2b962e8acc2fc086a0844d8bd4146baec65ed68c59c462c",
+    "evidence_manifest_digest":  "107e5791ae836187bee4f64e32efedc401097f63877821abb5f798661a17eda9",
+    "acceptance_criteria_digest":  "e584a6bbf5e8069bf2daf8face195921e931456698e6ae2cdc3f8b3c095c1a6e",
+    "issuer_key_id":  "c63d13141ee5a3db92936f2f3960b9d8bdb53f00b9f1f13dc818a6df3e5e9700",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1003",
+    "archived_at":  "2026-06-20T00:35:37.3011680+08:00",
+    "decision":  "archived",
+    "archive_digest":  "ce1f2fe3fd892b185b5f9becd67166347b7ec8ac7455401c39abd0045d0d8068"
+}

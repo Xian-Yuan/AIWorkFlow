@@ -1,0 +1,12 @@
+- [x] Task 1: 新增 `开发者模式` 入口与 `DeveloperModeShell`，打通主界面到地图编辑器模块首页的入口
+- [x] Task 2: 建立 `map-editor-types`、`tile-palette`、`create-empty-map-asset`，锁定 tile 编辑器基础数据模型
+- [x] Task 3: 实现 `editor-reducer`、按层 palette 过滤、基础画布绘制与撤销重做，形成最小可编辑闭环
+- [x] Task 4: 扩展 Dexie 表与 `map/world` 仓储，实现地图保存、列表浏览、打开和重新编辑
+- [x] Task 5: 实现 `world-composition` 与相邻地图只读幽灵层预览，支持多地图拼接参考
+- [x] Task 6: 实现 `runtime-map-loader` 与游戏内桥接，让已发布编辑地图可在运行时显示
+- [x] Task 7: 实现 AI 草稿辅助面板与规则化房屋布局草稿输出，保持建议层与正式层分离
+- [x] Task 8: 完成 Vitest、Playwright、build 回归验证，并在必要时同步设计文档命名
+- [x] Task 9: 重构 `PixelAsset` 尺寸语义，移除“预览规格决定真实尺寸”的误导，改为固定尺寸模板驱动真实 `pixelWidth / pixelHeight`
+- [x] Task 10: 扩展素材库画板与 Inspector，支持 `8x8 / 16x16 / 24x24 / 32x32` 固定尺寸模板，并让缩放仅作用于视图
+- [x] Task 11: 抽离素材库与地图编辑器共享的画板/工具配置，统一画笔、橡皮、吸管及子工具行为
+- [x] Task 12: 回归地图调色板与 `TileCanvas` 放置逻辑，确保素材库绘制尺寸与地图占格 `1:1` 一致，并补齐测试、构建与预览验证

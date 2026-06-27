@@ -1,0 +1,9 @@
+﻿name: "vsummary"
+last_run: "2026-06-22T14:30:00"
+status: "idle"
+progress: "218/232 videos summarized (94%)"
+provider: "MiniMax-M1"
+next_steps: "4 failed videos need retry; 10 skipped (no audio)"
+error: null
+updated_by: "manual"
+updated_at: "2026-06-27T03:25:00"

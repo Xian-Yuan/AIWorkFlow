@@ -1,0 +1,4 @@
+Docs/AI/.cache-manifest.md
+Docs/AI/27-AI-Workflow-Refactor-Manifest.md
+Docs/AI/42-GitHub-SSH-Publish-Workflow.md
+Docs/AI/README.md

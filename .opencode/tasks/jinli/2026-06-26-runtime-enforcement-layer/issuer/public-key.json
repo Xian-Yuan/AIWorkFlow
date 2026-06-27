@@ -1,0 +1,9 @@
+{
+    "schema_version":  1,
+    "algorithm":  "ECDSA_P256_SHA256",
+    "key_name":  "jinli-runtime-issuer",
+    "issuer_key_id":  "7728aa43ef32c5f80480213421629f4b3dc8a7afbc6c52f780f5581a2314b76f",
+    "issuer_sid":  "S-1-5-21-263756836-1623563520-3528240279-1001",
+    "public_blob_base64":  "RUNTMSAAAAB35RUghL/ltdg01sYhbrZW6HVPo06mqX0R1eKmZPe6Q0glEc8Lc8NH4GqnoZCBhg6OwkHc2xapl+TjtFzOJmRx",
+    "private_exportable":  false
+}

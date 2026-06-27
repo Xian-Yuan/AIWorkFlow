@@ -1,0 +1,2 @@
+[PASS] doc-impact with no-code reason passes
+[PASS] missing doc-impact blocks

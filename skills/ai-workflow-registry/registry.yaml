@@ -1,0 +1,27 @@
+# AI Workflow Registry
+# Auto-maintained by sync-workflow-registry.py
+# Manual edits are preserved for entries without status.yaml
+
+workflows:
+- name: vsummary
+  description: Batch video download and AI summarization from Bilibili favorites.
+    yt-dlp download -> vsummary ASR+LLM summarization -> progress resume -> provider
+    auto-switch.
+  status: idle
+  skill_path: skills/vsummary/SKILL.md
+  last_run: '2026-06-22T14:30:00'
+  trigger_keywords:
+  - vsummary
+  - video summary
+  - summarize video
+  - batch summarize
+  - bilibili favorites
+  - video download
+  - ASR
+  - whisper
+  category: media-processing
+  providers:
+  - MiniMax-M1
+  - NVIDIA-DS-V4-Pro
+  - Zhipu-GLM-4-Flash
+  progress: 218/232 videos summarized (94%)

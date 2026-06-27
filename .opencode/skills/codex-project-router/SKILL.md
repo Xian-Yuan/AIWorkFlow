@@ -1,4 +1,4 @@
----
+﻿---
 name: codex-project-router
 description: Codex-specific adapter for the shared UEGameDevelopment AI workflow. Use before Codex plans or edits project/workflow tasks so Codex follows task packets, architecture evidence, and mechanical gates.
 ---
@@ -25,7 +25,7 @@ Before planning or editing project work, read:
 
 ## Runtime Task Root
 
-Codex uses `.codex/tasks/` (junction → `.trae/tasks/`). Task packets are shared across Codex, OpenCode, and Trae.
+Codex uses `.codex/tasks/` (junction 鈫?`.trae/tasks/`). Task packets are shared across Codex, OpenCode, and Trae.
 
 Task names use:
 
@@ -36,6 +36,17 @@ YYYY-MM-DD-<system>-<feature-or-requirement>
 ## Non-Skippable Gates
 
 Codex must not edit project files until:
+`powershell
+& .\.trae\scripts\contract-verify.ps1 <task-name> init
+& .\.trae\scripts\contract-verify.ps1 <task-name> verify -Strict
+`
+
+This is a **mechanical contract check** that validates all required task packet artifacts exist and pass their verification criteria. It does not depend on Agent self-discipline. See Docs/AI/46-Enforcement-Framework.md.
+
+When blocked, the verify command outputs REPAIR GUIDANCE with specific fix instructions. Run `contract-verify scaffold` to generate template files with all required markers. See Docs/AI/48-Plan-Phase-Checklist.md for the complete checklist.
+
+Codex must not edit project files until (original gate):
+
 
 ```powershell
 & .\.trae\scripts\task-state.ps1 can-edit <task-name>

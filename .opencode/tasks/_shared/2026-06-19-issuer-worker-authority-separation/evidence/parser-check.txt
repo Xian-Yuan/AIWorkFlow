@@ -1,0 +1,16 @@
+PARSE PASS .trae/scripts/authority-core.psm1
+PARSE PASS .trae/scripts/issuer-identity.ps1
+PARSE PASS .trae/scripts/task-packet-seal.ps1
+PARSE PASS .trae/scripts/worker-capability.ps1
+PARSE PASS .trae/scripts/worker-submit.ps1
+PARSE PASS .trae/scripts/worker-sandbox.ps1
+PARSE PASS .trae/scripts/issuer-review.ps1
+PARSE PASS .trae/scripts/issuer-archive.ps1
+PARSE PASS .trae/scripts/migrate-task-authority.ps1
+PARSE PASS .trae/scripts/task-state.ps1
+PARSE PASS .trae/scripts/task-guard.ps1
+PARSE PASS .trae/scripts/task-handoff.ps1
+PARSE PASS .trae/scripts/worker-repair-loop.ps1
+PARSE PASS .trae/scripts/test-authority-separation.ps1
+PARSE PASS .trae/scripts/test-worker-repair-loop.ps1
+PARSE PASS .trae/scripts/test-workflow-regression.ps1

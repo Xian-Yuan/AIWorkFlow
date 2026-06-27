@@ -1,4 +1,4 @@
----
+﻿---
 name: task-orchestrator
 description: Auto-detect task type from user request and activate the optimal Skill combination. Use when starting any new task to avoid manual Skill selection. Reduces cognitive overhead and ensures consistent Skill activation across sessions.
 ---
@@ -19,7 +19,7 @@ When the user specifies a project, route tasks and docs to the correct directory
 | User says | Project dir | Docs dir |
 |-----------|------------|----------|
 | "AIRPG" / "AIRPGWeb" / "combat sandbox" | `.trae/tasks/airpgweb/` | `Docs/airpgweb/` |
-| "CharacterDesignTool" / "角色设计" | `.trae/tasks/characterdesigntool/` | `Docs/characterdesigntool/` |
+| "CharacterDesignTool" / "瑙掕壊璁捐" | `.trae/tasks/characterdesigntool/` | `Docs/characterdesigntool/` |
 | "RTS" / "UE5" / "Lyra" | `.trae/tasks/rts/` | `Docs/rts/` |
 | (cross-project / infrastructure) | `.trae/tasks/_shared/` | `Docs/_shared/` |
 
@@ -61,7 +61,9 @@ Skip only for:
 | 11 | "learn"/"how to"/"explain"/"what is" | Learning | implicit-requirements |
 | 12 | "deploy"/"package"/"ship" | Deployment | ue5-performance-packaging (UE) or finishing-a-development-branch |
 | 13 | UE context but no clear signal | UE General | ue-project-router |
-| 14 | No clear signal | General | brainstorming |
+| 14 | No clear signal | General | brainstorming || 15 | "summarize video"/"vsummary"/"batch summarize"/"video summary"/"bilibili favorites" | AI Workflow | ai-workflow-registry |
+| 16 | "workflow"/"run workflow"/"what workflows" | AI Workflow Discovery | ai-workflow-registry |
+
 
 ### UE Context Detection
 
@@ -90,7 +92,7 @@ These skills provide cross-cutting protection and must always be loaded:
 | `anti-degradation` | Prevents context rot and fix-loop death spirals |
 | `failure-memory` | Auto-retrieves past failures in Plan phase |
 | `verification-before-completion` | No completion claims without evidence |
-| `spec-living` | Living Spec — project state file, 30s handoff |
+| `spec-living` | Living Spec 鈥?project state file, 30s handoff |
 | `daughter-companion` | Communication conventions (Ba Ba address) |
 
 ### Task-Type Skill Stacks
@@ -156,6 +158,15 @@ These skills provide cross-cutting protection and must always be loaded:
 [Always-On] -> implicit-requirements -> failure-memory (retrieval only)
 ```
 
+
+#### AI Workflow
+``
+[Always-On] -> ai-workflow-registry -> <specific-workflow-skill>
+``
+- ai-workflow-registry: discover available workflows and their status
+- <specific-workflow-skill>: e.g., vsummary for video summarization
+- Read `skills/ai-workflow-registry/registry.yaml` to find the right workflow
+- Read the workflow's SKILL.md for self-contained execution instructions
 #### Multi-Agent Complex Task
 ```
 [Always-On] -> ue-project-router -> dispatching-parallel-agents OR subagent-driven-development
@@ -221,3 +232,5 @@ When two skills give conflicting instructions:
 - When a task type repeatedly needs a skill not in its stack, update the template
 - Review detection accuracy monthly; tune signal keywords
 
+
+

@@ -1,0 +1,155 @@
+{
+  "wp_id": "WP03-runtime-api-turn-client",
+  "task": "jinli/2026-06-27-runtime-daemon-unified-ide",
+  "phase": "implement",
+  "claimant": "金璃好帮手 (Implement Agent)",
+  "claimed_at": "2026-06-27T15:00:00Z",
+  "status": "in_progress",
+  "scope": {
+    "primary_scenarios": ["AC03", "AC04", "AC05", "AC06"],
+    "secondary_scenarios": ["AC01", "AC02"],
+    "done_definition": [
+      "Project/Jinli/services/runtime/api_server.py: FastAPI/uvicorn HTTP transport exposing POST /turn and GET /healthz, fully driven by injected turn orchestrator and service registry snapshots — no LLM, no network calls, no daemon lifecycle",
+      "Project/Jinli/services/runtime/client.py: DaemonClient (POST /turn) with structured errors, configurable timeout, and explicit offline/degraded surfacing",
+      "Project/Jinli/services/runtime/tests/test_client.py: 18 new tests covering online success, manifest_id/turn_id round-trip, gate_passed/degraded flags, service_evidence enumeration, transport errors, timeout, and recovery hint messages",
+      "Project/Jinli/services/runtime/daemon.py: JinliDaemon extended with _start_api_server and _stop_api_server lifecycle hooks; daemon owns the uvicorn server lifecycle, port chosen at start, endpoint URL written into daemon state for the client to consume",
+      ".trae/scripts/jinli-runtime-turn.ps1: New -Mode parameter (lite|full), defaults to daemon HTTP client path, exposes -UseCompat as explicit opt-in to the legacy soul-core path so the compat shim remains first-class callable",
+      "WP02 baseline 82/82 tests still pass; 18 new client tests pass; total 100/100 in 63.70s; zero regressions",
+      "Live smoke: jinli-system.ps1 start → jinli-runtime-turn.ps1 -Mode lite -Text 'health probe' -Json returns manifest_id + turn_id, gate_passed=true, degraded=false, 11 services online, fallback_used=false",
+      "Offline smoke: with daemon stopped, the same command produces a clear error message naming the cause and listing recovery hints (start daemon / -UseCompat)",
+      "detect-duplicates.ps1 on Project\\Jinli\\services\\runtime returns CLEAN"
+    ]
+  },
+  "allowed_paths": [
+    "Project/Jinli/services/runtime/api_server.py",
+    "Project/Jinli/services/runtime/client.py",
+    "Project/Jinli/services/runtime/tests/test_client.py",
+    "Project/Jinli/services/runtime/daemon.py",
+    ".trae/scripts/jinli-runtime-turn.ps1",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP03-runtime-api-turn-client.claim.json"
+  ],
+  "forbidden_paths": [
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/.task.yaml",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/routing.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/analysis.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/spec.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/tasks.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/requirements.md",
+    ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/execution-prompt.md",
+    "C:/Users/87372/.codex/**",
+    "C:/Users/87372/plugins/jinli-soul-core/**",
+    ".opencode/**",
+    "Project/RTS/**",
+    "Project/CharacterDesignTool/**"
+  ],
+  "out_of_scope_for_this_wp": [
+    "MCP tool migration to daemon client (WP04)",
+    "IDE registry sync to Codex/OpenCode/Trae (WP05)",
+    "Compatibility/legacy adapter migration (WP06)",
+    "voice/avatar/WeChat/mobile/UE editor control (forbidden by spec)",
+    "Replacing soul-core MCP turn orchestration inside Codex/OpenCode turn layer (deferred; only the .trae/scripts PowerShell client is rewired in WP03)",
+    "Persistent WebSocket / streaming transport (HTTP POST /turn only in this WP)",
+    "Multi-tenant authn/authz on the HTTP transport (loopback-only assumed; to be revisited in WP05+)"
+  ],
+  "ac_satisfied": ["AC03", "AC04", "AC05", "AC06"],
+  "evidence": {
+    "tests": {
+      "command": "python -m pytest Project/Jinli/services/runtime/tests/ -v",
+      "result": "100 passed in 63.70s (82 WP02 baseline + 18 new in test_client.py)",
+      "new_test_module": "Project/Jinli/services/runtime/tests/test_client.py",
+      "new_test_count": 18,
+      "baseline_pre_wp03": 82,
+      "regressions": 0
+    },
+    "commands": [
+      {
+        "name": "live_turn_call",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-runtime-turn.ps1 -Mode lite -Text \"health probe\" -Json",
+        "daemon_state": "online",
+        "manifest_id": "m_8cd3275833ed",
+        "turn_id": "t_2f48d3c094",
+        "mode": "lite",
+        "gate_passed": true,
+        "degraded": false,
+        "service_evidence_count": 11,
+        "service_evidence_all_online": true,
+        "fallback_used": false
+      },
+      {
+        "name": "offline_turn_call",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-runtime-turn.ps1 -Mode lite -Text \"health probe\" -Json",
+        "daemon_state": "offline",
+        "result": "clear error message naming the cause and listing recovery hints (start daemon / -UseCompat)"
+      },
+      {
+        "name": "duplicates_check",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/detect-duplicates.ps1 -Target Project\\Jinli\\services\\runtime",
+        "result": "CLEAN"
+      }
+    ],
+    "evidence_locations": [
+      "reports/WP03-runtime-api-turn-client.md (full report written by 原 Issuer / 金璃小天才)",
+      "Project/Jinli/services/runtime/api_server.py (new, HTTP transport)",
+      "Project/Jinli/services/runtime/client.py (new, daemon HTTP client)",
+      "Project/Jinli/services/runtime/tests/test_client.py (new, 18 tests)",
+      "Project/Jinli/services/runtime/daemon.py (modified, _start_api_server / _stop_api_server lifecycle hooks)",
+      ".trae/scripts/jinli-runtime-turn.ps1 (modified, -Mode + default daemon client path + -UseCompat explicit fallback)",
+      "Project/Jinli/services/runtime/daemon-state/daemon.status (live snapshot at end of test run)",
+      "Project/Jinli/services/runtime/daemon-state/daemon.log (operational evidence)"
+    ]
+  },
+  "stop_conditions_acknowledged": [
+    "Plan/can-edit gate passed per handoff",
+    "Don't delete data files → no data files deleted; only new files under Project/Jinli/services/runtime/ were created and two existing files (daemon.py, jinli-runtime-turn.ps1) were extended in allowed-path lines only",
+    "Don't modify workflow gate scripts → jinli-system.ps1, task-state.ps1, task-guard.ps1, contract-verify.ps1 untouched",
+    "HTTP transport is loopback-only with no LLM, no network calls, no persistent state — only proxies to the existing turn orchestrator already owned by JinliDaemon",
+    "Backward compat preserved → -UseCompat remains the explicit escape hatch; the default path is daemon HTTP client, no behavior loss for callers that opt in",
+    "Forbidden files not touched → confirmed via git status; only files in allowed_paths modified",
+    "No soul-core MCP calls made by implementer during this WP",
+    "Report file written by 原 Issuer, not implementer; implementer only writes this claim"
+  ],
+  "constraints_honored": {
+    "no_soul_core_mcp_calls": true,
+    "no_handoff_to_review_file": true,
+    "no_forbidden_path_edits": true,
+    "no_workflow_script_modifications": true,
+    "no_data_file_deletions": true,
+    "turn_orchestrator_api_untouched": true
+  },
+  "open_issues": [
+    {
+      "id": "WP01-stop-flag-leak",
+      "description": "daemon.stop() writes daemon.stop flag into state but does not delete it; a subsequent start may short-stop on the leftover flag",
+      "severity": "minor",
+      "suggested_followup": "WP04 prep ticket (or WP05) — clear stop flag on start, or move to a dedicated start/stop state file"
+    },
+    {
+      "id": "memory-adapter-cold-start",
+      "description": "MemoryAdapter takes ~22s cold start on this host; default client timeout is 60s which is safe today but offers little headroom",
+      "severity": "info",
+      "suggested_followup": "Re-tune default client timeout once a warmup signal / readiness probe is added (likely WP05)"
+    },
+    {
+      "id": "claim-write-fallback",
+      "description": "Previous implementer turn self-reported claim write but the file did not land on disk; this fix-packet is the corrective write and is the only change in this turn",
+      "severity": "info",
+      "suggested_followup": "Consider adding a 'claim landed' self-check (Test-Path + sha256 echo) at the end of the implement turn template"
+    }
+  ],
+  "next_wp_unblock": {
+    "wp04_can_start": true,
+    "wp04_unblockers_satisfied": [
+      "DaemonClient exposes a stable HTTP contract (POST /turn, GET /healthz) with structured error responses — WP04 MCP tools can wrap this client",
+      "Live smoke proves the daemon-owned path is the default and the legacy -UseCompat shim is a deliberate opt-in — WP04 only needs to choose the same default for each IDE-side MCP tool",
+      "Status JSON shape from WP02 is unchanged and forwarded transparently by /turn — WP04 can rely on the same field set",
+      "turn_orchestrator public API is untouched — WP04 does not need to know about transport changes"
+    ]
+  },
+  "handoff": {
+    "report": ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP03-runtime-api-turn-client.md",
+    "report_author": "原 Issuer (金璃小天才)",
+    "ready_for_review": true,
+    "ready_for_wp04": true,
+    "note": "implementer self-reported claim write in previous turn but file did not land on disk; this fix-packet only writes the claim JSON, nothing else"
+  }
+}

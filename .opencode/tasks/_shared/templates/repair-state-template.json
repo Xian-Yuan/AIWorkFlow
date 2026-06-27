@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "status": "idle",
+  "worker_profile": "ds4-flash",
+  "max_attempts_per_root_cause": 3,
+  "active_root_cause": null,
+  "attempts_by_root_cause": {},
+  "total_attempts_by_root_cause": {},
+  "latest_attempt": 0,
+  "active_package": null,
+  "latest_evidence": null
+}
