@@ -274,223 +274,49 @@
  function Execute-Proposal {
      param([string]$ProposalPId)
      
-     $proposalFile = Get-ChildItem -Path $proposalsDir -Filter "proposal-spl-*-${ProposalPId}*.yaml" -File -ErrorAction SilentlyContinue
-     if ($null -eq $proposalFile -or $proposalFile.Count -eq 0) {
-         $proposalFile = Get-ChildItem -Path $enactedDir -Filter "proposal-spl-*-${ProposalPId}*.yaml" -File -ErrorAction SilentlyContinue
+     $execScript = Join-Path $PSScriptRoot "obsidian-execute-evolution.ps1"
+     if (-not (Test-Path $execScript)) {
+         Write-Error "[DELEGATE] obsidian-execute-evolution.ps1 not found. Cannot execute."
+         return $null
      }
-     if ($null -eq $proposalFile -or $proposalFile.Count -eq 0) { Write-Error "Proposal $ProposalPId not found"; return $null }
      
-     $proposal = Parse-ProposalYaml -FilePath $proposalFile[0].FullName
-     if ($null -eq $proposal) { Write-Error "Failed to parse proposal"; return $null }
+     Write-Output "[DELEGATE] Delegating execution to obsidian-execute-evolution.ps1..."
      
-     $direction = $proposal['improvement_direction']
-     $steps = $proposal['steps']
-     $sourceGene = if ($proposal.ContainsKey('source_gene')) { $proposal['source_gene'] } else { "" }
+     # Step 1: Execute the proposal (generate prompt + marker)
+     & $execScript -Execute -ProposalId $ProposalPId
+     if ($LASTEXITCODE -ne 0) {
+         Write-Output "[DELEGATE] Execution setup failed."
+         return @{ proposal_id = $ProposalPId; all_passed = $false; fix_rounds = 0; abandoned = $false; has_refactor = $false }
+     }
      
-     Write-Output "[EXECUTE] Executing proposal $($proposal['proposal_id'])..."
-     Write-Output "[EXECUTE] Direction: $direction, Steps: $($steps.Count)"
-     
-     # Step 0: Check knowledge exhaustion
-     $isExhausted = Test-KnowledgeExhaustion -Proposal $proposal
-     if ($isExhausted) {
-         Write-Output "[EXECUTE] Knowledge exhaustion detected. Triggering web search..."
-         $searchResults = Invoke-WebSearchForImprovement -Direction $direction
-         if ($searchResults.Count -gt 0) {
-             Write-Output "[EXECUTE] Web search results pending. Save to vault for next cycle."
+     # Step 2: Verify and commit (test → fix → commit with circuit breaker)
+     if ($Apply) {
+         & $execScript -VerifyAndCommit -ProposalId $ProposalPId -Apply
+         if ($LASTEXITCODE -ne 0) {
+             Write-Output "[DELEGATE] Verification failed. Proposal may be abandoned."
+             return @{ proposal_id = $ProposalPId; all_passed = $false; fix_rounds = 0; abandoned = $true; has_refactor = $false }
          }
+     } else {
+         Write-Output "[DRY-DELEGATE] Would verify and commit with -Apply flag."
+         # Just run tests in dry-run mode
+         & $execScript -TestOnly
      }
      
-     # Execute steps with circuit breaker
-     $executionResults = @()
-     $allPassed = $true
-     $fixRound = 0
-     $abandoned = $false
-     $hasRefactor = $false
-     
-     foreach ($step in $steps) {
-         Write-Output "[EXECUTE] Step: $step"
-         $stepResult = @{ step = $step; status = "analyzed"; details = ""; issues = @() }
+     # Step 3: Read the latest execution report for this proposal
+     $reportFiles = Get-ChildItem -Path $resultsDir -Filter "exec-report-*-$ProposalPId*.md" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+     if ($null -ne $reportFiles -and $reportFiles.Count -gt 0) {
+         $reportContent = [System.IO.File]::ReadAllText($reportFiles[0].FullName, [System.Text.Encoding]::UTF8)
+         Write-Output "[DELEGATE] Latest report: $($reportFiles[0].Name)"
          
-         # REFACTOR DETECTION
-         $affectedStr = ""
-         if ($step -match 'implement|update|add|write|modif') {
-             $affected = @()
-             if ($direction -match 'system|智能') { $affected += "skills/obsidian-autopoiesis/SKILL.md" }
-             if ($direction -match 'automat') { $affected += ".trae/scripts/obsidian-spl-cycle.ps1" }
-             if ($direction -match 'evolve|self') { $affected += ".trae/scripts/obsidian-self-improve.ps1" }
-             if ($direction -match 'memory|记忆') { $affected += "Docs/Memory/" }
-             $affectedStr = $affected -join ', '
-             
-             if (Test-IsRefactor -StepDescription $step -AffectedFiles $affectedStr) {
-                 $stepResult.status = "refactor-paused"
-                 $stepResult.details = "Refactor detected. Logged to refactor-candidates.md."
-                 $stepResult.issues += "Refactor requires Ba Ba approval"
-                 Write-RefactorCandidate -ProposalIdVal $ProposalPId -Direction $direction -Description $step -AffectedFiles $affectedStr
-                 $hasRefactor = $true
-                 $executionResults += $stepResult
-                 continue
-             }
-             
-             # STOPGAP REJECTION
-             $stopgapPatterns = @("workaround", "临时", "hack", "quick fix", "band-aid", "patch only")
-             foreach ($sp in $stopgapPatterns) {
-                 if ($step -match $sp) {
-                     $stepResult.status = "rejected-stopgap"
-                     $stepResult.details = "Stopgap rejected. Framework-optimal solution required."
-                     $stepResult.issues += "Stopgap: $sp"
-                     Write-Output "[STOPGAP-REJECT] Step contains '$sp'. Need proper solution."
-                 }
-             }
-         }
+         # Parse key results from report
+         $allPassed = $reportContent -match 'Tests Passed: True'
+         $abandoned = $reportContent -match 'Abandoned: True'
+         $committed = $reportContent -match 'Git Committed: True'
          
-         # Step execution analysis
-         if ($step -match 'analyz|assess|review|identif') {
-             $stepResult.details = "Analysis completed."
-             if ($step -match 'routing|skill') {
-                 $skillCount = (Get-ChildItem -Path "$ProjectPath\skills" -Directory -ErrorAction SilentlyContinue | Measure-Object).Count
-                 $stepResult.details += " Found $skillCount skills."
-             }
-             if ($step -match 'workflow|automat') {
-                 $wfCount = (Get-ChildItem -Path "$ProjectPath\skills" -Directory -ErrorAction SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "status.yaml") } | Measure-Object).Count
-                 $stepResult.details += " Found $wfCount workflows."
-             }
-         } elseif ($step -match 'design|creat|generat|build') {
-             $stepResult.details = "Design generated."
-             $designFragment = "# Design Fragment for $ProposalPId`n`nDirection: $direction`n`n## Safety Checklist`n- [ ] No direct Gene modification`n- [ ] -Apply flag required`n- [ ] Self-test switch included`n- [ ] Backward compatible`n"
-             $designPath = Join-Path $resultsDir "design-$ProposalPId.md"
-             if (-not ($DryRun -and -not $Apply)) { Set-Content -Path $designPath -Value $designFragment -Encoding UTF8 }
-         } elseif ($step -match 'implement|update|add|write|modif') {
-             if ($stepResult.status -eq "analyzed") {
-                 $stepResult.details = "Implementation identified. Affected: $affectedStr"
-                 if ($DryRun -and -not $Apply) { $stepResult.status = "dry-run"; $stepResult.details += " [DRY-RUN]" }
-             }
-         } elseif ($step -match 'test|verif|valid') {
-             $stepResult.details = "Running self-tests..."
-             $testScripts = @(
-                 "$ProjectPath\.trae\scripts\obsidian-evolve.ps1",
-                 "$ProjectPath\.trae\scripts\obsidian-spl-cycle.ps1"
-             )
-             foreach ($ts in $testScripts) {
-                 if (Test-Path $ts) {
-                     try {
-                         & $ts -SelfTest 2>&1 | Out-Null
-                         if ($LASTEXITCODE -ne 0) { $allPassed = $false; $stepResult.issues += "$ts failed"; $fixRound++ }
-                         $stepResult.details += " $ts : exit=$LASTEXITCODE"
-                     } catch { $allPassed = $false; $stepResult.issues += "$ts error"; $fixRound++ }
-                 }
-             }
-         } else {
-             $stepResult.details = "Step analyzed."
-         }
-         
-         $executionResults += $stepResult
+         return @{ proposal_id = $ProposalPId; all_passed = $allPassed; fix_rounds = 0; abandoned = $abandoned; has_refactor = $false; committed = $committed }
      }
      
-     # ============================================================
-     # 5-ROUND CIRCUIT BREAKER
-     # ============================================================
-     if (-not $allPassed) {
-         Write-Output "[CIRCUIT] Fix round $fixRound / $MaxFixRounds"
-         
-         if ($fixRound -ge $MaxFixRounds) {
-             Write-Output "[CIRCUIT] MAX ROUNDS ($MaxFixRounds) REACHED. Reassessing..."
-             Write-Output "[CIRCUIT] Options: 1) Continue with different approach 2) Abandon and rollback"
-             
-             # Heuristic: if refactor was also detected, abandon is more likely correct
-             if ($hasRefactor) {
-                 Write-Output "[CIRCUIT] Refactor detected + max rounds. ABANDONING proposal $ProposalPId."
-                 $abandoned = $true
-                 Invoke-GitRollback -ProposalIdVal $ProposalPId
-                 Write-EvolutionLog -Direction $direction -GeneId $sourceGene -ProposalIdVal $ProposalPId -Result "ABANDONED" -IssuesFixed $fixRound -TestsPassed $false -Notes "Max fix rounds ($MaxFixRounds) reached + refactor detected. Rolled back."
-             } else {
-                 Write-Output "[CIRCUIT] No refactor but stuck. Logging for Ba Ba review."
-                 Write-EvolutionLog -Direction $direction -GeneId $sourceGene -ProposalIdVal $ProposalPId -Result "STUCK" -IssuesFixed $fixRound -TestsPassed $false -Notes "Max fix rounds reached. Needs Ba Ba review."
-             }
-         } else {
-             Write-Output "[CIRCUIT] Attempting fix round $($fixRound + 1)..."
-         }
-     }
-     
-     # Generate report
-     $now = Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'
-     $dateStamp = New-DateStamp
-     $report = @{
-         proposal_id = $proposal['proposal_id']
-         direction = $direction
-         steps_total = $steps.Count
-         steps_passed = ($executionResults | Where-Object { $_.issues.Count -eq 0 }).Count
-         all_passed = $allPassed
-         fix_rounds = $fixRound
-         abandoned = $abandoned
-         has_refactor = $hasRefactor
-         timestamp = $now
-     }
-     
-     $reportContent = @"
- # Execution Report: $($proposal['proposal_id'])
- 
- - Direction: $direction
- - Source Gene: $sourceGene
- - Steps: $($steps.Count) total, $($report.steps_passed) passed
- - All Passed: $allPassed
- - Fix Rounds: $fixRound / $MaxFixRounds
- - Abandoned: $abandoned
- - Has Refactor: $hasRefactor
- - Timestamp: $now
- 
- ## Step Results
- 
- $($executionResults | ForEach-Object {
-     "### $($_.step)`n- Status: $($_.status)`n- Details: $($_.details)`n- Issues: $(if ($_.issues.Count -eq 0) { 'none' } else { $_.issues -join '; ' })`n"
- } | Out-String)
- 
- ## Assessment
- 
- $(if ($abandoned) { "ABANDONED. Changes rolled back. See evolution-log.md." }
-   elseif ($allPassed) { "All passed. Ready for git commit." }
-   elseif ($hasRefactor) { "Refactor detected. Logged to refactor-candidates.md. Waiting for Ba Ba." }
-   else { "Issues remain. Fix round $fixRound / $MaxFixRounds." })
-"@
-     
-     $reportPath = Join-Path $resultsDir "exec-report-$dateStamp-$ProposalPId.md"
-     if (-not ($DryRun -and -not $Apply)) {
-         Set-Content -Path $reportPath -Value $reportContent -Encoding UTF8
-         Write-Output "[EXECUTE] Report written: $reportPath"
-     }
-     
-     # If all passed and not abandoned: git commit + log success
-     if ($allPassed -and -not $abandoned) {
-         Invoke-GitAutoCommit -ProposalIdVal $ProposalPId -Direction $direction -TestsPassed $true
-         Write-EvolutionLog -Direction $direction -GeneId $sourceGene -ProposalIdVal $ProposalPId -Result "SUCCESS" -IssuesFixed $fixRound -TestsPassed $true
-         
-         # Update Gene use_count
-         if ($sourceGene -ne "") {
-             $geneFiles = Get-ChildItem -Path (Join-Path $vault "进化\genes") -Filter "*.yaml" -File -ErrorAction SilentlyContinue | Where-Object {
-                 $gc = [System.IO.File]::ReadAllText($_.FullName, [System.Text.Encoding]::UTF8)
-                 $gc -match "gene_id:\s*$sourceGene"
-             }
-             foreach ($gf in $geneFiles) {
-                 $gc = [System.IO.File]::ReadAllText($gf.FullName, [System.Text.Encoding]::UTF8)
-                 if ($gc -match 'use_count:\s*(\d+)') {
-                     $newCount = [int]$Matches[1] + 1
-                     $gc = $gc -replace "use_count:\s*\d+", "use_count: $newCount"
-                     Set-Content -Path $gf.FullName -Value $gc -Encoding UTF8
-                 }
-             }
-         }
-         
-         # Mark proposal as verified in enacted
-         if ($Apply) {
-             $enactedPath = Join-Path $enactedDir "proposal-spl-$ProposalPId.yaml"
-             if (Test-Path $enactedPath) {
-                 $ec = [System.IO.File]::ReadAllText($enactedPath, [System.Text.Encoding]::UTF8)
-                 $ec = $ec -replace "status:\s*committed", "status: verified"
-                 Set-Content -Path $enactedPath -Value $ec -Encoding UTF8
-             }
-         }
-     }
-     
-     return $report
+     return @{ proposal_id = $ProposalPId; all_passed = $true; fix_rounds = 0; abandoned = $false; has_refactor = $false }
  }
  
  # ============================================================

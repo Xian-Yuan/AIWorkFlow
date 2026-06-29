@@ -307,16 +307,80 @@ function Run-SPLImprove {
     
     $primaryDirection = if ($SelectedGene.improvement_directions.Count -gt 0) { $SelectedGene.improvement_directions[0] } else { "system-enhance" }
     
-    # Direction-specific proposal templates
-    $proposalSteps = @()
-     switch -regex ($primaryDirection) {
-         "intelligence" { $proposalSteps = @("Analyze skill routing for gaps", "Design improved routing from Gene strategy", "Update routing rules", "Test routing accuracy") }
-         "automation" { $proposalSteps = @("Identify manual steps to automate", "Design automation script", "Implement with error handling", "Test automation") }
-         "humanize" { $proposalSteps = @("Review interaction patterns for gaps", "Design natural response templates", "Update Soul Core config", "Test interaction quality") }
-         "self_evolve" { $proposalSteps = @("Design self-assessment metrics from Gene", "Implement feedback loop", "Create adaptive rule update", "Test self-evolution cycle") }
-         "memory" { $proposalSteps = @("Design memory scope partition", "Implement persistent vs temp memory", "Create nightly digest", "Test memory recall") }
-         "skill" { $proposalSteps = @("Identify missing skills from vault", "Generate skill template", "Implement with validation", "Test skill integration") }
-         default { $proposalSteps = @("Analyze improvement opportunity", "Design from Gene+context", "Implement with SPL safety", "Test with self-verification") }
+    # Load full Gene data for rich proposal content
+    $geneFilePath = $SelectedGene.file_path
+    $geneStrategy = ""
+    $geneTrigger = if ($SelectedGene.ContainsKey('trigger')) { $SelectedGene.trigger } else { "" }
+    $evidencePaths = @()
+    $evidenceContent = @()
+    
+    if (-not [string]::IsNullOrEmpty($geneFilePath) -and (Test-Path $geneFilePath)) {
+        $geneFull = [System.IO.File]::ReadAllText($geneFilePath, [System.Text.Encoding]::UTF8)
+        
+        # Extract multi-line strategy
+        $inStrategy = $false
+        $stratLines = @()
+        foreach ($gline in $geneFull -split "`n") {
+            if ($gline -match '^strategy:\s*"') { $inStrategy = $true; $stratLines += $gline -replace '^strategy:\s*"', ''; continue }
+            if ($inStrategy -and $gline -match '^[a-z_]+:') { $inStrategy = $false; continue }
+            if ($inStrategy) { $stratLines += $gline.TrimEnd() }
+        }
+        $geneStrategy = ($stratLines -join "`n").Trim().Trim('"')
+        
+        # Extract evidence paths
+        $inEvidence = $false
+        foreach ($gline in $geneFull -split "`n") {
+            if ($gline -match '^evidence:') { $inEvidence = $true; continue }
+            if ($inEvidence -and $gline -match '^\s+-\s+(.+)') { $evidencePaths += $Matches[1].Trim() }
+            elseif ($inEvidence -and $gline -match '^[a-z_]') { $inEvidence = $false }
+        }
+        
+        # Load evidence previews (first 400 chars each)
+        foreach ($evPath in $evidencePaths) {
+            if (Test-Path $evPath) {
+                try {
+                    $evBody = [System.IO.File]::ReadAllText($evPath, [System.Text.Encoding]::UTF8)
+                    if ($evBody.Length -gt 400) { $evBody = $evBody.Substring(0, 400) + "..." }
+                    $evidenceContent += @{ path = $evPath; preview = $evBody }
+                } catch { }
+            }
+        }
+    }
+    
+    # Generate context-aware steps based on Gene strategy (not empty templates)
+    $strategySnippet = if ($geneStrategy.Length -gt 80) { $geneStrategy.Substring(0, 80) + "..." } else { $geneStrategy }
+    
+    # Map direction to target system components
+    $targetMap = @{
+        "intelligence" = @{ files = @("skills/", ".trae/scripts/obsidian-spl-cycle.ps1"); desc = "Improve skill routing and context retrieval" }
+        "automation" = @{ files = @(".trae/scripts/obsidian-*.ps1"); desc = "Add new automation or reduce manual steps" }
+        "humanize" = @{ files = @("Soul Core config", "response patterns"); desc = "Improve interaction quality and warmth" }
+        "self_evolve" = @{ files = @(".trae/scripts/obsidian-self-improve.ps1", "obsidian-metacognitive.ps1"); desc = "Improve the self-improvement cycle itself" }
+        "memory" = @{ files = @("Docs/Memory/", ".trae/scripts/memory-retrieve.ps1"); desc = "Enhance memory architecture and recall" }
+        "skill" = @{ files = @("skills/"); desc = "Create new skills from knowledge gaps" }
+    }
+    
+    $targetInfo = $targetMap[$primaryDirection]
+    if ($null -eq $targetInfo) { $targetInfo = @{ files = @(".trae/scripts/"); desc = "Enhance system in $primaryDirection direction" } }
+    
+    # Build steps that reference actual Gene content
+    $proposalSteps = @(
+        "Read and analyze Gene strategy: $strategySnippet",
+        "Identify specific code changes in $($targetInfo.files -join ', ') based on Gene knowledge",
+        "Implement the change with -SelfTest switch and -Apply safety flag",
+        "Run all obsidian self-tests to verify no regression",
+        "If tests pass: git commit. If fail: fix (up to 5 rounds), then rollback if stuck"
+    )
+    
+    # Build evidence block for proposal
+    $evidenceBlock = ""
+    if ($evidenceContent.Count -gt 0) {
+        $evidenceBlock = "`n"
+        foreach ($ev in $evidenceContent) {
+            $preview = $ev.preview -replace "`n", " " -replace "\s+", " "
+            if ($preview.Length -gt 200) { $preview = $preview.Substring(0, 200) + "..." }
+            $evidenceBlock += "  - $($ev.path): $preview`n"
+        }
     }
     
     $now = Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'
@@ -333,17 +397,25 @@ function Run-SPLImprove {
         system_sources = @($SelectedGene.system_hits | Select-Object -First 3)
         overlap_warning = @($SelectedGene.existing_overlap)
         pareto_mean = $SelectedGene.pareto_mean
+        gene_strategy = $geneStrategy
+        evidence_preview = $evidenceBlock
+        target_files = @($targetInfo.files)
         status = "proposed"
         created_at = $now
     }
     
-    # Write proposal YAML
+    # Write proposal YAML with Gene strategy and evidence
     $stepsYaml = ($proposalSteps | ForEach-Object { "  - $_" }) -join "`n"
     $ctxYaml = if ($proposal.context_sources.Count -gt 0) { ($proposal.context_sources | ForEach-Object { "  - $_" }) -join "`n" } else { "  - none" }
     $sysYaml = if ($proposal.system_sources.Count -gt 0) { ($proposal.system_sources | ForEach-Object { "  - $_" }) -join "`n" } else { "  - none" }
     $overlapYaml = if ($proposal.overlap_warning.Count -gt 0) { $proposal.overlap_warning -join ', ' } else { "none" }
+    $targetYaml = ($targetInfo.files | ForEach-Object { "  - $_" }) -join "`n"
     
-    $proposalContent = "proposal_id: `"$proposalId`"`nsource_gene: `"$($SelectedGene.gene_id)`"`nimprovement_direction: `"$primaryDirection`"`nsteps:`n$stepsYaml`ncontext_sources:`n$ctxYaml`nsystem_sources:`n$sysYaml`noverlap_warning: [$overlapYaml]`npareto_mean: $($SelectedGene.pareto_mean)`nstatus: proposed`ncreated_at: `"$now`""
+    # Escape strategy for YAML (use literal block scalar)
+    $strategyYaml = $geneStrategy
+    if ($strategyYaml.Length -gt 500) { $strategyYaml = $strategyYaml.Substring(0, 500) + "..." }
+    
+    $proposalContent = "proposal_id: `"$proposalId`"`nsource_gene: `"$($SelectedGene.gene_id)`"`nimprovement_direction: `"$primaryDirection`"`nsteps:`n$stepsYaml`ncontext_sources:`n$ctxYaml`nsystem_sources:`n$sysYaml`noverlap_warning: [$overlapYaml]`npareto_mean: $($SelectedGene.pareto_mean)`ngene_strategy: |-`n  $strategyYaml`nevidence_preview: |-$evidenceBlock`ntarget_files:`n$targetYaml`nstatus: proposed`ncreated_at: `"$now`""
     
     $proposalPath = Join-Path $script:proposalsDir "proposal-spl-${dateStamp}-$proposalId.yaml"
     if (-not ($DryRun -and -not $Apply)) {
@@ -353,7 +425,7 @@ function Run-SPLImprove {
         Write-Host "[DRY-PROPOSAL] Would write: $proposalPath"
     }
     
-    # Write implementation detail
+    # Write implementation detail with Gene strategy
     $ctxBlocks = @()
     foreach ($notePath in $SelectedGene.related_notes) {
         if (Test-Path $notePath) {
@@ -364,7 +436,12 @@ function Run-SPLImprove {
     }
     $ctxText = if ($ctxBlocks.Count -gt 0) { $ctxBlocks -join "`n" } else { "No local context available" }
     
-    $implDetail = "# Implementation Detail for $proposalId`n`n## Source Gene`n- ID: $($SelectedGene.gene_id)`n- Domain: $($SelectedGene.domain)`n- Direction: $primaryDirection`n`n## Context`n$ctxText`n`n## Steps`n$(($proposalSteps | ForEach-Object { "- $_" }) -join "`n")`n`n## Self-Test Plan`n- Verify no existing system breakage`n- Verify Gene YAML not modified directly`n- Verify new capability works`n- Verify -SelfTest switch included`n"
+    $evidenceText = ""
+    foreach ($ev in $evidenceContent) {
+        $evidenceText += "`n### $($ev.path)`n$($ev.preview)`n"
+    }
+    
+    $implDetail = "# Implementation Detail for $proposalId`n`n## Source Gene`n- ID: $($SelectedGene.gene_id)`n- Domain: $($SelectedGene.domain)`n- Direction: $primaryDirection`n`n## Gene Strategy`n$geneStrategy`n`n## Evidence`n$evidenceText`n`n## Context`n$ctxText`n`n## Steps`n$(($proposalSteps | ForEach-Object { "- $_" }) -join "`n")`n`n## Target Files`n$(($targetInfo.files | ForEach-Object { "- $_" }) -join "`n")`n`n## Self-Test Plan`n- Verify no existing system breakage`n- Verify Gene YAML not modified directly`n- Verify new capability works`n- Verify -SelfTest switch included`n"
     $implPath = Join-Path $script:proposalsDir "impl-detail-$proposalId.md"
     if (-not ($DryRun -and -not $Apply)) {
         [System.IO.File]::WriteAllText($implPath, $implDetail, [System.Text.Encoding]::UTF8)
