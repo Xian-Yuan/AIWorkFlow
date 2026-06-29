@@ -1,0 +1,78 @@
+workflow: full
+phase: plan
+project_type: other
+implement_mode: null
+isolation: null
+clarification_status: answered
+user_confirmed_plan: true
+router_skill_loaded: true
+review_result: pending
+verify_result: pending
+verification_report: null
+archived: false
+design_doc: Project/Jinli/docs/03-Architecture/General/architecture.md
+base_ref: null
+created_at: 2026-06-29
+verified_at: null
+fix_attempts: 0
+spec_exists: true
+spec_scenario_count: 13
+spec_scenarios_done: 0
+legacy_trust: null
+# task-specific metadata (consumed by Plan phase)
+title: "DaemonScheduler 统一调度重构"
+slug: "daemon-scheduler-unify"
+related_tasks:
+  - "2026-06-18-jinli-self-evolution-engine"
+  - "2026-06-18-jinli-soul-core-bridge-v2"
+supersedes:
+  - "services/jinli_daemon.py#legacy 9-thread daemon"
+  - "services/proactive/p1/triggers.py#IdleTrigger 独立 AsyncIOScheduler"
+authority_profile: "issuer-worker-v1"
+requirements_status: resolved
+clarification_questions:
+  - id: D2
+    question: "legacy services/jinli_daemon.py 9 线程怎么处理�?
+    options: [A-保留, B-迁scheduler, C-退役]
+    recommended: A-保留
+    user_decision: A
+    user_decision_at: 2026-06-29
+  - id: D3
+    question: "Phase 1/2 async 桥接边界�?
+    options: [X-strict-sync-then-async, Y-blend]
+    recommended: X
+    user_decision: X
+    user_decision_at: 2026-06-29
+  - id: D4
+    question: "scheduler 频率配置化？"
+    options: [alpha-硬编�? beta-加yaml]
+    recommended: alpha
+    user_decision: beta
+    user_decision_at: 2026-06-29
+work_packages:
+  - id: WP01
+    title: Scheduler Core
+    priority: P0
+  - id: WP02
+    title: 6 Jobs Register
+    priority: P0
+  - id: WP03
+    title: 3 Sink Adapters
+    priority: P0
+  - id: WP04
+    title: 4 EventBus Subscriptions
+    priority: P0
+  - id: WP05
+    title: Phase 1 Sync-to-Async Bridge
+    priority: P0
+  - id: WP06
+    title: Tests + Coverage
+    priority: P0
+  - id: WP07
+    title: Docs + /status Endpoint
+    priority: P0
+  - id: WP08
+    title: Scheduler Config YAML
+    priority: P0
+    added_by_decision: D4=beta
+    added_at: 2026-06-29

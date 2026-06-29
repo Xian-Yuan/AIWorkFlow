@@ -204,8 +204,55 @@ Then sync the registry:
 python E:\UEGameDevelopment\.trae\scripts\sync-workflow-registry.py
 ```
 
+
+## Post-Summarize Hook (obsidian-autopoiesis)
+
+After vsummary completes a batch summarization run, the following post-hook chain fires automatically to classify, evaluate, and link new knowledge:
+
+### Hook Chain
+
+`
+vsummary completes
+  -> obsidian-classify.ps1 -Batch -Apply -SourceDir "E:\ObsidianVault\JinliKG\Sources\Videos"
+  -> obsidian-evolve.ps1 -Batch -ExtractGene -SourceDir "E:\ObsidianVault\知识"
+  -> obsidian-link-discover.ps1 -Method tag-cooccurrence -DryRun
+`
+
+### How to Run
+
+After workflow.py run or atch_pipeline.py --all completes:
+
+`powershell
+# Step 1: Classify new summaries into 知识/ directories
+E:\UEGameDevelopment\.trae\scripts\obsidian-classify.ps1 -Batch -Apply -SourceDir "E:\ObsidianVault\JinliKG\Sources\Videos"
+
+# Step 2: Extract Genes from high-value knowledge
+E:\UEGameDevelopment\.trae\scripts\obsidian-evolve.ps1 -Batch -ExtractGene -Apply -SourceDir "E:\ObsidianVault\知识"
+
+# Step 3: Discover cross-note associations (DryRun first, then -Apply when ready)
+E:\UEGameDevelopment\.trae\scripts\obsidian-link-discover.ps1 -Method tag-cooccurrence -DryRun
+`
+
+### Idempotency
+
+Each step is idempotent:
+- **classify**: same kg_id already at target = skip (no re-classification)
+- **evolve**: same gene_id (sha1 of domain:trigger) = skip (no re-extraction)
+- **link-discover**: existing [[target]] in ## Related = skip (no duplicate links)
+
+### Safety
+
+- D1: Old files in JinliKG/ are NEVER modified or deleted (only redirect stubs created)
+- D7: All destructive ops require explicit -Apply flag
+- Post-hook does NOT auto-delete, auto-archive, or auto-approve anything
+
+### Integration Point
+
+This hook is defined in skills/obsidian-autopoiesis/SKILL.md and registered in skills/ai-workflow-registry/registry.yaml.
+
 ## Related Skills
 
 - `ai-workflow-registry` — discovery and registration system
 - `vsummary-deploy` (Hermes) — deployment and configuration details
 - `jinli-memory-architecture` — Obsidian knowledge graph integration
+

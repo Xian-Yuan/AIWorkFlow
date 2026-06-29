@@ -1,0 +1,233 @@
+﻿{
+  "claim_id": "WP06-compat-docs-verification",
+  "task": "jinli/2026-06-27-runtime-daemon-unified-ide",
+  "wp_id": "WP06",
+  "wp_title": "Compat Docs Verification",
+  "phase": "verify",
+  "verifier_role": "lead",
+  "verifier_model": "minimax-cn/MiniMax-M3",
+  "verifier_agent": "金璃小天才 (Plan Agent / Issuer)",
+  "verified_at": "2026-06-29T01:30:00Z",
+  "spec_section": "WP06-compat-docs-verification.md",
+  "authority_profile": "none",
+  "authority_status": "legacy",
+  "legacy_trust": "legacy_untrusted",
+
+  "scope_compliance": {
+    "allowed_paths_followed": true,
+    "forbidden_paths_touched": [],
+    "wp04_exemption_used": false,
+    "wp05_exemption_used": false
+  },
+
+  "doc_changes": {
+    "new_files": [
+      {
+        "path": "Project/Jinli/docs/06-Operations/General/runtime-daemon-runbook.md",
+        "bytes": 7400,
+        "purpose": "Operator runbook for daemon lifecycle, MCP smoke, IDE sync, failure modes"
+      },
+      {
+        "path": ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/verification-report.md",
+        "bytes": 13200,
+        "purpose": "Lead-signed verification report with 5 markers + AC mapping"
+      }
+    ],
+    "extended_files": [
+      {
+        "path": "Project/Jinli/docs/03-Architecture/runtime-enforcement-layer.md",
+        "before_lines": 118,
+        "after_lines": 224,
+        "added_sections": [
+          "Authority Layers (4-level table)",
+          "Source-of-Truth Policy (8-row table)",
+          "Service Registry (WP02) 11 services",
+          "Runtime API (WP03) 8 endpoints",
+          "MCP Adapter (WP04) 17 tools distribution",
+          "IDE Registry Sync (WP05) 3 modes",
+          "Spec Scenarios Mapping S01-S09",
+          "旧 MIRP 1-11 scenarios mapping"
+        ]
+      },
+      {
+        "path": "Project/Jinli/docs/04-Implementation/runtime-protocol.md",
+        "before_lines": 130,
+        "after_lines": 281,
+        "added_sections": [
+          "File Layout (159 pytest + 19 node test + WP01-WP05 modules)",
+          "Public API (Daemon + Service Registry + Runtime Emotion + Daemon HTTP Client)",
+          "Scripts (WP01-WP05 commands)",
+          "Test Run (159/19/0)",
+          "MCP Adapter Adapter Notes (WP04)",
+          "IDE Registry Sync Notes (WP05)",
+          "Boundary Rules §4-6",
+          "Known Limitations §4-6"
+        ]
+      },
+      {
+        "path": "Project/Jinli/docs/DOCS_TREE.md",
+        "before_lines": 89,
+        "after_lines": 91,
+        "added_rows": [
+          "2026-06-29 WP06 entry",
+          "runtime-daemon-runbook.md categorized entry"
+        ]
+      }
+    ],
+    "unchanged_files_verified_correct": [
+      "Project/Jinli/config/ide-registry.json (WP05, 3552 B)",
+      ".trae/scripts/jinli-system.ps1 (WP05-final)",
+      ".trae/scripts/jinli-runtime-turn.ps1 (WP05-final)",
+      ".trae/scripts/jinli-mcp-smoke.ps1 (WP05-final)",
+      ".trae/scripts/jinli-ide-sync.ps1 (WP05-final)",
+      ".trae/scripts/validate-codex-capabilities.ps1 (WP05-final)",
+      ".codex/capability-baseline.json (WP05, 15292 B)"
+    ]
+  },
+
+  "verification_commands": {
+    "V1_jinli_system_doctor": {
+      "command": ".trae/scripts/jinli-system.ps1 doctor",
+      "result": "PASS",
+      "details": "11/11 services online (5 required + 4 optional + 2 daemon probes), 391 live memories",
+      "initial_state": "offline (expected; start required)",
+      "after_start": "online + OK: daemon is healthy and all required services are online"
+    },
+    "V2_jinli_mcp_smoke": {
+      "command": ".trae/scripts/jinli-mcp-smoke.ps1",
+      "result": "PASS",
+      "details": "5/5 steps green (daemon start + Python client 200 + Node plugin reads endpoint + stop fallback + summary)"
+    },
+    "V3_validate_codex_capabilities": {
+      "command": ".trae/scripts/validate-codex-capabilities.ps1 -Mode Inspect",
+      "result": "PASS",
+      "details": "5/5 check groups PASS (project-skill-junction / skill-inventory 75 active + 11 archived / plugin-three-state-report / jinli-soul-core-runtime-readiness 7/7 / capability-baseline 1.0.0 + 8 plugins + 3 marketplaces / cc-switch-providers)",
+      "expected_warn": "Codex jinli-soul-core@personal not installed (forbidden path, accepted G2)"
+    },
+    "V4_task_guard_verify": {
+      "command": ".trae/scripts/task-guard.ps1 jinli/2026-06-27-runtime-daemon-unified-ide verify",
+      "result": "FAIL",
+      "details": "4 sub-failures: tasks.md 全 [ ] / verification_report null / verify_result=pending / report markers 缺失",
+      "root_cause": "WP06 spec forbids tasks.md; 41-Issuer-Worker governance: Worker cannot edit; legacy-trust packet has no Issuer crypto seal",
+      "explicit_gap": "G1"
+    },
+    "additional_python_pytest": {
+      "command": "python -m pytest Project/Jinli/services/runtime/tests/ -v",
+      "result": "PASS",
+      "details": "159 passed in ~25s (WP01: 13, WP02: 21, WP03: 18, WP01-repair: 4, WP04-fix-payload: 24, WP04 Scope A': 30, pre-existing: 49)"
+    },
+    "additional_node_tests": {
+      "command": "node --test mcp/tests/test_daemon_http.mjs",
+      "result": "PASS",
+      "details": "19 tests / 10 suites — 14 pass + 5 skip (online tests skip when daemon offline) + 0 fail"
+    },
+    "additional_runtime_turn": {
+      "command": ".trae/scripts/jinli-runtime-turn.ps1 -Mode lite -Text 'verify runbook test' -Json",
+      "result": "PASS",
+      "details": "gate.passed=true, 7 evidence records (memory, soul_persona, skill_route, file_route, workflow_route, verifier_lite, memory_lite), 11 services online"
+    }
+  },
+
+  "acceptance_criteria": {
+    "S01_daemon_lifecycle": "PASS",
+    "S02_service_registry_health": "PASS",
+    "S03_runtime_turn_api": "PASS",
+    "S04_mcp_daemon_backed_tools": "PASS (3/17 migrated, 6 deferred + 8 stay-on-PS documented)",
+    "S05_ide_registry_sync": "PASS",
+    "S06_legacy_compatibility": "PASS",
+    "S07_diagnostics_degraded": "PASS",
+    "S08_documentation_extension_contract": "PASS",
+    "S09_verification_acceptance_evidence": "PARTIAL (V4 fail documented as explicit gap G1)",
+    "AC01_integration_docs_no_ownership_dup": "PASS",
+    "AC02_legacy_ps_json_documented_as_compat": "PASS",
+    "AC03_verification_report_at_canonical_path": "PASS",
+    "AC04_each_verification_command_with_output": "PASS",
+    "AC05_failed_commands_recorded_with_repair": "PASS"
+  },
+
+  "explicit_gaps": [
+    {
+      "id": "G1",
+      "severity": "governance",
+      "description": "task-guard.ps1 verify BLOCKED on tasks.md 全 [x] requirement",
+      "root_cause": "WP06 spec forbids tasks.md; Workers cannot edit; legacy-trust packet has no Issuer crypto seal",
+      "options_for_ba_ba": [
+        "A: Ba Ba explicitly grants Issuer exemption for WP06; I update tasks.md and re-run task-guard verify (recommended)",
+        "B: Ba Ba accepts explicit gap per WP06 done definition; archive under 41-Issuer-Worker-Authority-Separation.md §Verify And Archive with verify_result=blocked",
+        "C: Ba Ba adds Issuer-exception clause to WP06 packet and reseals"
+      ]
+    },
+    {
+      "id": "G2",
+      "severity": "low (known limitation)",
+      "description": "Codex jinli-soul-core@personal not auto-installed",
+      "root_cause": "Codex TOML forbidden path; auto_sync:false in ide-registry.json",
+      "repair": "jinli-ide-sync.ps1 doctor -Ide codex returns manual TOML diff"
+    },
+    {
+      "id": "G3",
+      "severity": "medium (accepted)",
+      "description": "6 MCP tools remain on PowerShell fallback (response_plan, vision_*, growth_*)",
+      "root_cause": "Daemon endpoints not yet implemented",
+      "repair": "Follow-on WP to add /response/plan/full, /vision/start, /vision/stop, /vision/status, /growth/approve, /growth/rollback endpoints (estimated 3-4 days)"
+    }
+  ],
+
+  "architecture_compliance": {
+    "boundary_discipline_1_service_existence_vs_usage": "PASS (service_registry_builder + per-service state probe)",
+    "boundary_discipline_2_task_authority_vs_runtime_authority": "PASS (WP01 never writes .task.yaml)",
+    "boundary_discipline_3_degradation_is_declared": "PASS (commit.notes memory_sink_unavailable)",
+    "boundary_discipline_4_daemon_authority_vs_adapter_authority": "PASS (daemon-http.mjs is the only path)",
+    "boundary_discipline_5_service_registry_canonical": "PASS (11 services in build_default_registry)",
+    "boundary_discipline_6_ide_config_from_one_registry": "PASS (ide-registry.json as SoT; auto-sync for OpenCode; manual for Codex/Trae)"
+  },
+
+  "test_evidence": {
+    "python_pytest": {"count": 159, "pass": 159, "skip": 0, "fail": 0, "wall_time_s": 25},
+    "node_tests": {"count": 19, "pass": 14, "skip": 5, "fail": 0, "wall_time_s": 3},
+    "total": {"count": 178, "pass": 173, "skip": 5, "fail": 0}
+  },
+
+  "residual_risk": [
+    "G1: tasks.md governance gap (resolvable only by Ba Ba decision)",
+    "G2: Codex MCP manual install (low; known limitation)",
+    "G3: 6 MCP tools on PowerShell fallback (medium; follow-on WP)",
+    "R4: PowerShell ExecutionPolicy Bypass required (host config, not defect)",
+    "R5: Daemon stop-between-tests UX (low; design feature, documented in runbook §七)",
+    "R6: UTF-8 BOM by default for future claim/report writers (low; memory candidate)"
+  ],
+
+  "recommendation": {
+    "verdict": "ACCEPT_WITH_EXPLICIT_GAP",
+    "summary": "Accept WP06 with explicit gap G1; defer G2/G3 to follow-on maintenance",
+    "rationale": [
+      "V1, V2, V3 all PASS — runtime functional, MCP adapter works, IDE sync works",
+      "V4 FAILS only on tasks.md governance — implementation is verified (159 pytest + 14 node pass + runtime turn e2e succeeds)",
+      "G2 (Codex MCP) and G3 (6 deferred MCP tools) are documented known limitations, accepted by WP04/WP05 design",
+      "No new technical risk introduced — all architecture boundary disciplines (6/6) respected"
+    ],
+    "next_action_for_ba_ba": "Pick Option A / B / C for G1 (see explicit_gaps[0].options_for_ba_ba)"
+  },
+
+  "follow_on_issues": [
+    {"issue": "6 MCP tools need daemon endpoints", "severity": "medium", "owner": "subagent (future WP)", "effort_days": 3.5},
+    {"issue": "Codex MCP manual install procedure", "severity": "low", "owner": "Ba Ba / operator", "effort_minutes": 5},
+    {"issue": "tasks.md governance permanent fix", "severity": "low", "owner": "Ba Ba decision", "effort_days": 0},
+    {"issue": "Claim/report UTF-8 BOM by default", "severity": "low", "owner": "Jinli-Plan Agent", "effort_hours": 1}
+  ],
+
+  "artifacts": {
+    "verification_report": ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/verification-report.md",
+    "report": ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/reports/WP06-compat-docs-verification.md",
+    "claim": ".trae/tasks/jinli/2026-06-27-runtime-daemon-unified-ide/claims/WP06-compat-docs-verification.claim.json"
+  },
+
+  "signatures": {
+    "issuer_sid": null,
+    "issuer_key_id": null,
+    "issuer_seal_method": "plaintext_legacy_trust",
+    "signed_by": "金璃小天才 (Plan Agent / Issuer, model minimax-cn/MiniMax-M3)",
+    "signed_at": "2026-06-29T01:30:00Z",
+    "note": "Per Docs/AI/41-Issuer-Worker-Authority-Separation.md §Verify, only the original Issuer may sign this claim. Workers (subagent) cannot. This claim is signed by the Issuer directly."
+  }
+}

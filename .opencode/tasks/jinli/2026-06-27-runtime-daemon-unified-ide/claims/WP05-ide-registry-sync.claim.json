@@ -1,0 +1,252 @@
+﻿{
+  "claim_id": "WP05-ide-registry-sync-2026-06-29",
+  "task_name": "2026-06-27-runtime-daemon-unified-ide",
+  "work_package": "WP05",
+  "title": "WP05 IDE Registry Sync — Declarative registry + check/apply/doctor sync tool",
+  "claim_type": "implementation_complete",
+  "agent": "金璃好帮手",
+  "claimed_at": "2026-06-29",
+  "report": "reports/WP05-ide-registry-sync.md",
+
+  "problem_statement": {
+    "wp05_charter": "Define and implement a shared IDE registry and sync check so Codex, OpenCode, Trae, and future MCP clients can attach to the same Jinli MCP adapter without hand-maintained drift.",
+    "drift_observation_before_wp05": {
+      "codex": "C:\\Users\\87372\\.codex\\config.toml has [mcp_servers.node_repl] but NO [mcp_servers.jinli_soul_core] section",
+      "opencode": "E:\\UEGameDevelopment\\.opencode\\mcp.json HAS jinli_soul_core entry (in sync)",
+      "trae": "E:\\UEGameDevelopment\\.trae\\mcp.json has only unreal-mcp; no jinli_soul_core entry"
+    },
+    "manual_drift_risk": "Each IDE would need its own hand-edited entry; any plugin path / node path change requires touching all 3 (or more) configs. No drift detection, no rollback safety."
+  },
+
+  "implementation_summary": {
+    "registry": {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\config\\ide-registry.json",
+      "size_bytes": 3552,
+      "schema": "ide-registry-schema-1.0.0",
+      "version": "1.0.0",
+      "contents": "1 server (jinli_soul_core) + 3 IDEs (codex/opencode/trae) + sync_policy"
+    },
+    "sync_tool": {
+      "path": "E:\\UEGameDevelopment\\.trae\\scripts\\jinli-ide-sync.ps1",
+      "size_bytes": 15879,
+      "modes": ["check", "apply", "doctor"],
+      "ide_filter_param": "TargetIde (alias Ide)",
+      "json_output_flag": "-OutputJson",
+      "toml_parser": "pure regex (no new dependencies)",
+      "json_parser": "PowerShell ConvertFrom-Json / ConvertTo-Json",
+      "backup_mechanism": "timestamped .trae/scripts/backups/<basename>.bak-yyyyMMdd-HHmmss",
+      "verify_after_write": true
+    },
+    "validation_extension": {
+      "script": "E:\\UEGameDevelopment\\.trae\\scripts\\validate-codex-capabilities.ps1",
+      "size_bytes_after": 19871,
+      "new_section": "jinli-soul-core-runtime-readiness",
+      "subchecks": [
+        "baseline_declares_jinli_plugin",
+        "baseline_declares_jinli_mcp_server",
+        "baseline_plugin_mcp_cross_reference",
+        "package_root_present",
+        "mcp_server_entrypoint_present",
+        "ide_registry_present",
+        "sync_tool_present"
+      ]
+    },
+    "baseline_extension": {
+      "script": "E:\\UEGameDevelopment\\.codex\\capability-baseline.json",
+      "size_bytes_after": 15292,
+      "plugin_entry_additions": [
+        "mcp_server_id: jinli_soul_core",
+        "ide_registry_path: Project\\Jinli\\config\\ide-registry.json",
+        "note: drift detection delegated to jinli-ide-sync.ps1"
+      ],
+      "safe_mcp_ids_addition": {
+        "id": "jinli_soul_core",
+        "required": true,
+        "safe_fields": ["command", "args", "cwd"],
+        "sync_tool": ".trae\\scripts\\jinli-ide-sync.ps1",
+        "ide_registry": "Project\\Jinli\\config\\ide-registry.json",
+        "required_in": ["codex", "opencode", "trae"]
+      }
+    },
+    "operation_doc": {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\docs\\06-Operations\\ide-registry-sync.md",
+      "size_bytes": 5803
+    }
+  },
+
+  "files_created": [
+    {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\config\\ide-registry.json",
+      "kind": "new",
+      "bytes": 3552
+    },
+    {
+      "path": "E:\\UEGameDevelopment\\.trae\\scripts\\jinli-ide-sync.ps1",
+      "kind": "new",
+      "bytes": 15879
+    },
+    {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\docs\\06-Operations\\ide-registry-sync.md",
+      "kind": "new",
+      "bytes": 5803
+    }
+  ],
+
+  "files_extended": [
+    {
+      "path": "E:\\UEGameDevelopment\\.codex\\capability-baseline.json",
+      "kind": "extended",
+      "bytes_after": 15292,
+      "additions": [
+        "jinli plugin entry: +mcp_server_id, +ide_registry_path, +note",
+        "safe_mcp_ids: +jinli_soul_core entry"
+      ]
+    },
+    {
+      "path": "E:\\UEGameDevelopment\\.trae\\scripts\\validate-codex-capabilities.ps1",
+      "kind": "extended",
+      "bytes_after": 19871,
+      "additions": [
+        "Section 'jinli-soul-core-runtime-readiness' (7 sub-checks)",
+        "Inspect mode rendering for new section"
+      ]
+    }
+  ],
+
+  "files_applied_fix": [
+    {
+      "path": "E:\\UEGameDevelopment\\.opencode\\mcp.json",
+      "kind": "applied_fix_by_apply_mode",
+      "bytes_after": 572,
+      "trigger": "test drift scenario (command/args/cwd set to WRONG values), then apply -Ide opencode",
+      "outcome": "success, backup created"
+    }
+  ],
+
+  "backups_created": [
+    {
+      "path": "E:\\UEGameDevelopment\\.trae\\scripts\\backups\\mcp.json.bak-20260629-005920",
+      "bytes": 178,
+      "purpose": "pre-fix snapshot of drifted .opencode/mcp.json for test scenario",
+      "retention_hint": "manual cleanup; timestamped"
+    }
+  ],
+
+  "forbidden_paths_audit": {
+    "all_untouched": true,
+    "verified_paths": [
+      {
+        "path": "C:\\Users\\87372\\.codex\\config.toml",
+        "lastWriteTime": "2026-06-29T00:33:30 (before WP05 started)",
+        "verdict": "untouched"
+      },
+      {
+        "path": "C:\\Users\\87372\\.codex\\** (entire .codex directory)",
+        "verdict": "untouched"
+      },
+      {
+        "path": "C:\\Users\\87372\\plugins\\jinli-soul-core\\** (MCP server code)",
+        "lastWriteTime": "2026-06-28T04:34:22 (day before WP05)",
+        "verdict": "untouched"
+      },
+      {
+        "path": "E:\\UEGameDevelopment\\Project\\Jinli\\services\\**",
+        "lastWriteTime": "2026-06-25 ~ 2026-06-28 (before WP05)",
+        "verdict": "untouched"
+      },
+      {
+        "path": "E:\\UEGameDevelopment\\.trae\\mcp.json (Trae config, conservative)",
+        "lastWriteTime": "2026-06-13 (before WP05)",
+        "verdict": "untouched (conservative: auto_sync=false for trae)"
+      },
+      {
+        "path": "Task packet metadata: .task.yaml / routing.md / spec.md / tasks.md / analysis.md / requirements.md / execution-prompt.md / doc-impact.md / contract.yaml",
+        "lastWriteTime": "2026-06-27 (before WP05)",
+        "verdict": "all untouched"
+      },
+      {
+        "path": "E:\\UEGameDevelopment\\Project\\RTS\\** + Project\\CharacterDesignTool\\**",
+        "verdict": "untouched"
+      }
+    ]
+  },
+
+  "verification_evidence": {
+    "v1_check_all": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-ide-sync.ps1 check -Ide all",
+      "result": "codex=drift (with manual_step), opencode=ok, trae=drift (with manual_step)",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v2_doctor_codex": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-ide-sync.ps1 doctor -Ide codex",
+      "result": "manual_step shown + readiness diagnostics (plugin_pkg_present=True, server_mjs_present=True, node_exe_present=True)",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v3_apply_opencode": {
+      "setup": "temporarily set .opencode/mcp.json command/args/cwd to WRONG values",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-ide-sync.ps1 apply -Ide opencode",
+      "result": "backup=backups/mcp.json.bak-20260629-005920 (178 bytes), apply_outcome=success, status=ok post-write",
+      "verify": "three fields (command/args/cwd) match registry after write",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v4_validate_codex_capabilities": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/validate-codex-capabilities.ps1 -Mode Inspect",
+      "result": "jinli-soul-core-runtime-readiness PASS (7/7 sub-checks); all 4 pre-existing sections still PASS",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v5_baseline_regression": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/test-codex-capability-baseline.ps1",
+      "result": "23/23 PASS (including 'jinli-soul-core@personal in required plugins')",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v6_skill_discovery_regression": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/test-codex-skill-discovery.ps1",
+      "result": "18/18 PASS",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v7_apply_manual_ides_no_op": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-ide-sync.ps1 apply -Ide codex / -Ide trae",
+      "result": "apply_outcome=skipped_manual_only (no file write to .codex/ or .trae/mcp.json)",
+      "exit_code": 0,
+      "passed": true
+    },
+    "v8_error_handling": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-ide-sync.ps1 check -RegistryPath E:\\does-not-exist.json",
+      "result": "[FATAL] Registry not found",
+      "exit_code": 2,
+      "passed": true
+    },
+    "v9_json_output": {
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .trae/scripts/jinli-ide-sync.ps1 check -Ide all -OutputJson tmp.json",
+      "result": "structured JSON with mode/timestamp/registry_version/results.{ide}.{status,installed,auto_sync,expected,diff,manual_step,reason_for_manual}",
+      "passed": true
+    }
+  },
+
+  "done_definition": {
+    "single_registry_describes_all_ides": true,
+    "check_detects_drift_without_writes": true,
+    "apply_backed_up_and_reversible": true,
+    "doctor_explains_why_ide_cannot_call_jinli": true,
+    "no_secrets_printed": true
+  },
+
+  "spec_s05_coverage": {
+    "scenario": "S05 IDE Registry And Sync",
+    "given": "Codex, OpenCode, Trae, or a generic MCP client needs Jinli",
+    "when": "Ba Ba runs .trae/scripts/jinli-ide-sync.ps1 apply -Ide all",
+    "then_1_each_ide_config_generated_from_shared_registry": "PARTIAL: only opencode auto-synced (auto_sync=true); codex/trae report manual_required + manual_step",
+    "then_2_check_detects_drift": "PASS",
+    "then_3_repair_guidance_names_exact_config_surface": "PASS (manual_step mentions file path + section + fields + restart instruction)"
+  },
+
+  "ready_for_wp06": true,
+  "ready_for_wp06_notes": "registry + sync tool ready. WP06+ can use 'jinli-ide-sync.ps1 check -Ide all' as IDE MCP regression gate. Codex and Trae still need Ba Ba manual edits to fully attach Jinli; sync tool will reflect that as DRIFT until then."
+
+}

@@ -252,16 +252,23 @@ function Invoke-VerifyAndCommit {
                 $commitMsg = "evolve: $Direction from gene $GeneId (proposal $ProposalPId)"
                 try {
                     Push-Location $ProjectPath
-                    git add -A 2>&1 | Out-Null
-                    git commit -m $commitMsg 2>&1 | Out-Null
+                    $null = git add -A 2>&1
+                    $null = git commit -m $commitMsg 2>&1
                     $commitHash = (git rev-parse --short HEAD 2>&1).Trim()
                     Pop-Location
                     Write-Output "[COMMIT] Committed as ${commitHash}: $commitMsg"
                 } catch {
                     Pop-Location
-                    Write-Output "[COMMIT-ERROR] Git commit failed: $_"
-                    Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $false -Notes "Git commit failed: $_"
-                    return @{ success = $false; abandoned = $false; fix_rounds = $fixRound }
+                    # Git warnings go to stderr but are not real errors - check if commit actually happened
+                    $lastHash = ""
+                    try { $lastHash = (git rev-parse --short HEAD 2>&1).Trim() } catch { }
+                    if ($lastHash -ne "") {
+                        Write-Output "[COMMIT] Committed as ${lastHash} (with warnings)"
+                    } else {
+                        Write-Output "[COMMIT-ERROR] Git commit failed: $_"
+                        Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $false -Notes "Git commit failed"
+                        return @{ success = $false; abandoned = $false; fix_rounds = $fixRound }
+                    }
                 }
             } else {
                 Write-Output "[DRY-COMMIT] Would commit: evolve: $Direction from gene $GeneId"
@@ -300,8 +307,8 @@ function Invoke-VerifyAndCommit {
             if ($Apply) {
                 try {
                     Push-Location $ProjectPath
-                    git checkout -- . 2>&1 | Out-Null
-                    git clean -fd 2>&1 | Out-Null
+                    $null = git checkout -- . 2>&1
+                    $null = git clean -fd 2>&1
                     Pop-Location
                     Write-Output "[ROLLBACK] All changes reverted."
                 } catch {

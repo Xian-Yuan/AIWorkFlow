@@ -1,11 +1,11 @@
-{
-    "mcpServers": {
-        "jinli_soul_core": {
-            "command": "D:\\NodeJS\\node.exe",
-            "args": [
-                "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\server.mjs"
-            ],
-            "cwd": "C:\\Users\\87372\\plugins\\jinli-soul-core"
-        }
-    }
+﻿{
+    "mcpServers":  {
+                       "jinli_soul_core":  {
+                                               "command":  "D:\\NodeJS\\node.exe",
+                                               "args":  [
+                                                            "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\server.mjs"
+                                                        ],
+                                               "cwd":  "C:\\Users\\87372\\plugins\\jinli-soul-core"
+                                           }
+                   }
 }

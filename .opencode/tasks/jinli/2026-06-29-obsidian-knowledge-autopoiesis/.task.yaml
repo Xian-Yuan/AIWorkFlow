@@ -1,0 +1,59 @@
+workflow: full
+phase: implement
+project_type: other
+implement_mode: null
+isolation: null
+clarification_status: answered
+user_confirmed_plan: true
+router_skill_loaded: true
+review_result: pending
+verify_result: pending
+verification_report: null
+archived: false
+design_doc: Docs/AI/17-Self-Improving-Framework.md
+base_ref: null
+created_at: 2026-06-29
+verified_at: null
+fix_attempts: 0
+spec_exists: true
+spec_scenario_count: 8
+spec_scenarios_done: 0
+legacy_trust: null
+title: "Obsidian Knowledge Autopoiesis"
+slug: "obsidian-knowledge-autopoiesis"
+related_tasks:
+  - "2026-06-23-T8-evolution"
+  - "2026-06-23-T7-subconscious-dreamer"
+  - "2026-06-20-obsidian-native-kg-upgrade"
+  - "2026-06-23-obsidian-unified-taxonomy"
+  - "2026-06-22-vsummary-workflow-improvement"
+supersedes:
+  - "2026-06-23-T8-evolution (partial: evolution engine)"
+  - "2026-06-23-T7-subconscious-dreamer (partial: dream reflection)"
+authority_profile: "issuer-worker-v1"
+requirements_status: resolved
+work_packages:
+  - id: WP01
+    title: "Skill + classification-rules + evolution-rubric"
+    priority: P0
+  - id: WP02
+    title: "obsidian-classify.ps1"
+    priority: P0
+  - id: WP03
+    title: "obsidian-evolve.ps1"
+    priority: P1
+  - id: WP04
+    title: "obsidian-link-discover.ps1"
+    priority: P1
+  - id: WP05
+    title: "obsidian-dream-reflect.ps1"
+    priority: P1
+  - id: WP06
+    title: "obsidian-maintain.ps1"
+    priority: P1
+  - id: WP07
+    title: "vsummary post-hook integration"
+    priority: P0
+  - id: WP08
+    title: "ai-workflow-registry + verification"
+    priority: P0

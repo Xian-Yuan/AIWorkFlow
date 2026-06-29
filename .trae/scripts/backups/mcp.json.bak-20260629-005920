@@ -1,0 +1,9 @@
+{
+    "mcpServers": {
+        "jinli_soul_core": {
+            "command": "WRONG_NODE_PATH",
+            "args": ["WRONG_ARGS"],
+            "cwd": "WRONG_CWD"
+        }
+    }
+}

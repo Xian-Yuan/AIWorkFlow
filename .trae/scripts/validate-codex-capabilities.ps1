@@ -193,6 +193,120 @@ function Get-RedactedReport {
 
     $report.sections += $pluginSection
 
+    # --- Section 3b: jinli-soul-core runtime readiness (WP05) ---
+    $jinliReadinessSection = @{
+        name = "jinli-soul-core-runtime-readiness"
+        passed = $true
+        checks = @()
+    }
+
+    # Locate baseline even if it was passed in via -BaselinePath (relative or absolute)
+    $jinliBaselinePath = $BaselinePath
+    if (-not [System.IO.Path]::IsPathRooted($jinliBaselinePath)) {
+        $jinliBaselinePath = Join-Path $Root $jinliBaselinePath
+    }
+
+    $jinliPluginFromBaseline = $null
+    $jinliMcpFromBaseline = $null
+    if (Test-Path -LiteralPath $jinliBaselinePath) {
+        try {
+            $baselineDoc = Get-Content -LiteralPath $jinliBaselinePath -Raw | ConvertFrom-Json
+            if ($baselineDoc.required_plugins) {
+                $jinliPluginFromBaseline = $baselineDoc.required_plugins | Where-Object { $_.id -eq "jinli-soul-core@personal" }
+            }
+            if ($baselineDoc.safe_mcp_ids) {
+                $jinliMcpFromBaseline = $baselineDoc.safe_mcp_ids | Where-Object { $_.id -eq "jinli_soul_core" }
+            }
+        } catch {
+            $jinliReadinessSection.passed = $false
+            $jinliReadinessSection.checks += @{
+                check = "baseline_parse"
+                result = $false
+                detail = "Failed to parse baseline for readiness check: $_"
+            }
+        }
+    }
+
+    # Check 1: baseline declares the plugin
+    $jinliReadinessSection.checks += @{
+        check = "baseline_declares_jinli_plugin"
+        result = [bool]$jinliPluginFromBaseline
+        detail = if ($jinliPluginFromBaseline) { "required_plugins entry present" } else { "jinli-soul-core@personal missing from required_plugins" }
+    }
+    if (-not $jinliPluginFromBaseline) { $jinliReadinessSection.passed = $false }
+
+    # Check 2: baseline declares the MCP server
+    $jinliReadinessSection.checks += @{
+        check = "baseline_declares_jinli_mcp_server"
+        result = [bool]$jinliMcpFromBaseline
+        detail = if ($jinliMcpFromBaseline) { "safe_mcp_ids entry present" } else { "jinli_soul_core missing from safe_mcp_ids" }
+    }
+    if (-not $jinliMcpFromBaseline) { $jinliReadinessSection.passed = $false }
+
+    # Check 3: plugin entry has mcp_server_id cross-reference
+    $hasCrossRef = $false
+    if ($jinliPluginFromBaseline -and $jinliPluginFromBaseline.PSObject.Properties.Match('mcp_server_id').Count -gt 0) {
+        $hasCrossRef = ($jinliPluginFromBaseline.mcp_server_id -eq "jinli_soul_core")
+    }
+    $jinliReadinessSection.checks += @{
+        check = "baseline_plugin_mcp_cross_reference"
+        result = $hasCrossRef
+        detail = if ($hasCrossRef) { "plugin.mcp_server_id == jinli_soul_core" } else { "plugin.mcp_server_id missing or mismatched" }
+    }
+    if (-not $hasCrossRef) { $jinliReadinessSection.passed = $false }
+
+    # Check 4: package_root directory present (filesystem evidence, no secret content)
+    $packageRoot = "C:\\Users\\87372\\plugins\\jinli-soul-core"
+    $packagePresent = Test-Path -LiteralPath $packageRoot
+    $jinliReadinessSection.checks += @{
+        check = "package_root_present"
+        result = $packagePresent
+        detail = "C:\\Users\\87372\\plugins\\jinli-soul-core"
+    }
+    if (-not $packagePresent) { $jinliReadinessSection.passed = $false }
+
+    # Check 5: server.mjs entry point present
+    $serverMjs = Join-Path $packageRoot "mcp\server.mjs"
+    $serverMjsPresent = Test-Path -LiteralPath $serverMjs
+    $jinliReadinessSection.checks += @{
+        check = "mcp_server_entrypoint_present"
+        result = $serverMjsPresent
+        detail = if ($serverMjsPresent) { "server.mjs present" } else { "server.mjs MISSING — install incomplete" }
+    }
+    if (-not $serverMjsPresent) { $jinliReadinessSection.passed = $false }
+
+    # Check 6: ide-registry.json is present (declarative source of truth)
+    $registryPath = Join-Path $Root "Project\\Jinli\\config\\ide-registry.json"
+    $registryPresent = Test-Path -LiteralPath $registryPath
+    $jinliReadinessSection.checks += @{
+        check = "ide_registry_present"
+        result = $registryPresent
+        detail = if ($registryPresent) { "ide-registry.json present" } else { "ide-registry.json missing — sync tool has no source of truth" }
+    }
+    if (-not $registryPresent) { $jinliReadinessSection.passed = $false }
+
+    # Check 7: sync tool present
+    $syncToolPath = Join-Path $Root ".trae\\scripts\\jinli-ide-sync.ps1"
+    $syncToolPresent = Test-Path -LiteralPath $syncToolPath
+    $jinliReadinessSection.checks += @{
+        check = "sync_tool_present"
+        result = $syncToolPresent
+        detail = if ($syncToolPresent) { "jinli-ide-sync.ps1 present" } else { "jinli-ide-sync.ps1 missing" }
+    }
+    if (-not $syncToolPresent) { $jinliReadinessSection.passed = $false }
+
+    $jinliReadinessSection.summary = @{
+        plugin_baseline = [bool]$jinliPluginFromBaseline
+        mcp_baseline = [bool]$jinliMcpFromBaseline
+        cross_ref = $hasCrossRef
+        package_present = $packagePresent
+        server_mjs_present = $serverMjsPresent
+        registry_present = $registryPresent
+        sync_tool_present = $syncToolPresent
+    }
+
+    $report.sections += $jinliReadinessSection
+
     # --- Section 4: Baseline presence check ---
     $baselineSection = @{
         name = "capability-baseline"
@@ -284,6 +398,14 @@ switch ($Mode) {
                     foreach ($mp in $section.marketplaces) {
                         Write-Host "    $($mp.id): type=$($mp.source_type)"
                     }
+                }
+            }
+
+            if ($section.name -eq "jinli-soul-core-runtime-readiness") {
+                Write-Host "  --- jinli-soul-core@personal runtime readiness ---"
+                foreach ($check in $section.checks) {
+                    $cIcon = if ($check.result) { "  [PASS]" } else { "  [FAIL]" }
+                    Write-Host ("$cIcon {0,-40} {1}" -f $check.check, $check.detail)
                 }
             }
 

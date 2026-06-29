@@ -3,6 +3,27 @@
 # Manual edits are preserved for entries without status.yaml
 
 workflows:
+- name: obsidian-autopoiesis
+  description: Self-organizing Obsidian knowledge autopoiesis system. Classifies video
+    summaries into knowledge directories, extracts compact Gene YAMLs, discovers cross-note
+    associations, runs dream-reflection, and self-maintains the vault.
+  status: active
+  skill_path: skills/obsidian-autopoiesis/SKILL.md
+  last_run: '2026-06-29T10:38:58'
+  trigger_keywords:
+  - obsidian
+  - autopoiesis
+  - auto-classify
+  - knowledge autopoiesis
+  - gene extraction
+  - dream reflection
+  - self-evolve
+  - JIPA-SPL
+  category: knowledge-management
+  providers:
+  - codex
+  progress: 5 scripts + 2 rules + skill + helpers implemented; self-tests pass; awaiting
+    AC verification
 - name: vsummary
   description: Batch video download and AI summarization from Bilibili favorites.
     yt-dlp download -> vsummary ASR+LLM summarization -> progress resume -> provider

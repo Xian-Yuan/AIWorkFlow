@@ -1,0 +1,156 @@
+{
+  "claim_id": "WP04-fix-payload-2026-06-28",
+  "task_name": "2026-06-27-runtime-daemon-unified-ide",
+  "work_package": "WP04-fix-payload",
+  "scope": "fix-payload",
+  "claim_type": "implementation_complete",
+  "agent": "金璃好帮手",
+  "claimed_at": "2026-06-28",
+  "title": "WP04-fix-payload — daemon memory_adapter items[] 真流到 MCP 端",
+
+  "problem_statement": {
+    "wp04_scope_a_limit": "soulMemoryHandler 永远走 PowerShell fallback (即使 daemon 在线)，因为 daemon memory_adapter.py:131-143 payload 只含 summary 字符串，items 列表被 _summarize() 吃掉",
+    "blocker_for_wp05_plus": "_wp04_source='daemon' 永远是 false，scope B 迁移 16 个未迁移工具的先例不成立"
+  },
+
+  "files_modified": [
+    {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\adapters\\memory_adapter.py",
+      "kind": "modified",
+      "lines_changed": 90,
+      "purpose": "+_extract_items() +_item_to_jsonobj() static methods; gather() payload 加 items/item_count 字段; _summarize() 加 RecallResult dataclass 处理"
+    },
+    {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\api_server.py",
+      "kind": "modified",
+      "lines_changed": 45,
+      "purpose": "handle_memory_query 顶层透出 items/item_count/query，保留 memory_evidence 向下兼容; degraded 路径返 ok=true+items=[]; 失败路径返 ok=false+error; typing import 加 List"
+    },
+    {
+      "path": "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\tests\\test_memory_adapter_items.py",
+      "kind": "new",
+      "lines_added": 380,
+      "purpose": "24 tests / 3 describe blocks: TestExtractItems (12) + TestGatherReturnsItemsInPayload (5) + TestHandleMemoryQueryResponseShape (7)"
+    },
+    {
+      "path": "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\lib\\daemon-http.mjs",
+      "kind": "modified",
+      "lines_changed": 8,
+      "purpose": "readEndpoint() 返回的 protocol 硬写 'http' (与 Python client.py:215 对齐)，不再用 endpointDoc.protocol 拼 URL (daemon 写 'tcp' 是 raw transport label 但实际 HTTP)"
+    },
+    {
+      "path": "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\lib\\tools.mjs",
+      "kind": "modified",
+      "lines_changed": 120,
+      "purpose": "soulMemoryHandler 升级 daemon-优先: +_normalizeDaemonItem() 统一 PowerShell+daemon 形状; +_callDaemon() 三段 fail-soft; 重写 happy/fallback 分支; 空 items 也走 daemon 路径 (不静默 fallback)"
+    },
+    {
+      "path": "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\tests\\test_daemon_http.mjs",
+      "kind": "modified",
+      "lines_changed": 50,
+      "purpose": "翻转 _wp04_source 断言 (powershell_fallback → daemon); +empty items test (daemon 在线但 items=[] 仍走 daemon 路径)"
+    }
+  ],
+
+  "files_not_touched": {
+    "forbidden_paths": [
+      "C:\\Users\\87372\\plugins\\jinli-soul-core\\package.json",
+      "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\server.mjs",
+      "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\lib\\types.mjs",
+      "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\lib\\soul-cli.mjs",
+      "C:\\Users\\87372\\plugins\\jinli-soul-core\\mcp\\lib\\tools-orchestrator.mjs",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\daemon.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\client.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\paths.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\daemon_state.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\service_registry*.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\turn_manifest.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\turn_orchestrator.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\response_gate.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\after_turn_commit.py",
+      "E:\\UEGameDevelopment\\Project\\Jinli\\services\\runtime\\route_index.py",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\.task.yaml",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\routing.md",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\analysis.md",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\spec.md",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\tasks.md",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\requirements.md",
+      "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\execution-prompt.md",
+      "E:\\UEGameDevelopment\\.opencode\\**",
+      "C:\\Users\\87372\\.codex\\**"
+    ],
+    "also_preserved": [
+      "16 个未迁移 tool handler (soul_init/auto/turn/end/emotion/status/learn/evolve/discover/check/response_plan/vision_*/growth_*) — handler 引用/函数签名/依赖完全不变",
+      "WP01-03 稳定 Python 产品 (daemon/client/paths/daemon_state/service_registry*/turn_manifest/turn_orchestrator/response_gate/after_turn_commit/route_index) — 一行未动",
+      "OUTPUT_SCHEMAS 17 个 (server.mjs passthrough 配置 WP04 已完成，本次无回归)"
+    ]
+  },
+
+  "verification_evidence": {
+    "pytest_full": {
+      "command": "python -m pytest Project/Jinli/services/runtime/tests/ -q",
+      "result": "129 passed in 61.95s (0:01:01)",
+      "baseline_105": "WP01-03 baseline 105 passed (无回归)",
+      "new_24": "WP04-fix-payload 新增 24 passed (test_memory_adapter_items.py)"
+    },
+    "node_tests": {
+      "command": "node --test ./mcp/tests/test_daemon_http.mjs",
+      "result": "15/15 pass (suites 6, fail 0, skipped 0, duration_ms 32520)",
+      "wp04_baseline_14": "WP04 baseline 14 tests 全部仍 pass",
+      "new_1": "WP04-fix-payload 新增 1 test (empty items still daemon path)"
+    },
+    "daemon_curl_smoke": {
+      "command": "python curl_memory_query.py 62667 'jinli daemon'",
+      "result": "ok=True, items_type=list, items_len=1, item_count=1, query='jinli daemon', evidence.status='gathered', evidence.summary='recall returned 1 items'",
+      "first_item_keys": ["layer", "memory_id", "subject", "summary", "importance", "decision", "score", "strength", "recall_count", "tokens", "related_subjects", "timestamp", "extra"]
+    },
+    "node_handler_smoke": {
+      "command": "node _smoke_handler.mjs (已删除，3 query 测过)",
+      "result": [
+        "query='jinli daemon'                  items=1 sources=['daemon']",
+        "query='rule.call-user-daddy'          items=2 sources=['daemon','daemon']",
+        "query='completely-unmatched-zzz'      items=0 sources=[] (daemon 路径，不 fallback)"
+      ],
+      "wp04_source_tag_now_real": "soulMemoryHandler 真实返 _wp04_source='daemon' (非永远 powershell_fallback)"
+    },
+    "syntax_check": {
+      "command": "node --check on daemon-http.mjs + test_daemon_http.mjs + tools.mjs",
+      "all_clean": true
+    }
+  },
+
+  "scope_adherence": {
+    "unlocked_files_only": true,
+    "wp05_readiness": "scope B 迁移 16 个未迁移工具的前置条件全部就绪 (daemon_http 稳定 + daemon-http.mjs 适配层稳定 + tools.mjs daemon 优先模板可用 + Zod passthrough 容忍)",
+    "honest_limitations": [
+      "daemon 端 daemon.py:331 仍写 'protocol':'tcp' (raw transport label, 实际是 HTTP)，本次 fix 在 Node 端硬覆盖为 'http'。WP05+ 可顺手把 daemon.py:331 改为 'http' 减少心智负担",
+      "_extract_items 对未知 shape (非 list/dict/dataclass/str) 走 [str(result)] 兜底，不会丢数据但 caller 看到字符串不是预期 dict",
+      "测试环境 MemoryService 可能无法 import (无 FTS5/LLM embedder) — degraded path tests (status='missing'/'degraded' + items=[]) 已覆盖; 真实 daemon 环境已用 curl 验证 gathered 路径"
+    ]
+  },
+
+  "design_decisions": {
+    "items_shape_unified": "daemon items 同时含 PowerShell 形状字段 (id/type/content/weight/decay_factor/recall_count) + daemon 完整字段 (layer/memory_id/subject/summary/importance/score/strength/timestamp/tokens/related_subjects/extra) — 向下兼容 + 不丢信息",
+    "degraded_doesnt_fake_ok": "handle_memory_query degraded 路径 ok=True+items=[]+item_count=0+memory_evidence.status='degraded'; 不静默 fallback",
+    "adapter_error_doesnt_swallow": "MemoryAdapter 抛错 → ok=False+error='memory_query_failed'+message; 不假装 ok",
+    "empty_list_is_legal_daemon_result": "daemon 在线+ok=true+items=[] → handler 返 []+_wp04_source='daemon'; 不静默 fallback 到 PowerShell (会掩盖 'no memories' 真实答案)",
+    "daemon_http_protocol_hardcoded": "Node 端 readEndpoint 硬写 protocol='http' 与 Python client.py:215 行为一致; 不读 endpointDoc.protocol (daemon 写错)"
+  },
+
+  "report_path": "E:\\UEGameDevelopment\\.trae\\tasks\\jinli\\2026-06-27-runtime-daemon-unified-ide\\reports\\WP04-fix-payload.md",
+
+  "next_steps_for_dad": [
+    "WP05+ scope B 迁移: 优先迁 GET 类只读工具 (soul_emotion/soul_status/soul_check) — daemon 端已有对应端点或可一行加, 风险最低",
+    "顺手把 daemon.py:331 写为 'protocol':'http' (消除 daemon.py/daemon.http.mjs/client.py 之间的 label 不一致)",
+    "是否要给 OUTPUT_SCHEMAS 17 个加 _wp04_source 字段 (当前 schema 是 passthrough 容忍, 不显式声明)"
+  ],
+
+  "open_questions_for_dad": [
+    "items 形状统一方案 (PowerShell+daemon 双形状) 是否需要拆成两个工具 (soul_memory_daemon / soul_memory_powershell) ?",
+    "empty items 走 daemon 路径 (不静默 fallback) 是否符合预期 ?",
+    "_wp04_* 诊断字段是否要在 OUTPUT_SCHEMAS 17 个里显式声明 (而不是靠 passthrough)?"
+  ],
+
+  "claim_status": "ready_for_review",
+  "reviewer_required": "Lead Verifier (not Implement Agent)"
+}
