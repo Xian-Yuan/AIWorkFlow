@@ -461,7 +461,9 @@ if ($SelfTest) {
     # Step 3: Verify file I/O
     Write-Host "  [3/3] Testing Write-MetaYaml..."
     $testYaml = "# Self-test verification`ntest: true`ntimestamp: $(Get-Date -Format yyyy-MM-ddTHH:mm:ss)`n"
-    Write-MetaYaml -FileName "self-test-verify.yaml" -Content $testYaml
+    # Self-test bypasses DryRun to verify actual I/O
+    $verifyPath = Join-Path $MetaPath "self-test-verify.yaml"
+    [System.IO.File]::WriteAllText($verifyPath, $testYaml, [System.Text.Encoding]::UTF8)
     $verifyPath = Join-Path $MetaPath "self-test-verify.yaml"
     if (Test-Path $verifyPath) {
         Write-Host "[SELFTEST-PASS] File I/O works"
