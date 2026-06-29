@@ -1,0 +1,9 @@
+﻿name: obsidian-autopoiesis
+last_run: "2026-06-29T10:38:58"
+status: active
+progress: "5 scripts + 2 rules + skill + helpers implemented; self-tests pass; awaiting AC verification"
+provider: codex
+next_steps: "Run AC01-AC08 verification against real vault data"
+error: null
+updated_by: wp02-wp06-implementation
+updated_at: "2026-06-29T10:38:58"
