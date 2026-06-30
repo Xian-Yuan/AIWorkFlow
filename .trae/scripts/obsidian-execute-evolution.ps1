@@ -6,9 +6,9 @@ param(
     [string]$ProposalId = "",
     [string]$VaultPath = "E:\ObsidianVault",
     [string]$ProjectPath = "E:\UEGameDevelopment",
-    [string]$GeneDir = "E:\ObsidianVault\进化\genes",
-    [string]$ProposalsDir = "E:\ObsidianVault\进化\proposals",
-    [string]$ResultsDir = "E:\ObsidianVault\进化\results",
+    [string]$GeneDir = "",
+    [string]$ProposalsDir = "",
+    [string]$ResultsDir = "",
     [int]$MaxFixRounds = 5,
     [switch]$Execute,
     [switch]$TestOnly,
@@ -22,6 +22,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$evolveDir = Join-Path $VaultPath ([char]0x8FDB + [char]0x5316)
+if (-not $GeneDir) { $GeneDir = Join-Path $evolveDir "genes" }
+if (-not $ProposalsDir) { $ProposalsDir = Join-Path $evolveDir "proposals" }
+if (-not $ResultsDir) { $ResultsDir = Join-Path $evolveDir "results" }
 $helpersPath = "$PSScriptRoot\_shared\ObsidianHelpers.psm1"
 Import-Module $helpersPath -Force -WarningAction SilentlyContinue
 
@@ -44,7 +48,7 @@ function Read-ProposalContext {
         $propFile = Get-ChildItem -Path "$VaultPath\进化\enacted" -Filter "proposal-spl-*-${PId}*.yaml" -File -ErrorAction SilentlyContinue
     }
     if ($null -eq $propFile -or $propFile.Count -eq 0) {
-        Write-Output "[WARN] Proposal $ProposalPId not found"; return $null
+        Write-Host "[WARN] Proposal $ProposalPId not found"; return $null
     }
     
     $content = [System.IO.File]::ReadAllText($propFile[0].FullName, [System.Text.Encoding]::UTF8)
@@ -99,7 +103,8 @@ function Read-ProposalContext {
         }
     }
     
-    return $proposal
+    # PS5.1: ensure only the hashtable is returned, not pipeline artifacts
+    return ,$proposal
 }
 # ============================================================
 # Build AI execution prompt from proposal context
@@ -506,11 +511,11 @@ function Invoke-FullPipeline {
     foreach ($p in $proposals) {
         $pc = [System.IO.File]::ReadAllText($p.FullName, [System.Text.Encoding]::UTF8)
         if ($pc -notmatch 'status:\s*committed') { continue }
-        $pId = if ($pc -match 'proposal_id:\s*"([^"]+)"') { $Matches[1] } else { "" }
-        $dir = if ($pc -match 'improvement_direction:\s*"([^"]+)"') { $Matches[1] } else { "" }
-        $gene = if ($pc -match 'source_gene:\s*"([^"]+)"') { $Matches[1] } else { "" }
+        $propPId = if ($pc -match 'proposal_id:\s*"([^"]+)"') { $Matches[1] } else { "" }
+        $propDir = if ($pc -match 'improvement_direction:\s*"([^"]+)"') { $Matches[1] } else { "" }
+        $propGene = if ($pc -match 'source_gene:\s*"([^"]+)"') { $Matches[1] } else { "" }
         $time = $p.LastWriteTime
-        if ($time -gt $latestTime) { $latestTime = $time; $latestProposal = @{ id = $pId; direction = $dir; gene = $gene } }
+        if ($time -gt $latestTime) { $latestTime = $time; $latestProposal = @{ id = $propPId; direction = $propDir; gene = $propGene } }
     }
     
     if ($null -eq $latestProposal) {
