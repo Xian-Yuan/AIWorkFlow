@@ -1,0 +1,124 @@
+{
+    "inverted":  {
+                     "secondary":  [
+                                       "229f7d38"
+                                   ],
+                     "temp":  [
+                                  "efc9506c"
+                              ],
+                     "use":  [
+                                 "aa3bb218"
+                             ],
+                     "primary":  [
+                                     "229f7d38"
+                                 ],
+                     "ref":  [
+                                 "aa3bb218"
+                             ],
+                     "for":  [
+                                 "aa3bb218",
+                                 "efc9506c"
+                             ],
+                     "gas":  [
+                                 "aa3bb218"
+                             ],
+                     "pref":  [
+                                  "229f7d38"
+                              ],
+                     "lyra":  [
+                                  "aa3bb218"
+                              ],
+                     "notes":  [
+                                   "efc9506c"
+                               ],
+                     "task":  [
+                                  "efc9506c"
+                              ],
+                     "system":  [
+                                    "aa3bb218"
+                                ],
+                     "current":  [
+                                     "efc9506c"
+                                 ],
+                     "english":  [
+                                     "229f7d38"
+                                 ],
+                     "ability":  [
+                                     "aa3bb218"
+                                 ],
+                     "baba":  [
+                                  "229f7d38"
+                              ],
+                     "rts":  [
+                                 "aa3bb218"
+                             ],
+                     "chinese":  [
+                                     "229f7d38"
+                                 ],
+                     "lang":  [
+                                  "229f7d38"
+                              ],
+                     "draft":  [
+                                   "efc9506c"
+                               ]
+                 },
+    "meta":  {
+                 "created_at":  "2026-06-30T18:11:47.6436610+08:00",
+                 "entry_count":  3,
+                 "version":  1,
+                 "keyword_count":  21
+             },
+    "index":  [
+                  {
+                      "id":  "aa3bb218",
+                      "scope":  "project",
+                      "keywords":  [
+                                       "rts",
+                                       "gas",
+                                       "ref",
+                                       "use",
+                                       "lyra",
+                                       "for",
+                                       "ability",
+                                       "system"
+                                   ],
+                      "access_count":  0,
+                      "key":  "rts-gas-ref",
+                      "scope_type":  "persistent",
+                      "updated_at":  "2026-06-30T08:02:45.7780727+08:00"
+                  },
+                  {
+                      "id":  "229f7d38",
+                      "scope":  "user",
+                      "keywords":  [
+                                       "baba",
+                                       "pref",
+                                       "lang",
+                                       "chinese",
+                                       "primary",
+                                       "english",
+                                       "secondary"
+                                   ],
+                      "access_count":  0,
+                      "key":  "baba-pref-lang",
+                      "scope_type":  "persistent",
+                      "updated_at":  "2026-06-30T08:02:46.1730172+08:00"
+                  },
+                  {
+                      "id":  "efc9506c",
+                      "scope":  "session",
+                      "keywords":  [
+                                       "temp",
+                                       "draft",
+                                       "notes",
+                                       "for",
+                                       "current",
+                                       "task"
+                                   ],
+                      "access_count":  0,
+                      "key":  "temp-draft-1",
+                      "scope_type":  "local",
+                      "updated_at":  "2026-06-30T08:02:46.5065474+08:00"
+                  }
+              ]
+}
