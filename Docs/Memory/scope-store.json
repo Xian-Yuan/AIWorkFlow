@@ -1,0 +1,41 @@
+{
+    "entries":  [
+                    {
+                        "id":  "aa3bb218",
+                        "updated_at":  "2026-06-30T08:02:45.7780727+08:00",
+                        "key":  "rts-gas-ref",
+                        "created_at":  "2026-06-30T08:02:45.7780727+08:00",
+                        "value":  "Use Lyra GAS for RTS ability system",
+                        "scope":  "project",
+                        "access_count":  0,
+                        "digest":  "",
+                        "scope_type":  "persistent"
+                    },
+                    {
+                        "id":  "229f7d38",
+                        "updated_at":  "2026-06-30T08:02:46.1730172+08:00",
+                        "key":  "baba-pref-lang",
+                        "created_at":  "2026-06-30T08:02:46.1730172+08:00",
+                        "value":  "Chinese primary, English secondary",
+                        "scope":  "user",
+                        "access_count":  0,
+                        "digest":  "",
+                        "scope_type":  "persistent"
+                    },
+                    {
+                        "id":  "efc9506c",
+                        "updated_at":  "2026-06-30T08:02:46.5065474+08:00",
+                        "key":  "temp-draft-1",
+                        "created_at":  "2026-06-30T08:02:46.5065474+08:00",
+                        "value":  "Draft notes for current task",
+                        "scope":  "session",
+                        "access_count":  0,
+                        "digest":  "",
+                        "scope_type":  "local"
+                    }
+                ],
+    "meta":  {
+                 "created_at":  "2026-06-30T08:02:45.5269479+08:00",
+                 "version":  1
+             }
+}
