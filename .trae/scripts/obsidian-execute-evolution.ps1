@@ -1,4 +1,4 @@
-﻿# obsidian-execute-evolution.ps1 - Real execution engine for SPL proposals
+# obsidian-execute-evolution.ps1 - Real execution engine for SPL proposals
 # Bridges the gap between "proposal generated" and "code actually changed"
 # PowerShell 5.1 compatible
 
@@ -163,11 +163,18 @@ $evidenceBlock
 1. Analyze Gene strategy and identify the SPECIFIC code change needed
 2. Implement the change using apply_patch
 3. Run -SelfTest on every modified script
-4. If all tests pass, stage and commit: "evolve: $direction from gene $geneId"
-5. If tests fail, fix up to 5 rounds. Still failing = revert all changes
-6. Write execution report to $ResultsDir\exec-report-$(Get-Date -Format yyyy-MM-dd)-$($Proposal['proposal_id']).md
+4. Run LIVE VERIFICATION: call the new script with real data (not just -SelfTest)
+   - For scope-store: Init, Store, Recall, Delete with real keys
+   - For scope-bridge: Init, ContextualRecall with real scope
+   - For turn-closure: Init, ClosureAudit
+   - For scope-fusion: Init, FusionReport
+   - For scope-index: Init, BuildIndex, SearchIndex, Prefetch, IndexStats
+   - Every new function must be called with real arguments and produce expected output
+5. If all tests AND live verification pass, stage and commit: "evolve: $direction from gene $geneId"
+6. If tests fail, fix up to 5 rounds. Still failing = revert all changes
+7. Write execution report to $ResultsDir\exec-report-$(Get-Date -Format yyyy-MM-dd)-$($Proposal['proposal_id']).md
 
-IMPORTANT: Actually write code. Actually modify files. Actually run tests. Actually commit.
+IMPORTANT: Actually write code. Actually modify files. Actually run tests. Actually run live verification with real data. Actually commit.
 Do NOT just analyze and report. This is EXECUTION, not planning.
 "@
     
@@ -185,7 +192,12 @@ function Run-AllSelfTests {
         "$ProjectPath\.trae\scripts\obsidian-maintain.ps1",
         "$ProjectPath\.trae\scripts\obsidian-spl-cycle.ps1",
         "$ProjectPath\.trae\scripts\obsidian-self-improve.ps1",
-        "$ProjectPath\.trae\scripts\obsidian-metacognitive.ps1"
+        "$ProjectPath\.trae\scripts\obsidian-metacognitive.ps1",
+        "$ProjectPath\.trae\scripts\scope-store.ps1",
+        "$ProjectPath\.trae\scripts\scope-bridge.ps1",
+        "$ProjectPath\.trae\scripts\turn-closure.ps1",
+        "$ProjectPath\.trae\scripts\scope-fusion.ps1",
+        "$ProjectPath\.trae\scripts\scope-index.ps1"
     )
     
     $allPassed = $true
@@ -225,11 +237,126 @@ function Write-ExecReport {
 "@
     
     $reportPath = Join-Path $ResultsDir "exec-report-$(Get-Date -Format 'yyyy-MM-dd')-$ProposalPId.md"
+    $reportDir = Split-Path -Parent $reportPath
+    if ($reportDir -and -not (Test-Path -LiteralPath $reportDir)) { New-Item -ItemType Directory -Path $reportDir -Force | Out-Null }
     [System.IO.File]::WriteAllText($reportPath, $report, [System.Text.Encoding]::UTF8)
     Write-Output "[REPORT] Written: $reportPath"
 }
 
 # ============================================================
+# ============================================================
+# Live Verification: run new scripts with real data, not just -SelfTest
+# ============================================================
+function Run-LiveVerification {
+    param([string]$ProposalPId)
+
+    Write-Output "[LIVE-VERIFY] Running live verification for proposal $ProposalPId..."
+    $liveOk = $true
+    $liveResults = @()
+
+    # Find newly created/modified scripts (git diff --name-only)
+    Push-Location $ProjectPath
+    $changedFiles = @()
+    try {
+        $diffOutput = git diff --name-only HEAD 2>&1
+        $stagedOutput = git diff --name-only --cached HEAD 2>&1
+        # Also check untracked
+        $untracked = git ls-files --others --exclude-standard 2>&1
+        foreach ($f in $diffOutput) { if ($f -match '\.ps1$') { $changedFiles += $f } }
+        foreach ($f in $stagedOutput) { if ($f -match '\.ps1$') { $changedFiles += $f } }
+        foreach ($f in $untracked) { if ($f -match '\.ps1$') { $changedFiles += $f } }
+        # Deduplicate
+        $changedFiles = $changedFiles | Select-Object -Unique
+    } catch {
+        $changedFiles = @()
+    }
+    Pop-Location
+
+    # Scope Recall scripts: verify with real data operations
+    $scopeRecallScripts = @('scope-store.ps1', 'scope-bridge.ps1', 'turn-closure.ps1', 'scope-fusion.ps1', 'scope-index.ps1')
+    foreach ($sr in $scopeRecallScripts) {
+        $srPath = Join-Path $ProjectPath ".trae\scripts\$sr"
+        if (-not (Test-Path $srPath)) { continue }
+
+        # Check if this script was newly created or modified
+        $srName = ".trae\scripts\$sr"
+        $isChanged = $changedFiles -contains $srName
+
+        # Always run live verification for scope recall scripts
+        Write-Output "  [LIVE] Testing $sr with real data..."
+        try {
+            switch ($sr) {
+                'scope-store.ps1' {
+                    # Real: Init, Store, Recall, ListScopes
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Store -Scope project -Key live-verify-test -Value "test value for live verification" -Apply 2>&1 | Out-Null
+                    $recallResult = & powershell -ExecutionPolicy Bypass -File $srPath -Recall -Scope project -Key live-verify-test 2>&1
+                    $found = ($recallResult | Out-String) -match "test value"
+                    # Cleanup test entry
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Delete -Scope project -Key live-verify-test -Apply 2>&1 | Out-Null
+                    if (-not $found) { $liveOk = $false; $liveResults += "${sr}: Recall after Store returned no data" }
+                    else { $liveResults += "${sr}: Store+Recall OK" }
+                }
+                'scope-bridge.ps1' {
+                    # Real: Init, ContextualRecall
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    $crResult = & powershell -ExecutionPolicy Bypass -File $srPath -ContextualRecall -Scope project -ContextFilter "rts" 2>&1
+                    $crStr = $crResult | Out-String
+                    # ContextualRecall should not error even with no data
+                    $liveResults += "${sr}: ContextualRecall OK (len=$($crStr.Length))"
+                }
+                'turn-closure.ps1' {
+                    # Real: Init, ClosureAudit
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    $auditResult = & powershell -ExecutionPolicy Bypass -File $srPath -ClosureAudit 2>&1
+                    $auditStr = $auditResult | Out-String
+                    $liveResults += "${sr}: ClosureAudit OK (len=$($auditStr.Length))"
+                }
+                'scope-fusion.ps1' {
+                    # Real: Init, FusionReport
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    $frResult = & powershell -ExecutionPolicy Bypass -File $srPath -FusionReport 2>&1
+                    $frStr = $frResult | Out-String
+                    $liveResults += "${sr}: FusionReport OK (len=$($frStr.Length))"
+                }
+                'scope-index.ps1' {
+                    # Real: Init, BuildIndex, SearchIndex, Prefetch, IndexStats
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -BuildIndex 2>&1 | Out-Null
+                    # Search for a keyword that should exist in real data
+                    $searchResult = & powershell -ExecutionPolicy Bypass -File $srPath -SearchIndex -Query "rts" 2>&1
+                    $searchStr = $searchResult | Out-String
+                    $searchOk = $searchStr -match "Found"
+     
+                    $prefetchResult = & powershell -ExecutionPolicy Bypass -File $srPath -Prefetch -CurrentScope project -Query "rts" 2>&1
+                    $prefetchStr = $prefetchResult | Out-String
+                    # IndexStats
+                    $statsResult = & powershell -ExecutionPolicy Bypass -File $srPath -IndexStats 2>&1
+                    $statsStr = $statsResult | Out-String
+                    $statsOk = $statsStr -match "Entries"
+                    if (-not $searchOk) { $liveOk = $false; $liveResults += "${sr}: SearchIndex returned no results indicator" }
+                    elseif (-not $statsOk) { $liveOk = $false; $liveResults += "${sr}: IndexStats missing Entries" }
+                    else { $liveResults += "${sr}: Init+Build+Search+Prefetch+Stats OK" }
+                }
+            }
+        } catch {
+            $liveOk = $false
+            $liveResults += "${sr}: ERROR - $_"
+        }
+    }
+
+    # Report
+    Write-Output "[LIVE-VERIFY] Results:"
+    foreach ($r in $liveResults) { Write-Output "  $r" }
+    if ($liveOk) {
+        Write-Output "[LIVE-VERIFY] All live verifications passed."
+    } else {
+        Write-Output "[LIVE-VERIFY] Some live verifications FAILED."
+    }
+
+    return @{ ok = $liveOk; results = $liveResults }
+}
+
 # VerifyAndCommit: test → commit (or fix → retry → rollback)
 # ============================================================
 function Invoke-VerifyAndCommit {
@@ -247,6 +374,19 @@ function Invoke-VerifyAndCommit {
         if ($testsOk) {
             Write-Output "[VERIFY] All tests passed!"
             
+            # Live verification: run new scripts with real data (not just -SelfTest)
+            Write-Output "[VERIFY] Running live verification with real data..."
+            $liveResult = Run-LiveVerification -ProposalPId $ProposalPId
+            if (-not $liveResult.ok) {
+                Write-Output "[VERIFY] Live verification FAILED. Treating as test failure."
+                $testsOk = $false
+            } else {
+                Write-Output "[VERIFY] Live verification passed."
+            }
+            
+            if (-not $testsOk) {
+                # Live verification failed, fall through to fix round logic
+            } else {
             # Git commit
             if ($Apply) {
                 $commitMsg = "evolve: $Direction from gene $GeneId (proposal $ProposalPId)"
@@ -274,7 +414,7 @@ function Invoke-VerifyAndCommit {
                 Write-Output "[DRY-COMMIT] Would commit: evolve: $Direction from gene $GeneId"
             }
             
-            Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $true -Notes "All tests passed, committed successfully"
+            Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $true -Notes "All tests passed + live verification passed, committed successfully"
             
             # Update gene use_count
             if ($Apply -and -not [string]::IsNullOrEmpty($GeneId)) {
@@ -293,6 +433,7 @@ function Invoke-VerifyAndCommit {
             }
             
             return @{ success = $true; abandoned = $false; fix_rounds = $fixRound }
+            } # end live-verify gate
         }
         
         # Tests failed
