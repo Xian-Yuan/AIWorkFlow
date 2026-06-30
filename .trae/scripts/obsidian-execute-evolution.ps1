@@ -1,4 +1,4 @@
-# obsidian-execute-evolution.ps1 - Real execution engine for SPL proposals
+﻿# obsidian-execute-evolution.ps1 - Real execution engine for SPL proposals
 # Bridges the gap between "proposal generated" and "code actually changed"
 # PowerShell 5.1 compatible
 
@@ -203,6 +203,8 @@ function Run-AllSelfTests {
         "$ProjectPath\.trae\scripts\turn-closure.ps1",
         "$ProjectPath\.trae\scripts\scope-fusion.ps1",
         "$ProjectPath\.trae\scripts\scope-index.ps1"
+        "$ProjectPath\.trae\scripts\scope-evolution-log.ps1"
+        "$ProjectPath\.trae\scripts\scope-recall-manager.ps1"
     )
     
     $allPassed = $true
@@ -279,6 +281,8 @@ function Run-LiveVerification {
 
     # Scope Recall scripts: verify with real data operations
     $scopeRecallScripts = @('scope-store.ps1', 'scope-bridge.ps1', 'turn-closure.ps1', 'scope-fusion.ps1', 'scope-index.ps1')
+    $scopeRecallScripts += 'scope-evolution-log.ps1'
+    $scopeRecallScripts += 'scope-recall-manager.ps1'
     foreach ($sr in $scopeRecallScripts) {
         $srPath = Join-Path $ProjectPath ".trae\scripts\$sr"
         if (-not (Test-Path $srPath)) { continue }
@@ -341,7 +345,27 @@ function Run-LiveVerification {
                     $statsOk = $statsStr -match "Entries"
                     if (-not $searchOk) { $liveOk = $false; $liveResults += "${sr}: SearchIndex returned no results indicator" }
                     elseif (-not $statsOk) { $liveOk = $false; $liveResults += "${sr}: IndexStats missing Entries" }
-                    else { $liveResults += "${sr}: Init+Build+Search+Prefetch+Stats OK" }
+                   else { $liveResults += "${sr}: Init+Build+Search+Prefetch+Stats OK" }
+               }
+                'scope-evolution-log.ps1' {
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Record -GeneId test-gene -Direction test -ProposalId test-prop -Result committed -ScriptName test-script -CommitHash test123 -Notes "live verify" 2>&1 | Out-Null
+                    $histResult = & powershell -ExecutionPolicy Bypass -File $srPath -History 2>&1
+                    $histStr = $histResult | Out-String
+                    $histOk = $histStr -match "Evolution Audit Trail"
+                    $statsResult = & powershell -ExecutionPolicy Bypass -File $srPath -GeneStats 2>&1
+                    $statsStr = $statsResult | Out-String
+                    $statsOk = $statsStr -match "Gene Statistics"
+                    if (-not $histOk -or -not $statsOk) { $liveOk = $false; $liveResults += "${sr}: History or GeneStats failed" }
+                   else { $liveResults += "${sr}: Init+Record+History+GeneStats OK" }
+               }
+                'scope-recall-manager.ps1' {
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    $mgrResult = & powershell -ExecutionPolicy Bypass -File $srPath -HealthCheck 2>&1
+                    $mgrStr = $mgrResult | Out-String
+                    $mgrOk = $mgrStr -match "HEALTHY"
+                    if (-not $mgrOk) { $liveOk = $false; $liveResults += "${sr}: HealthCheck failed" }
+                    else { $liveResults += "${sr}: Init+HealthCheck OK" }
                 }
             }
         } catch {
@@ -434,10 +458,25 @@ function Invoke-VerifyAndCommit {
                         $gc = $gc -replace "use_count:\s*\d+", "use_count: $newCount"
                         [System.IO.File]::WriteAllText($gf.FullName, $gc, [System.Text.Encoding]::UTF8)
                     }
+               }
+           }
+           
+            # Auto-record evolution in scope-evolution-log
+            if ($Apply -and -not [string]::IsNullOrEmpty($GeneId)) {
+                $evoLogScript = Join-Path $ProjectPath ".trae\scripts\scope-evolution-log.ps1"
+                if (Test-Path $evoLogScript) {
+                    try {
+                        $commitHashForLog = ""
+                        try { $commitHashForLog = (git rev-parse --short HEAD 2>&1).Trim() } catch { }
+                        & powershell -ExecutionPolicy Bypass -File $evoLogScript -Record -GeneId $GeneId -Direction $Direction -ProposalId $ProposalPId -Result committed -ScriptName "evolution-pipeline" -CommitHash $commitHashForLog -Notes "Auto-recorded by VerifyAndCommit" 2>&1 | Out-Null
+                        Write-Output "[EVO-LOG] Evolution recorded in audit trail."
+                    } catch {
+                        Write-Output "[EVO-LOG-WARN] Failed to record evolution: $_"
+                    }
                 }
             }
             
-            return @{ success = $true; abandoned = $false; fix_rounds = $fixRound }
+           return @{ success = $true; abandoned = $false; fix_rounds = $fixRound }
             } # end live-verify gate
         }
         

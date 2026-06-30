@@ -32,6 +32,17 @@
                         "access_count":  0,
                         "digest":  "",
                         "scope_type":  "local"
+                    },
+                    {
+                        "id":  "77f56076",
+                        "updated_at":  "2026-06-30T19:14:49.3072753+08:00",
+                        "key":  "rts-gas",
+                        "created_at":  "2026-06-30T19:14:49.3072753+08:00",
+                        "value":  "Use Lyra GAS for RTS ability system",
+                        "scope":  "project",
+                        "access_count":  0,
+                        "digest":  "",
+                        "scope_type":  "persistent"
                     }
                 ],
     "meta":  {
