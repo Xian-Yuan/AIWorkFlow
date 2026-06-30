@@ -1,0 +1,100 @@
+{
+    "entries":  [
+                    {
+                        "commit_hash":  "5514190",
+                        "proposal_id":  "47834661",
+                        "id":  "evo-2c00dcb2",
+                        "direction":  "more-intelligent",
+                        "rolled_back_from":  "",
+                        "gene_id":  "e7f6845e",
+                        "created_at":  "2026-06-30T18:46:54.4364877+08:00",
+                        "script_name":  "scope-index.ps1",
+                        "result":  "committed",
+                        "notes":  "Layer 5: structured index + prefetch"
+                    },
+                    {
+                        "commit_hash":  "fd1b839",
+                        "proposal_id":  "47834661",
+                        "id":  "evo-2c00dcb2",
+                        "direction":  "more-intelligent",
+                        "rolled_back_from":  "",
+                        "gene_id":  "e7f6845e",
+                        "created_at":  "2026-06-30T18:46:54.1826127+08:00",
+                        "script_name":  "scope-fusion.ps1",
+                        "result":  "committed",
+                        "notes":  "Layer 4: cross-session fusion"
+                    },
+                    {
+                        "commit_hash":  "da0798c",
+                        "proposal_id":  "47834661",
+                        "id":  "evo-cea8514d",
+                        "direction":  "more-intelligent",
+                        "rolled_back_from":  "",
+                        "gene_id":  "e7f6845e",
+                        "created_at":  "2026-06-30T18:46:53.7775385+08:00",
+                        "script_name":  "turn-closure.ps1",
+                        "result":  "committed",
+                        "notes":  "Layer 3: turn closure audit"
+                    },
+                    {
+                        "commit_hash":  "fe3abf4",
+                        "proposal_id":  "47834661",
+                        "id":  "evo-cea8514d",
+                        "direction":  "more-intelligent",
+                        "rolled_back_from":  "",
+                        "gene_id":  "e7f6845e",
+                        "created_at":  "2026-06-30T18:46:53.5201171+08:00",
+                        "script_name":  "scope-bridge.ps1",
+                        "result":  "committed",
+                        "notes":  "Layer 2: scope-aware recall bridge"
+                    },
+                    {
+                        "commit_hash":  "d989b02",
+                        "proposal_id":  "47834661",
+                        "id":  "evo-cea8514d",
+                        "direction":  "more-intelligent",
+                        "rolled_back_from":  "",
+                        "gene_id":  "e7f6845e",
+                        "created_at":  "2026-06-30T18:46:53.2804405+08:00",
+                        "script_name":  "scope-store.ps1",
+                        "result":  "committed",
+                        "notes":  "Layer 1: scoped memory store"
+                    }
+                ],
+    "meta":  {
+                 "created_at":  "2026-06-30T18:46:53.0409186+08:00",
+                 "version":  1
+             },
+    "resources":  {
+                      "scope-index.ps1":  {
+                                              "status":  "active",
+                                              "gene_id":  "e7f6845e",
+                                              "created_by":  "evo-2c00dcb2",
+                                              "version":  1
+                                          },
+                      "scope-store.ps1":  {
+                                              "status":  "active",
+                                              "gene_id":  "e7f6845e",
+                                              "created_by":  "evo-cea8514d",
+                                              "version":  1
+                                          },
+                      "scope-fusion.ps1":  {
+                                               "status":  "active",
+                                               "gene_id":  "e7f6845e",
+                                               "created_by":  "evo-2c00dcb2",
+                                               "version":  1
+                                           },
+                      "scope-bridge.ps1":  {
+                                               "status":  "active",
+                                               "gene_id":  "e7f6845e",
+                                               "created_by":  "evo-cea8514d",
+                                               "version":  1
+                                           },
+                      "turn-closure.ps1":  {
+                                               "status":  "active",
+                                               "gene_id":  "e7f6845e",
+                                               "created_by":  "evo-cea8514d",
+                                               "version":  1
+                                           }
+                  }
+}
