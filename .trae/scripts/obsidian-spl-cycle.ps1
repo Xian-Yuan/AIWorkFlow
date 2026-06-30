@@ -356,7 +356,7 @@ function Run-SPLImprove {
         "automation" = @{ files = @(".trae/scripts/obsidian-*.ps1"); desc = "Add new automation or reduce manual steps" }
         "humanize" = @{ files = @("Soul Core config", "response patterns"); desc = "Improve interaction quality and warmth" }
         "self_evolve" = @{ files = @(".trae/scripts/obsidian-self-improve.ps1", "obsidian-metacognitive.ps1"); desc = "Improve the self-improvement cycle itself" }
-        "memory" = @{ files = @("Docs/Memory/", ".trae/scripts/memory-retrieve.ps1"); desc = "Enhance memory architecture and recall" }
+        "memory" = @{ files = @("Docs/Memory/", ".trae/scripts/memory-retrieve.ps1", ".trae/scripts/obsidian-scope-recall.ps1"); desc = "Enhance memory architecture and recall with scoped partitioning" }
         "skill" = @{ files = @("skills/"); desc = "Create new skills from knowledge gaps" }
     }
     

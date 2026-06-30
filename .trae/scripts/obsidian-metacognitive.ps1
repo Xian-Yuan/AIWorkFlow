@@ -115,6 +115,7 @@ function Invoke-MetacognitiveAssess {
 
     $cap['memory'] = ((Get-ChildItem (Join-Path $ProjectPath 'Docs\Memory\*.md') -File -ErrorAction SilentlyContinue | Measure-Object).Count -gt 0)
     $cap['soul_core'] = $true
+    $cap['scope_recall'] = Test-Path (Join-Path $ProjectPath '.trae\scripts\obsidian-scope-recall.ps1')
 
     $present = ($cap.GetEnumerator() | Where-Object { $_.Value }).Count
     $total = $cap.Count
@@ -242,6 +243,7 @@ function Invoke-MetacognitivePlan {
         'evolved' = $DIR_SELF_EVOLVE
         'memory' = $DIR_MEMORY
         'soul_core' = $DIR_HUMANIZE
+        'scope_recall' = $DIR_MEMORY
     }
 
     $priorities = @()
