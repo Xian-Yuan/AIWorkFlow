@@ -1,0 +1,52 @@
+﻿{
+    "links":  [
+                  {
+                      "scope":  "project",
+                      "key":  "rts-scope",
+                      "created_at":  "2026-06-30T19:47:05",
+                      "anchor_id":  "bv-video-19EE16aEn7"
+                  },
+                  {
+                      "scope":  "project",
+                      "key":  "rts-scope",
+                      "created_at":  "2026-06-30T19:47:05",
+                      "anchor_id":  "gh-commit-d989b02"
+                  },
+                  {
+                      "scope":  "project",
+                      "key":  "rts-scope",
+                      "created_at":  "2026-06-30T19:47:05",
+                      "anchor_id":  "doc-ref-29-Mature-Solution-First-Workflow"
+                  }
+              ],
+    "meta":  {
+                 "created_at":  "2026-06-30T19:46:20",
+                 "version":  1
+             },
+    "anchors":  [
+                    {
+                        "id":  "bv-video-19EE16aEn7",
+                        "fingerprint":  "BV19EE16aEn7",
+                        "value":  "BV19EE16aEn7",
+                        "created_at":  "2026-06-30T19:47:05",
+                        "type":  "bv-video",
+                        "description":  "Bilibili video BV19EE16aEn7"
+                    },
+                    {
+                        "id":  "gh-commit-d989b02",
+                        "fingerprint":  "d989b02",
+                        "value":  "d989b02",
+                        "created_at":  "2026-06-30T19:47:05",
+                        "type":  "gh-commit",
+                        "description":  "Git commit d989b02"
+                    },
+                    {
+                        "id":  "doc-ref-29-Mature-Solution-First-Workflow",
+                        "fingerprint":  "29-Mature-Solution-First-Workflow",
+                        "value":  "29-Mature-Solution-First-Workflow",
+                        "created_at":  "2026-06-30T19:47:05",
+                        "type":  "doc-ref",
+                        "description":  "AI Doc: 29-Mature-Solution-First-Workflow"
+                    }
+                ]
+}

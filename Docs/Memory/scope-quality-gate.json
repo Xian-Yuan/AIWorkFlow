@@ -1,0 +1,27 @@
+﻿{
+    "snapshots":  [
+                      {
+                          "id":  "qg-snap-20260630192946",
+                          "direction":  "more-intelligent",
+                          "timestamp":  "2026-06-30T19:29:46",
+                          "gene_id":  "cf8c1aca",
+                          "metrics":  {
+                                          "scope_data_bytes":  9059,
+                                          "script_count":  73,
+                                          "scope_data_files":  5,
+                                          "scope_recall_scripts":  8,
+                                          "quality_evaluations":  0,
+                                          "evolution_count":  0,
+                                          "scope_entries":  4
+                                      },
+                          "proposal_id":  "47834661"
+                      }
+                  ],
+    "evaluations":  [
+
+                    ],
+    "meta":  {
+                 "created_at":  "",
+                 "version":  1
+             }
+}

@@ -202,8 +202,8 @@ function Run-AllSelfTests {
         "$ProjectPath\.trae\scripts\scope-bridge.ps1",
         "$ProjectPath\.trae\scripts\turn-closure.ps1",
         "$ProjectPath\.trae\scripts\scope-fusion.ps1",
-        "$ProjectPath\.trae\scripts\scope-index.ps1"
-        "$ProjectPath\.trae\scripts\scope-evolution-log.ps1"
+        "$ProjectPath\.trae\scripts\scope-index.ps1",
+        "$ProjectPath\.trae\scripts\scope-evolution-log.ps1",
         "$ProjectPath\.trae\scripts\scope-recall-manager.ps1"
     )
     
