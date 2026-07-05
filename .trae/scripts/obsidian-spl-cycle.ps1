@@ -155,6 +155,12 @@ function Parse-ResourceRegistry {
     return @{ resources = $resources }
 }
 
+function Get-GeneSaturationPenalty {
+    param([int]$UseCount)
+    if ($UseCount -le 0) { return 0.0 }
+    return [Math]::Min(0.50, [double]$UseCount * 0.01)
+}
+
 # ============================================================
 # SPL-Reflect: Metacognitive Knowledge - assess what Genes can improve
 # ============================================================
@@ -178,6 +184,7 @@ function Run-SPLReflect {
         $trigger = if ($gene.ContainsKey('trigger')) { $gene['trigger'] } else { "" }
         $strategy = if ($gene.ContainsKey('strategy')) { $gene['strategy'] } else { "" }
         $mean = if ($gene.ContainsKey('pareto_mean')) { $gene['pareto_mean'] } else { 0 }
+        $useCount = if ($gene.ContainsKey('use_count')) { $gene['use_count'] } else { 0 }
         
         # Metacognitive Knowledge: match Gene to improvement directions
         $improvementDirections = @()
@@ -255,6 +262,7 @@ function Run-SPLReflect {
             related_notes = @($relatedNotes | Select-Object -Unique)
             system_hits = @($systemHits | Select-Object -Unique)
             existing_overlap = @($existingOverlap | Select-Object -Unique)
+            use_count = $useCount
             file_path = $g.FullName
         }
         $relevantGenes += $relevance
@@ -282,15 +290,19 @@ function Run-SPLSelect {
     param([array]$RelevantGenes)
    if ($null -eq $script:dynamicCriteria) { $script:dynamicCriteria = Read-DynamicCriteria }
     if ($RelevantGenes.Count -eq 0) { Write-Host "[SELECT] No genes."; return $null }
-    $bestGene = $null; $bestScore = 0
+    $bestGene = $null; $bestScore = -999999
     foreach ($rg in $RelevantGenes) {
-        $score = 0
-       $score += $rg.improvement_directions.Count * $script:dynamicCriteria['system_enhance_weight']
-       $score += $rg.pareto_mean * $script:dynamicCriteria['automation_weight']
-        $score += [Math]::Min($rg.related_notes.Count, 5) * 0.05
-        $score += [Math]::Min($rg.system_hits.Count, 3) * 0.1
-        if ($rg.existing_overlap.Count -eq 0) { $score += 0.15 }
-        Write-Host "[SELECT] Gene $($rg.gene_id): score=$score"
+        $baseScore = 0
+       $baseScore += $rg.improvement_directions.Count * $script:dynamicCriteria['system_enhance_weight']
+       $baseScore += $rg.pareto_mean * $script:dynamicCriteria['automation_weight']
+        $baseScore += [Math]::Min($rg.related_notes.Count, 5) * 0.05
+        $baseScore += [Math]::Min($rg.system_hits.Count, 3) * 0.1
+        if ($rg.existing_overlap.Count -eq 0) { $baseScore += 0.15 }
+        $useCount = 0
+        if ($rg.ContainsKey('use_count')) { $useCount = [int]$rg.use_count }
+        $saturationPenalty = Get-GeneSaturationPenalty -UseCount $useCount
+        $score = $baseScore - $saturationPenalty
+        Write-Host "[SELECT] Gene $($rg.gene_id): base=$baseScore saturation=$saturationPenalty use_count=$useCount score=$score"
         if ($score -gt $bestScore) { $bestScore = $score; $bestGene = $rg }
     }
     if ($null -ne $bestGene) { Write-Host "[SELECT] Selected $($bestGene.gene_id) (score=$bestScore)" }
@@ -566,7 +578,7 @@ if ($SelfTest) {
     Write-Output "[SELFTEST-PASS] Parse-GeneYaml: gene_id=$($gene['gene_id']), mean=$($gene['pareto_mean'])"
     
     # Test SPL-Improve with a manually constructed gene
-    $testGene = @{ gene_id = "test001"; domain = "ai/agent-arch"; trigger = "Self-evolving agent systems"; pareto_mean = 0.675; improvement_directions = @("自我进化", "更自动化"); related_notes = @(); system_hits = @(); existing_overlap = @() }
+    $testGene = @{ gene_id = "test001"; domain = "ai/agent-arch"; trigger = "Self-evolving agent systems"; pareto_mean = 0.675; improvement_directions = @("自我进化", "更自动化"); related_notes = @(); system_hits = @(); existing_overlap = @(); use_count = 0 }
     
     # Temporarily redirect output dir
     $origGenesDir = $script:genesDir
@@ -590,6 +602,13 @@ if ($SelfTest) {
     $selected = Run-SPLSelect -RelevantGenes @($testGene)
     if ($null -eq $selected) { Write-Output "[SELFTEST-FAIL] Select"; exit 1 }
     Write-Output "[SELFTEST-PASS] Select: $($selected.gene_id)"
+
+    # Test saturation penalty: same-value high-use Gene should yield to fresher option
+    $staleGene = @{ gene_id = "stale001"; improvement_directions = @("自我进化", "更自动化"); pareto_mean = 0.675; related_notes = @(); system_hits = @(); existing_overlap = @(); use_count = 50 }
+    $freshGene = @{ gene_id = "fresh001"; improvement_directions = @("自我进化", "更自动化"); pareto_mean = 0.675; related_notes = @(); system_hits = @(); existing_overlap = @(); use_count = 0 }
+    $selectedFresh = Run-SPLSelect -RelevantGenes @($staleGene, $freshGene)
+    if ($null -eq $selectedFresh -or $selectedFresh.gene_id -ne "fresh001") { Write-Output "[SELFTEST-FAIL] Saturation penalty"; exit 1 }
+    Write-Output "[SELFTEST-PASS] Saturation penalty selected: $($selectedFresh.gene_id)"
     
     # Restore dirs
     $script:genesDir = $origGenesDir
