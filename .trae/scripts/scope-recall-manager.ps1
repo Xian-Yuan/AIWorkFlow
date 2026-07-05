@@ -1,13 +1,14 @@
 ﻿# scope-recall-manager.ps1 -- Unified Entry Point for Scope Recall System
 #
 # Seventh layer of the Scope Recall pattern: the integration layer.
-# Provides a single command-line interface to all 6 Scope Recall scripts:
+# Provides a single command-line interface to all 7 Scope Recall scripts:
 #   1. scope-store.ps1      -- Partitioned JSON memory store
 #   2. scope-bridge.ps1     -- Scope-aware recall + contamination guard
 #   3. turn-closure.ps1     -- Turn closure audit + session-to-persistent promotion
 #   4. scope-fusion.ps1     -- Cross-session memory fusion + conflict reconciliation
 #   5. scope-index.ps1      -- Lightweight structured index + scope-aware prefetch
 #   6. scope-evolution-log.ps1 -- AGP-inspired evolution audit trail
+#   7. scope-decay.ps1      -- Scope-aware memory lifecycle and garbage collection
 #
 # Usage:
 #   .\scope-recall-manager.ps1 -InitAll
@@ -15,6 +16,8 @@
 #   .\scope-recall-manager.ps1 -Store -Scope project -Key rts-gas -Value "Use Lyra GAS"
 #   .\scope-recall-manager.ps1 -Search -Query "gas" -Scope project
 #   .\scope-recall-manager.ps1 -CloseSession -SessionKey task-rt1
+#   .\scope-recall-manager.ps1 -DecayReport -Scope project
+#   .\scope-recall-manager.ps1 -AutoDecay -Apply
 #   .\scope-recall-manager.ps1 -Status
 #   .\scope-recall-manager.ps1 -HealthCheck
 #   .\scope-recall-manager.ps1 -SelfTest
@@ -28,6 +31,8 @@ param(
     [switch]$Delete,
     [switch]$Search,
     [switch]$CloseSession,
+    [switch]$DecayReport,
+    [switch]$AutoDecay,
     [switch]$Status,
     [switch]$HealthCheck,
     [switch]$SelfTest,
@@ -57,6 +62,7 @@ $scriptMap = @{
     fusion   = Join-Path $scriptsDir "scope-fusion.ps1"
     index    = Join-Path $scriptsDir "scope-index.ps1"
     evoLog   = Join-Path $scriptsDir "scope-evolution-log.ps1"
+    decay    = Join-Path $scriptsDir "scope-decay.ps1"
 }
 
 function Invoke-ScopeScript {
@@ -227,7 +233,40 @@ function Invoke-CloseSessionWorkflow {
         $null = Invoke-ScopeScript -ScriptPath $indexPath -Arguments @("-BuildIndex")
         Write-Host "[INDEX] Index rebuilt after session close"
     }
+    $decayPath = $scriptMap['decay']
+    if (Test-Path -LiteralPath $decayPath) {
+        $decayResult = Invoke-ScopeScript -ScriptPath $decayPath -Arguments @("-AutoDecay")
+        Write-Host "[DECAY] $($decayResult | Out-String)"
+    }
     Write-Host "=== Session Closed ==="
+    return $true
+}
+
+# --- Decay ---
+function Invoke-DecayReportWorkflow {
+    param([string]$DecayScope)
+    $decayPath = $scriptMap['decay']
+    if (-not (Test-Path -LiteralPath $decayPath)) {
+        Write-Host "[MANAGER-ERROR] scope-decay.ps1 not found"
+        return $false
+    }
+    $args = @("-DecayReport")
+    if ($DecayScope) { $args += @("-Scope", $DecayScope) }
+    $result = Invoke-ScopeScript -ScriptPath $decayPath -Arguments $args
+    Write-Host "[DECAY] $($result | Out-String)"
+    return $true
+}
+
+function Invoke-AutoDecayWorkflow {
+    $decayPath = $scriptMap['decay']
+    if (-not (Test-Path -LiteralPath $decayPath)) {
+        Write-Host "[MANAGER-ERROR] scope-decay.ps1 not found"
+        return $false
+    }
+    $args = @("-AutoDecay")
+    if ($Apply) { $args += @("-Apply") }
+    $result = Invoke-ScopeScript -ScriptPath $decayPath -Arguments $args
+    Write-Host "[DECAY] $($result | Out-String)"
     return $true
 }
 
@@ -251,6 +290,12 @@ function Invoke-Status {
     if (Test-Path -LiteralPath $evoLogPath) {
         $result = Invoke-ScopeScript -ScriptPath $evoLogPath -Arguments @("-GeneStats")
         Write-Host "--- Evolution ---"
+        Write-Host ($result | Out-String)
+    }
+    $decayPath = $scriptMap['decay']
+    if (Test-Path -LiteralPath $decayPath) {
+        $result = Invoke-ScopeScript -ScriptPath $decayPath -Arguments @("-DecayReport")
+        Write-Host "--- Decay ---"
         Write-Host ($result | Out-String)
     }
     Write-Host "=== End Status ==="
@@ -314,7 +359,7 @@ function Invoke-ManagerSelfTest {
         if (Test-Path -LiteralPath $entry.Value) { $foundCount++ }
         else { Write-Host "  [WARN] Missing: $($entry.Key)" }
     }
-    Assert-Test "All 6 scripts found" ($foundCount -eq 6)
+    Assert-Test "All 7 scripts found" ($foundCount -eq 7)
 
     # Test 2: InitAll
     Write-Host ""
@@ -385,6 +430,14 @@ function Invoke-ManagerSelfTest {
     $rcResult = Invoke-RecallKey -RecallScope "project" -RecallKey ""
     Assert-Test "Recall rejects missing Key" ($rcResult -eq $false)
 
+    # Test 11: DecayReport and AutoDecay entry points
+    Write-Host ""
+    Write-Host "--- Test 11: Decay Workflow ---"
+    $drResult = Invoke-DecayReportWorkflow -DecayScope "project"
+    Assert-Test "DecayReport workflow completes" $drResult
+    $adResult = Invoke-AutoDecayWorkflow
+    Assert-Test "AutoDecay workflow completes" $adResult
+
     # Summary
     Write-Host ""
     Write-Host "=== SelfTest Results: $($script:_pass) passed, $($script:_fail) failed ==="
@@ -419,6 +472,14 @@ elseif ($CloseSession) {
     $result = Invoke-CloseSessionWorkflow -SessKey $SessionKey
     if (-not $result) { exit 1 }
 }
+elseif ($DecayReport) {
+    $result = Invoke-DecayReportWorkflow -DecayScope $Scope
+    if (-not $result) { exit 1 }
+}
+elseif ($AutoDecay) {
+    $result = Invoke-AutoDecayWorkflow
+    if (-not $result) { exit 1 }
+}
 elseif ($Status) {
     $result = Invoke-Status
     if (-not $result) { exit 1 }
@@ -440,6 +501,8 @@ else {
     Write-Host "  -Delete -Scope <s> -Key <k>            Delete a key"
     Write-Host "  -Search -Query <q> [-Scope]            Search the index"
     Write-Host "  -CloseSession -SessionKey <k>          Close session workflow"
+    Write-Host "  -DecayReport [-Scope <s>]              Show memory lifecycle risks"
+    Write-Host "  -AutoDecay [-Apply]                    Run TTL and compression maintenance"
     Write-Host "  -Status                   Show system status"
     Write-Host "  -HealthCheck              Verify all layers operational"
     Write-Host "  -SelfTest                 Run self-tests"

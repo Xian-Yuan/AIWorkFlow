@@ -204,6 +204,7 @@ function Run-AllSelfTests {
         "$ProjectPath\.trae\scripts\scope-fusion.ps1",
         "$ProjectPath\.trae\scripts\scope-index.ps1",
         "$ProjectPath\.trae\scripts\scope-evolution-log.ps1",
+        "$ProjectPath\.trae\scripts\scope-decay.ps1",
         "$ProjectPath\.trae\scripts\scope-recall-manager.ps1"
     )
     
@@ -282,6 +283,7 @@ function Run-LiveVerification {
     # Scope Recall scripts: verify with real data operations
     $scopeRecallScripts = @('scope-store.ps1', 'scope-bridge.ps1', 'turn-closure.ps1', 'scope-fusion.ps1', 'scope-index.ps1')
     $scopeRecallScripts += 'scope-evolution-log.ps1'
+    $scopeRecallScripts += 'scope-decay.ps1'
     $scopeRecallScripts += 'scope-recall-manager.ps1'
     foreach ($sr in $scopeRecallScripts) {
         $srPath = Join-Path $ProjectPath ".trae\scripts\$sr"
@@ -359,6 +361,17 @@ function Run-LiveVerification {
                     if (-not $histOk -or -not $statsOk) { $liveOk = $false; $liveResults += "${sr}: History or GeneStats failed" }
                    else { $liveResults += "${sr}: Init+Record+History+GeneStats OK" }
                }
+                'scope-decay.ps1' {
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
+                    $reportResult = & powershell -ExecutionPolicy Bypass -File $srPath -DecayReport -Scope project 2>&1
+                    $reportStr = $reportResult | Out-String
+                    $reportOk = $reportStr -match "Scope Decay Report"
+                    $autoResult = & powershell -ExecutionPolicy Bypass -File $srPath -AutoDecay 2>&1
+                    $autoStr = $autoResult | Out-String
+                    $autoOk = $autoStr -match "AUTODECAY"
+                    if (-not $reportOk -or -not $autoOk) { $liveOk = $false; $liveResults += "${sr}: DecayReport or AutoDecay failed" }
+                    else { $liveResults += "${sr}: Init+DecayReport+AutoDecay OK" }
+                }
                 'scope-recall-manager.ps1' {
                     & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
                     $mgrResult = & powershell -ExecutionPolicy Bypass -File $srPath -HealthCheck 2>&1
@@ -421,8 +434,17 @@ function Invoke-VerifyAndCommit {
                 $commitMsg = "evolve: $Direction from gene $GeneId (proposal $ProposalPId)"
                 try {
                     Push-Location $ProjectPath
-                    $null = git add -A 2>&1
-                    $null = git commit -m $commitMsg 2>&1
+                    $commitPaths = @(
+                        ".trae/scripts/obsidian-execute-evolution.ps1",
+                        ".trae/scripts/scope-decay.ps1",
+                        ".trae/scripts/scope-recall-manager.ps1"
+                    )
+                    foreach ($cp in $commitPaths) {
+                        if (Test-Path (Join-Path $ProjectPath $cp)) {
+                            $null = git add -- $cp 2>&1
+                        }
+                    }
+                    $null = git commit --only -m $commitMsg -- $commitPaths 2>&1
                     $commitHash = (git rev-parse --short HEAD 2>&1).Trim()
                     Pop-Location
                     Write-Output "[COMMIT] Committed as ${commitHash}: $commitMsg"
