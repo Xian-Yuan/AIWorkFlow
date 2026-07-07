@@ -430,36 +430,49 @@ function Invoke-VerifyAndCommit {
                 # Live verification failed, fall through to fix round logic
             } else {
             # Git commit
+            $commitSucceeded = $false
+            $commitHash = ""
             if ($Apply) {
                 $commitMsg = "evolve: $Direction from gene $GeneId (proposal $ProposalPId)"
                 try {
                     Push-Location $ProjectPath
+                    $beforeHash = (git rev-parse --short HEAD 2>&1).Trim()
                     $commitPaths = @(
                         ".trae/scripts/obsidian-execute-evolution.ps1",
+                        ".trae/scripts/obsidian-metacognitive.ps1",
                         ".trae/scripts/scope-decay.ps1",
-                        ".trae/scripts/scope-recall-manager.ps1"
+                        ".trae/scripts/scope-recall-manager.ps1",
+                        "Docs/Memory/scope-evolution-log.json",
+                        "Docs/Memory/scope-index.json",
+                        "Docs/Memory/scope-store-decay.json"
                     )
                     foreach ($cp in $commitPaths) {
                         if (Test-Path (Join-Path $ProjectPath $cp)) {
                             $null = git add -- $cp 2>&1
                         }
                     }
-                    $null = git commit --only -m $commitMsg -- $commitPaths 2>&1
+                    $commitOutput = git commit --only -m $commitMsg -- $commitPaths 2>&1
+                    $commitExit = $LASTEXITCODE
                     $commitHash = (git rev-parse --short HEAD 2>&1).Trim()
+                    if ($commitExit -eq 0 -and $commitHash -ne $beforeHash) {
+                        $commitSucceeded = $true
+                    }
                     Pop-Location
-                    Write-Output "[COMMIT] Committed as ${commitHash}: $commitMsg"
+                    if ($commitSucceeded) {
+                        Write-Output "[COMMIT] Committed as ${commitHash}: $commitMsg"
+                    } else {
+                        Write-Output "[COMMIT-ERROR] Git commit did not create a new HEAD."
+                        Write-Output ($commitOutput | Out-String)
+                    }
                 } catch {
                     Pop-Location
-                    # Git warnings go to stderr but are not real errors - check if commit actually happened
-                    $lastHash = ""
-                    try { $lastHash = (git rev-parse --short HEAD 2>&1).Trim() } catch { }
-                    if ($lastHash -ne "") {
-                        Write-Output "[COMMIT] Committed as ${lastHash} (with warnings)"
-                    } else {
-                        Write-Output "[COMMIT-ERROR] Git commit failed: $_"
-                        Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $false -Notes "Git commit failed"
-                        return @{ success = $false; abandoned = $false; fix_rounds = $fixRound }
-                    }
+                    Write-Output "[COMMIT-ERROR] Git commit failed: $_"
+                    Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $false -Notes "Git commit failed"
+                    return @{ success = $false; abandoned = $false; fix_rounds = $fixRound }
+                }
+                if (-not $commitSucceeded) {
+                    Write-ExecReport -ProposalPId $ProposalPId -Direction $Direction -GeneId $GeneId -TestsPassed $true -FixRounds $fixRound -Committed $false -Notes "Git commit did not create a new HEAD"
+                    return @{ success = $false; abandoned = $false; fix_rounds = $fixRound }
                 }
             } else {
                 Write-Output "[DRY-COMMIT] Would commit: evolve: $Direction from gene $GeneId"

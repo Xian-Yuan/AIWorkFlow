@@ -354,8 +354,7 @@ function Invoke-MetacognitiveReflect {
     # Lesson: gene reuse
     $usedGenes = @($pastOutcomes | Where-Object { $_.ContainsKey('gene') -and $_.gene -ne '' } | ForEach-Object { $_.gene } | Select-Object -Unique)
     if ($usedGenes.Count -gt 0) {
-        $geneList = $usedGenes -join ', '
-        $lessons += "Genes used: ${geneList}. High-use genes should be prioritized for future evolution."
+        $lessons += Get-GeneReuseLesson -Genes $usedGenes
     }
 
     if ($lessons.Count -eq 0) {
@@ -396,6 +395,17 @@ function Invoke-MetacognitiveReflect {
     }
 
     return @{ lessons = $lessons; success_rate = $successRate }
+}
+
+function Get-GeneReuseLesson {
+    param([string[]]$Genes)
+
+    if ($Genes -eq $null -or $Genes.Count -eq 0) {
+        return ''
+    }
+
+    $geneList = $Genes -join ', '
+    return "Genes used: ${geneList}. High-use genes should be monitored for saturation and balanced with diverse candidates."
 }
 # ============================================================
 # Full Meta Cycle
@@ -442,7 +452,7 @@ if ($SelfTest) {
     $critPath = Join-Path $metaDir "dynamic-criteria.yaml"
 
     # Generate fresh data by running assess inline
-    Write-Host "  [1/3] Running Assess..."
+    Write-Host "  [1/4] Running Assess..."
     $cap = @{}
     $cap["classify"] = Test-Path (Join-Path $ProjectPath ".trae\scripts\obsidian-classify.ps1")
     $cap["evaluate"] = Test-Path (Join-Path $ProjectPath ".trae\scripts\obsidian-evolve.ps1")
@@ -456,12 +466,20 @@ if ($SelfTest) {
     Write-Host "  Capabilities: $present/$($cap.Count) present"
 
     # Step 2: Verify past outcomes reader
-    Write-Host "  [2/3] Testing Read-PastOutcomes..."
+    Write-Host "  [2/4] Testing Read-PastOutcomes..."
     $outcomes = Read-PastOutcomes
     Write-Host "  Past outcomes found: $($outcomes.Count)"
 
-    # Step 3: Verify file I/O
-    Write-Host "  [3/3] Testing Write-MetaYaml..."
+    # Step 3: Verify gene reuse lesson does not undo SPL saturation pressure
+    Write-Host "  [3/4] Testing gene reuse lesson..."
+    $lesson = Get-GeneReuseLesson -Genes @("gene-a", "gene-b")
+    if ($lesson -match "prioritized" -or $lesson -notmatch "saturation" -or $lesson -notmatch "diverse") {
+        Write-Host "[SELFTEST-FAIL] Gene reuse lesson should encourage saturation monitoring and diversity"
+        exit 1
+    }
+
+    # Step 4: Verify file I/O
+    Write-Host "  [4/4] Testing Write-MetaYaml..."
     $testYaml = "# Self-test verification`ntest: true`ntimestamp: $(Get-Date -Format yyyy-MM-ddTHH:mm:ss)`n"
     # Self-test bypasses DryRun to verify actual I/O
     $verifyPath = Join-Path $MetaPath "self-test-verify.yaml"
