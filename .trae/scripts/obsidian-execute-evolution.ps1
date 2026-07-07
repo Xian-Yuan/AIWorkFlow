@@ -204,8 +204,9 @@ function Run-AllSelfTests {
         "$ProjectPath\.trae\scripts\scope-fusion.ps1",
         "$ProjectPath\.trae\scripts\scope-index.ps1",
         "$ProjectPath\.trae\scripts\scope-evolution-log.ps1",
-        "$ProjectPath\.trae\scripts\scope-decay.ps1",
-        "$ProjectPath\.trae\scripts\scope-recall-manager.ps1"
+       "$ProjectPath\.trae\scripts\scope-decay.ps1",
+        "$ProjectPath\.trae\scripts\scope-recall-manager.ps1",
+        "$ProjectPath\.trae\scripts\scope-digest.ps1"
     )
     
     $allPassed = $true
@@ -292,8 +293,9 @@ function Run-LiveVerification {
     # Scope Recall scripts: verify with real data operations
     $scopeRecallScripts = @('scope-store.ps1', 'scope-bridge.ps1', 'turn-closure.ps1', 'scope-fusion.ps1', 'scope-index.ps1')
     $scopeRecallScripts += 'scope-evolution-log.ps1'
-    $scopeRecallScripts += 'scope-decay.ps1'
-    $scopeRecallScripts += 'scope-recall-manager.ps1'
+   $scopeRecallScripts += 'scope-decay.ps1'
+   $scopeRecallScripts += 'scope-recall-manager.ps1'
+    $scopeRecallScripts += 'scope-digest.ps1'
     foreach ($sr in $scopeRecallScripts) {
         $srPath = Join-Path $ProjectPath ".trae\scripts\$sr"
         if (-not (Test-Path $srPath)) { continue }
@@ -382,13 +384,25 @@ function Run-LiveVerification {
                     if (-not $reportOk -or -not $autoOk) { $liveOk = $false; $liveResults += "${sr}: DecayReport or AutoDecay failed" }
                     else { $liveResults += "${sr}: Init+DecayReport+AutoDecay OK" }
                 }
-                'scope-recall-manager.ps1' {
-                    $managerStateRoot = Join-Path $liveStateRoot "manager"
-                    $mgrResult = & powershell -ExecutionPolicy Bypass -File $srPath -HealthCheck -StateRoot $managerStateRoot 2>&1
-                    $mgrStr = $mgrResult | Out-String
-                    $mgrOk = $mgrStr -match "HEALTHY"
-                    if (-not $mgrOk) { $liveOk = $false; $liveResults += "${sr}: HealthCheck failed" }
-                    else { $liveResults += "${sr}: Init+HealthCheck OK" }
+               'scope-recall-manager.ps1' {
+                   $managerStateRoot = Join-Path $liveStateRoot "manager"
+                   $mgrResult = & powershell -ExecutionPolicy Bypass -File $srPath -HealthCheck -StateRoot $managerStateRoot 2>&1
+                   $mgrStr = $mgrResult | Out-String
+                   $mgrOk = $mgrStr -match "HEALTHY"
+                   if (-not $mgrOk) { $liveOk = $false; $liveResults += "${sr}: HealthCheck failed" }
+                   else { $liveResults += "${sr}: Init+HealthCheck OK" }
+               }
+                'scope-digest.ps1' {
+                    $digestDb = Join-Path $liveStateRoot "scope-digest.json"
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -DbPath $digestDb 2>&1 | Out-Null
+                    $desensResult = & powershell -ExecutionPolicy Bypass -File $srPath -Desensitize -Text "key sk-1234567890abcdefghijklmnopqrst" 2>&1
+                    $desensStr = $desensResult | Out-String
+                    $desensOk = $desensStr -match '\[REDACTED:api-key\]'
+                    $reportResult = & powershell -ExecutionPolicy Bypass -File $srPath -DigestReport -DbPath $digestDb 2>&1
+                    $reportStr = $reportResult | Out-String
+                    $reportOk = $reportStr -match "Digest Report"
+                    if (-not $desensOk -or -not $reportOk) { $liveOk = $false; $liveResults += "${sr}: Desensitize or DigestReport failed" }
+                    else { $liveResults += "${sr}: Init+Desensitize+DigestReport OK" }
                 }
             }
         } catch {
@@ -451,8 +465,9 @@ function Invoke-VerifyAndCommit {
                         ".trae/scripts/obsidian-execute-evolution.ps1",
                         ".trae/scripts/obsidian-metacognitive.ps1",
                         ".trae/scripts/obsidian-spl-cycle.ps1",
-                        ".trae/scripts/scope-decay.ps1",
-                        ".trae/scripts/scope-recall-manager.ps1"
+                       ".trae/scripts/scope-decay.ps1",
+                        ".trae/scripts/scope-recall-manager.ps1",
+                        ".trae/scripts/scope-digest.ps1"
                     )
                     foreach ($cp in $commitPaths) {
                         if (Test-Path (Join-Path $ProjectPath $cp)) {

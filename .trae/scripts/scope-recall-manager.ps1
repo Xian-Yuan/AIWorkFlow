@@ -1,4 +1,4 @@
-﻿# scope-recall-manager.ps1 -- Unified Entry Point for Scope Recall System
+# scope-recall-manager.ps1 -- Unified Entry Point for Scope Recall System
 #
 # Seventh layer of the Scope Recall pattern: the integration layer.
 # Provides a single command-line interface to all 7 Scope Recall scripts:
@@ -9,6 +9,7 @@
 #   5. scope-index.ps1      -- Lightweight structured index + scope-aware prefetch
 #   6. scope-evolution-log.ps1 -- AGP-inspired evolution audit trail
 #   7. scope-decay.ps1      -- Scope-aware memory lifecycle and garbage collection
+#   8. scope-digest.ps1     -- Nightly digest: consolidate, desensitize, archive
 #
 # Usage:
 #   .\scope-recall-manager.ps1 -InitAll
@@ -33,6 +34,8 @@ param(
     [switch]$CloseSession,
     [switch]$DecayReport,
     [switch]$AutoDecay,
+    [switch]$DigestReport,
+    [switch]$AutoDigest,
     [switch]$Status,
     [switch]$HealthCheck,
     [switch]$SelfTest,
@@ -71,6 +74,7 @@ $scriptMap = @{
     index    = Join-Path $scriptsDir "scope-index.ps1"
     evoLog   = Join-Path $scriptsDir "scope-evolution-log.ps1"
     decay    = Join-Path $scriptsDir "scope-decay.ps1"
+    digest   = Join-Path $scriptsDir "scope-digest.ps1"
 }
 
 function Add-IsolatedArg {
@@ -111,10 +115,13 @@ function Get-IsolatedArgs {
         "scope-evolution-log.ps1" {
             $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value (Join-Path $script:stateRootPath "scope-evolution-log.json")
         }
-        "scope-decay.ps1" {
-            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeDb
+       "scope-decay.ps1" {
+           $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeDb
+       }
+        "scope-digest.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value (Join-Path $script:stateRootPath "scope-digest.json")
         }
-    }
+   }
     return $merged
 }
 
@@ -406,8 +413,8 @@ function Invoke-ManagerSelfTest {
     Write-Host "=== scope-recall-manager.ps1 SelfTest ==="
     Write-Host ""
     $productionWatch = @()
-    $repoMemoryDir = Join-Path $ProjectPath "Docs\Memory"
-    foreach ($watchName in @("scope-store.json", "scope-index.json", "scope-evolution-log.json", "scope-store-decay.json", "scope-fusion.json", "scope-bridge.json", "turn-closure.json")) {
+   $repoMemoryDir = Join-Path $ProjectPath "Docs\Memory"
+    foreach ($watchName in @("scope-store.json", "scope-index.json", "scope-evolution-log.json", "scope-store-decay.json", "scope-fusion.json", "scope-bridge.json", "turn-closure.json", "scope-digest.json")) {
         $watchPath = Join-Path $repoMemoryDir $watchName
         if (Test-Path -LiteralPath $watchPath) {
             $item = Get-Item -LiteralPath $watchPath
@@ -424,7 +431,7 @@ function Invoke-ManagerSelfTest {
         if (Test-Path -LiteralPath $entry.Value) { $foundCount++ }
         else { Write-Host "  [WARN] Missing: $($entry.Key)" }
     }
-    Assert-Test "All 7 scripts found" ($foundCount -eq 7)
+    Assert-Test "All 8 scripts found" ($foundCount -eq 8)
 
     # Test 2: InitAll
     Write-Host ""
@@ -560,6 +567,26 @@ elseif ($AutoDecay) {
     $result = Invoke-AutoDecayWorkflow
     if (-not $result) { exit 1 }
 }
+elseif ($DigestReport) {
+    $digestPath = $scriptMap['digest']
+    if (Test-Path -LiteralPath $digestPath) {
+        $result = & powershell -ExecutionPolicy Bypass -File $digestPath -DigestReport 2>&1
+        Write-Host ($result | Out-String)
+    } else {
+        Write-Host "[MANAGER-ERROR] scope-digest.ps1 not found"
+        exit 1
+    }
+}
+elseif ($AutoDigest) {
+    $digestPath = $scriptMap['digest']
+    if (Test-Path -LiteralPath $digestPath) {
+        $result = & powershell -ExecutionPolicy Bypass -File $digestPath -AutoDigest -Apply 2>&1
+        Write-Host ($result | Out-String)
+    } else {
+        Write-Host "[MANAGER-ERROR] scope-digest.ps1 not found"
+        exit 1
+    }
+}
 elseif ($Status) {
     $result = Invoke-Status
     if (-not $result) { exit 1 }
@@ -582,8 +609,10 @@ else {
     Write-Host "  -Search -Query <q> [-Scope]            Search the index"
     Write-Host "  -CloseSession -SessionKey <k>          Close session workflow"
     Write-Host "  -DecayReport [-Scope <s>]              Show memory lifecycle risks"
-    Write-Host "  -AutoDecay [-Apply]                    Run TTL and compression maintenance"
-    Write-Host "  -Status                   Show system status"
+   Write-Host "  -AutoDecay [-Apply]                    Run TTL and compression maintenance"
+    Write-Host "  -DigestReport                          Show digest/consolidation report"
+    Write-Host "  -AutoDigest [-Apply]                   Run nightly digest pipeline"
+   Write-Host "  -Status                   Show system status"
     Write-Host "  -HealthCheck              Verify all layers operational"
     Write-Host "  -SelfTest                 Run self-tests"
 }
