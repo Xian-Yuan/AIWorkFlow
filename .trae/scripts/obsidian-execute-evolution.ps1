@@ -261,6 +261,15 @@ function Run-LiveVerification {
     Write-Output "[LIVE-VERIFY] Running live verification for proposal $ProposalPId..."
     $liveOk = $true
     $liveResults = @()
+    $liveStateRoot = Join-Path $env:TEMP ("scope-liveverify-" + $ProposalPId + "-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $liveStateRoot -Force | Out-Null
+    $liveStoreDb = Join-Path $liveStateRoot "scope-store.sqlite3"
+    $liveStoreJson = $liveStoreDb -replace '\.sqlite3$', '.json'
+    $liveBridgePath = Join-Path $liveStateRoot "scope-bridge.json"
+    $liveClosurePath = Join-Path $liveStateRoot "turn-closure.json"
+    $liveFusionPath = Join-Path $liveStateRoot "scope-fusion.json"
+    $liveIndexPath = Join-Path $liveStateRoot "scope-index.json"
+    $liveEvoPath = Join-Path $liveStateRoot "scope-evolution-log.json"
 
     # Find newly created/modified scripts (git diff --name-only)
     Push-Location $ProjectPath
@@ -299,50 +308,51 @@ function Run-LiveVerification {
             switch ($sr) {
                 'scope-store.ps1' {
                     # Real: Init, Store, Recall, ListScopes
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Store -Scope project -Key live-verify-test -Value "test value for live verification" -Apply 2>&1 | Out-Null
-                    $recallResult = & powershell -ExecutionPolicy Bypass -File $srPath -Recall -Scope project -Key live-verify-test 2>&1
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -DbPath $liveStoreDb 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Store -Scope project -Key live-verify-test -Value "test value for live verification" -Apply -DbPath $liveStoreDb 2>&1 | Out-Null
+                    $recallResult = & powershell -ExecutionPolicy Bypass -File $srPath -Recall -Scope project -Key live-verify-test -DbPath $liveStoreDb 2>&1
                     $found = ($recallResult | Out-String) -match "test value"
                     # Cleanup test entry
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Delete -Scope project -Key live-verify-test -Apply 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Delete -Scope project -Key live-verify-test -Apply -DbPath $liveStoreDb 2>&1 | Out-Null
                     if (-not $found) { $liveOk = $false; $liveResults += "${sr}: Recall after Store returned no data" }
                     else { $liveResults += "${sr}: Store+Recall OK" }
                 }
                 'scope-bridge.ps1' {
                     # Real: Init, ContextualRecall
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    $crResult = & powershell -ExecutionPolicy Bypass -File $srPath -ContextualRecall -Scope project -ContextFilter "rts" 2>&1
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -BridgePath $liveBridgePath 2>&1 | Out-Null
+                    $crResult = & powershell -ExecutionPolicy Bypass -File $srPath -ContextualRecall -Scope project -ContextFilter "rts" -BridgePath $liveBridgePath 2>&1
                     $crStr = $crResult | Out-String
                     # ContextualRecall should not error even with no data
                     $liveResults += "${sr}: ContextualRecall OK (len=$($crStr.Length))"
                 }
                 'turn-closure.ps1' {
                     # Real: Init, ClosureAudit
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    $auditResult = & powershell -ExecutionPolicy Bypass -File $srPath -ClosureAudit 2>&1
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -ClosurePath $liveClosurePath 2>&1 | Out-Null
+                    $auditResult = & powershell -ExecutionPolicy Bypass -File $srPath -Audit -SessionKey live-session -ClosurePath $liveClosurePath 2>&1
                     $auditStr = $auditResult | Out-String
                     $liveResults += "${sr}: ClosureAudit OK (len=$($auditStr.Length))"
                 }
                 'scope-fusion.ps1' {
                     # Real: Init, FusionReport
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    $frResult = & powershell -ExecutionPolicy Bypass -File $srPath -FusionReport 2>&1
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -DbPath $liveStoreDb -FusionPath $liveFusionPath 2>&1 | Out-Null
+                    $frResult = & powershell -ExecutionPolicy Bypass -File $srPath -FusionReport -DbPath $liveStoreDb -FusionPath $liveFusionPath 2>&1
                     $frStr = $frResult | Out-String
                     $liveResults += "${sr}: FusionReport OK (len=$($frStr.Length))"
                 }
                 'scope-index.ps1' {
                     # Real: Init, BuildIndex, SearchIndex, Prefetch, IndexStats
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    & powershell -ExecutionPolicy Bypass -File $srPath -BuildIndex 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File (Join-Path $ProjectPath ".trae\scripts\scope-store.ps1") -Store -Scope project -Key live-index-rts -Value "rts live index value" -Apply -DbPath $liveStoreDb 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -IndexPath $liveIndexPath -StorePath $liveStoreJson 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -BuildIndex -IndexPath $liveIndexPath -StorePath $liveStoreJson 2>&1 | Out-Null
                     # Search for a keyword that should exist in real data
-                    $searchResult = & powershell -ExecutionPolicy Bypass -File $srPath -SearchIndex -Query "rts" 2>&1
+                    $searchResult = & powershell -ExecutionPolicy Bypass -File $srPath -SearchIndex -Query "rts" -IndexPath $liveIndexPath -StorePath $liveStoreJson 2>&1
                     $searchStr = $searchResult | Out-String
                     $searchOk = $searchStr -match "Found"
      
-                    $prefetchResult = & powershell -ExecutionPolicy Bypass -File $srPath -Prefetch -CurrentScope project -Query "rts" 2>&1
+                    $prefetchResult = & powershell -ExecutionPolicy Bypass -File $srPath -Prefetch -CurrentScope project -Query "rts" -IndexPath $liveIndexPath -StorePath $liveStoreJson 2>&1
                     $prefetchStr = $prefetchResult | Out-String
                     # IndexStats
-                    $statsResult = & powershell -ExecutionPolicy Bypass -File $srPath -IndexStats 2>&1
+                    $statsResult = & powershell -ExecutionPolicy Bypass -File $srPath -IndexStats -IndexPath $liveIndexPath -StorePath $liveStoreJson 2>&1
                     $statsStr = $statsResult | Out-String
                     $statsOk = $statsStr -match "Entries"
                     if (-not $searchOk) { $liveOk = $false; $liveResults += "${sr}: SearchIndex returned no results indicator" }
@@ -350,31 +360,31 @@ function Run-LiveVerification {
                    else { $liveResults += "${sr}: Init+Build+Search+Prefetch+Stats OK" }
                }
                 'scope-evolution-log.ps1' {
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Record -GeneId test-gene -Direction test -ProposalId test-prop -Result committed -ScriptName test-script -CommitHash test123 -Notes "live verify" 2>&1 | Out-Null
-                    $histResult = & powershell -ExecutionPolicy Bypass -File $srPath -History 2>&1
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -DbPath $liveEvoPath 2>&1 | Out-Null
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Record -GeneId test-gene -Direction test -ProposalId test-prop -Result committed -ScriptName test-script -CommitHash test123 -Notes "live verify" -DbPath $liveEvoPath 2>&1 | Out-Null
+                    $histResult = & powershell -ExecutionPolicy Bypass -File $srPath -History -DbPath $liveEvoPath 2>&1
                     $histStr = $histResult | Out-String
                     $histOk = $histStr -match "Evolution Audit Trail"
-                    $statsResult = & powershell -ExecutionPolicy Bypass -File $srPath -GeneStats 2>&1
+                    $statsResult = & powershell -ExecutionPolicy Bypass -File $srPath -GeneStats -DbPath $liveEvoPath 2>&1
                     $statsStr = $statsResult | Out-String
                     $statsOk = $statsStr -match "Gene Statistics"
                     if (-not $histOk -or -not $statsOk) { $liveOk = $false; $liveResults += "${sr}: History or GeneStats failed" }
                    else { $liveResults += "${sr}: Init+Record+History+GeneStats OK" }
                }
                 'scope-decay.ps1' {
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    $reportResult = & powershell -ExecutionPolicy Bypass -File $srPath -DecayReport -Scope project 2>&1
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -DbPath $liveStoreDb 2>&1 | Out-Null
+                    $reportResult = & powershell -ExecutionPolicy Bypass -File $srPath -DecayReport -Scope project -DbPath $liveStoreDb 2>&1
                     $reportStr = $reportResult | Out-String
                     $reportOk = $reportStr -match "Scope Decay Report"
-                    $autoResult = & powershell -ExecutionPolicy Bypass -File $srPath -AutoDecay 2>&1
+                    $autoResult = & powershell -ExecutionPolicy Bypass -File $srPath -AutoDecay -DbPath $liveStoreDb 2>&1
                     $autoStr = $autoResult | Out-String
                     $autoOk = $autoStr -match "AUTODECAY"
                     if (-not $reportOk -or -not $autoOk) { $liveOk = $false; $liveResults += "${sr}: DecayReport or AutoDecay failed" }
                     else { $liveResults += "${sr}: Init+DecayReport+AutoDecay OK" }
                 }
                 'scope-recall-manager.ps1' {
-                    & powershell -ExecutionPolicy Bypass -File $srPath -Init 2>&1 | Out-Null
-                    $mgrResult = & powershell -ExecutionPolicy Bypass -File $srPath -HealthCheck 2>&1
+                    $managerStateRoot = Join-Path $liveStateRoot "manager"
+                    $mgrResult = & powershell -ExecutionPolicy Bypass -File $srPath -HealthCheck -StateRoot $managerStateRoot 2>&1
                     $mgrStr = $mgrResult | Out-String
                     $mgrOk = $mgrStr -match "HEALTHY"
                     if (-not $mgrOk) { $liveOk = $false; $liveResults += "${sr}: HealthCheck failed" }
@@ -440,11 +450,9 @@ function Invoke-VerifyAndCommit {
                     $commitPaths = @(
                         ".trae/scripts/obsidian-execute-evolution.ps1",
                         ".trae/scripts/obsidian-metacognitive.ps1",
+                        ".trae/scripts/obsidian-spl-cycle.ps1",
                         ".trae/scripts/scope-decay.ps1",
-                        ".trae/scripts/scope-recall-manager.ps1",
-                        "Docs/Memory/scope-evolution-log.json",
-                        "Docs/Memory/scope-index.json",
-                        "Docs/Memory/scope-store-decay.json"
+                        ".trae/scripts/scope-recall-manager.ps1"
                     )
                     foreach ($cp in $commitPaths) {
                         if (Test-Path (Join-Path $ProjectPath $cp)) {
@@ -496,8 +504,8 @@ function Invoke-VerifyAndCommit {
                }
            }
            
-            # Auto-record evolution in scope-evolution-log
-            if ($Apply -and -not [string]::IsNullOrEmpty($GeneId)) {
+            # Auto-record evolution in scope-evolution-log only when explicitly requested.
+            if ($Apply -and -not [string]::IsNullOrEmpty($GeneId) -and $env:JINLI_EVOLUTION_RECORD_RUNTIME_AUDIT -eq "1") {
                 $evoLogScript = Join-Path $ProjectPath ".trae\scripts\scope-evolution-log.ps1"
                 if (Test-Path $evoLogScript) {
                     try {
@@ -509,6 +517,9 @@ function Invoke-VerifyAndCommit {
                         Write-Output "[EVO-LOG-WARN] Failed to record evolution: $_"
                     }
                 }
+            }
+            elseif ($Apply -and -not [string]::IsNullOrEmpty($GeneId)) {
+                Write-Output "[EVO-LOG] Runtime audit log skipped (set JINLI_EVOLUTION_RECORD_RUNTIME_AUDIT=1 to enable)."
             }
             
            return @{ success = $true; abandoned = $false; fix_rounds = $fixRound }
@@ -685,8 +696,38 @@ if ($SelfTest) {
         Write-Host "[SELFTEST-FAIL] Some self-tests failed"; exit 1
     }
     
-    # Test 4: Write-ExecReport
-    Write-Host "  [4/4] Testing Write-ExecReport..."
+    # Test 4: Commit allowlist includes the SPL cycle script
+    Write-Host "  [4/5] Testing commit allowlist..."
+    $selfContent = [System.IO.File]::ReadAllText($MyInvocation.MyCommand.Path, [System.Text.Encoding]::UTF8)
+    $commitBlock = [regex]::Match($selfContent, '(?s)\$commitPaths\s*=\s*@\((?<body>.*?)\)\s*foreach')
+    if (-not $commitBlock.Success -or $commitBlock.Groups['body'].Value -notmatch [regex]::Escape('.trae/scripts/obsidian-spl-cycle.ps1')) {
+        Write-Host "[SELFTEST-FAIL] Commit allowlist missing obsidian-spl-cycle.ps1"; exit 1
+    }
+    if ($commitBlock.Groups['body'].Value -match [regex]::Escape('Docs/Memory/')) {
+        Write-Host "[SELFTEST-FAIL] Commit allowlist must not include runtime memory files"; exit 1
+    }
+    Write-Host "[SELFTEST-PASS] Commit allowlist includes obsidian-spl-cycle.ps1"
+
+    # Test 5: Live verification uses isolated state paths
+    Write-Host "  [5/6] Testing live verification isolation..."
+    $liveBlock = [regex]::Match($selfContent, '(?s)function Run-LiveVerification\s*\{(?<body>.*?)# Report')
+    if (-not $liveBlock.Success -or
+        $liveBlock.Groups['body'].Value -notmatch [regex]::Escape('scope-liveverify') -or
+        $liveBlock.Groups['body'].Value -notmatch [regex]::Escape('-StateRoot')) {
+        Write-Host "[SELFTEST-FAIL] Live verification is not isolated from production scope memory"; exit 1
+    }
+    Write-Host "[SELFTEST-PASS] Live verification isolation is configured"
+
+    # Test 6: Runtime audit log writes are opt-in
+    Write-Host "  [6/7] Testing runtime audit log guard..."
+    $auditBlock = [regex]::Match($selfContent, '(?s)# Auto-record evolution in scope-evolution-log(?<body>.*?)return @\{ success = \$true')
+    if (-not $auditBlock.Success -or $auditBlock.Groups['body'].Value -notmatch 'JINLI_EVOLUTION_RECORD_RUNTIME_AUDIT') {
+        Write-Host "[SELFTEST-FAIL] Runtime audit log writes must be opt-in"; exit 1
+    }
+    Write-Host "[SELFTEST-PASS] Runtime audit log writes are opt-in"
+
+    # Test 7: Write-ExecReport
+    Write-Host "  [7/7] Testing Write-ExecReport..."
     Write-ExecReport -ProposalPId "self-test" -Direction "test" -GeneId "test" -TestsPassed $true -FixRounds 0 -Committed $false -Notes "Self-test verification"
     $reportCheck = Join-Path $ResultsDir "exec-report-$(Get-Date -Format 'yyyy-MM-dd')-self-test.md"
     if (Test-Path $reportCheck) {

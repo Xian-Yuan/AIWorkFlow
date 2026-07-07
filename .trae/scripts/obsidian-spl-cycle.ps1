@@ -161,6 +161,19 @@ function Get-GeneSaturationPenalty {
     return [Math]::Min(0.50, [double]$UseCount * 0.01)
 }
 
+function New-ProposalId {
+    param([hashtable]$SelectedGene, [string]$DateStamp)
+    if (-not (Get-Variable -Name proposalIdCounter -Scope Script -ErrorAction SilentlyContinue)) {
+        $script:proposalIdCounter = 0
+    }
+    $script:proposalIdCounter++
+    $useCount = 0
+    if ($SelectedGene.ContainsKey('use_count')) { $useCount = [int]$SelectedGene.use_count }
+    $nonce = [DateTime]::UtcNow.Ticks
+    $seed = "proposal:{0}:{1}:{2}:{3}:{4}" -f $SelectedGene.gene_id, $DateStamp, $useCount, $nonce, $script:proposalIdCounter
+    return Get-Sha1Short -InputString $seed
+}
+
 # ============================================================
 # SPL-Reflect: Metacognitive Knowledge - assess what Genes can improve
 # ============================================================
@@ -397,7 +410,7 @@ function Run-SPLImprove {
     
     $now = Get-Date -Format 'yyyy-MM-ddTHH:mm:ss'
     $dateStamp = New-DateStamp
-    $proposalId = Get-Sha1Short -InputString "proposal:$($SelectedGene.gene_id):$dateStamp"
+    $proposalId = New-ProposalId -SelectedGene $SelectedGene -DateStamp $dateStamp
     
     $proposal = @{
         proposal_id = $proposalId
@@ -592,6 +605,12 @@ if ($SelfTest) {
     if ($null -eq $testProposal) { Write-Output "[SELFTEST-FAIL] Proposal generation"; exit 1 }
     if (-not ($testProposal -is [hashtable])) { Write-Output "[SELFTEST-FAIL] Proposal not hashtable: $($testProposal.GetType())"; exit 1 }
     Write-Output "[SELFTEST-PASS] Proposal: $($testProposal.proposal_id)"
+    $secondProposal = Run-SPLImprove -SelectedGene $testGene
+    if ($null -eq $secondProposal -or $secondProposal.proposal_id -eq $testProposal.proposal_id) {
+        Write-Output "[SELFTEST-FAIL] Proposal ids must be unique for repeated same-day gene runs"
+        exit 1
+    }
+    Write-Output "[SELFTEST-PASS] Proposal id uniqueness: $($testProposal.proposal_id) -> $($secondProposal.proposal_id)"
     
     # Test Evaluate
     $testEval = Run-SPLEvaluate -Proposal $testProposal

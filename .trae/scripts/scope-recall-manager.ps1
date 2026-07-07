@@ -45,7 +45,8 @@ param(
     [string]$Value = "",
     [string]$Query = "",
     [string]$SessionKey = "",
-    [string]$ProjectPath = ""
+    [string]$ProjectPath = "",
+    [string]$StateRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -54,6 +55,13 @@ if (-not $ProjectPath) {
     $ProjectPath = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 }
 $scriptsDir = Join-Path $ProjectPath ".trae\scripts"
+if ($SelfTest -and [string]::IsNullOrEmpty($StateRoot)) {
+    $StateRoot = Join-Path $env:TEMP ("scope-manager-state-" + [Guid]::NewGuid().ToString("N"))
+}
+if (-not [string]::IsNullOrEmpty($StateRoot)) {
+    if (-not (Test-Path -LiteralPath $StateRoot)) { New-Item -ItemType Directory -Path $StateRoot -Force | Out-Null }
+}
+$script:stateRootPath = $StateRoot
 
 $scriptMap = @{
     store    = Join-Path $scriptsDir "scope-store.ps1"
@@ -65,13 +73,59 @@ $scriptMap = @{
     decay    = Join-Path $scriptsDir "scope-decay.ps1"
 }
 
+function Add-IsolatedArg {
+    param([string[]]$Arguments, [string]$Name, [string]$Value)
+    $merged = @($Arguments)
+    if ($merged -notcontains $Name) {
+        $merged += @($Name, $Value)
+    }
+    return $merged
+}
+
+function Get-IsolatedArgs {
+    param([string]$ScriptPath, [string[]]$Arguments)
+    $merged = @($Arguments)
+    if ([string]::IsNullOrEmpty($script:stateRootPath)) { return $merged }
+
+    $scriptName = [System.IO.Path]::GetFileName($ScriptPath).ToLowerInvariant()
+    $storeDb = Join-Path $script:stateRootPath "scope-store.sqlite3"
+    $storeJson = $storeDb -replace '\.sqlite3$', '.json'
+    switch ($scriptName) {
+        "scope-store.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeDb
+        }
+        "scope-bridge.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-BridgePath" -Value (Join-Path $script:stateRootPath "scope-bridge.json")
+        }
+        "turn-closure.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-ClosurePath" -Value (Join-Path $script:stateRootPath "turn-closure.json")
+        }
+        "scope-fusion.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeDb
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-FusionPath" -Value (Join-Path $script:stateRootPath "scope-fusion.json")
+        }
+        "scope-index.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-IndexPath" -Value (Join-Path $script:stateRootPath "scope-index.json")
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-StorePath" -Value $storeJson
+        }
+        "scope-evolution-log.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value (Join-Path $script:stateRootPath "scope-evolution-log.json")
+        }
+        "scope-decay.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeDb
+        }
+    }
+    return $merged
+}
+
 function Invoke-ScopeScript {
     param([string]$ScriptPath, [string[]]$Arguments)
     if (-not (Test-Path -LiteralPath $ScriptPath)) {
         Write-Host "[MANAGER-ERROR] Script not found: $ScriptPath"
         return $null
     }
-    $result = & powershell -ExecutionPolicy Bypass -File $ScriptPath @Arguments 2>&1
+    $safeArguments = Get-IsolatedArgs -ScriptPath $ScriptPath -Arguments $Arguments
+    $result = & powershell -ExecutionPolicy Bypass -File $ScriptPath @safeArguments 2>&1
     return $result
 }
 
@@ -351,6 +405,17 @@ function Assert-Test {
 function Invoke-ManagerSelfTest {
     Write-Host "=== scope-recall-manager.ps1 SelfTest ==="
     Write-Host ""
+    $productionWatch = @()
+    $repoMemoryDir = Join-Path $ProjectPath "Docs\Memory"
+    foreach ($watchName in @("scope-store.json", "scope-index.json", "scope-evolution-log.json", "scope-store-decay.json", "scope-fusion.json", "scope-bridge.json", "turn-closure.json")) {
+        $watchPath = Join-Path $repoMemoryDir $watchName
+        if (Test-Path -LiteralPath $watchPath) {
+            $item = Get-Item -LiteralPath $watchPath
+            $productionWatch += @{ path = $watchPath; exists = $true; length = $item.Length; last_write = $item.LastWriteTimeUtc.Ticks }
+        } else {
+            $productionWatch += @{ path = $watchPath; exists = $false; length = 0; last_write = 0 }
+        }
+    }
 
     # Test 1: Script discovery
     Write-Host "--- Test 1: Script Discovery ---"
@@ -386,8 +451,9 @@ function Invoke-ManagerSelfTest {
     Write-Host "--- Test 4: Search via Index ---"
     $indexPath = $scriptMap['index']
     if (Test-Path -LiteralPath $indexPath) {
-        $null = & powershell -ExecutionPolicy Bypass -File $indexPath -BuildIndex 2>&1
-        $searchResult = & powershell -ExecutionPolicy Bypass -File $indexPath -SearchIndex -Query "gas" 2>&1
+        $testIndexPath = Join-Path $testDir "scope-index.json"
+        $null = & powershell -ExecutionPolicy Bypass -File $indexPath -BuildIndex -IndexPath $testIndexPath -StorePath $testDbPath 2>&1
+        $searchResult = & powershell -ExecutionPolicy Bypass -File $indexPath -SearchIndex -Query "gas" -IndexPath $testIndexPath -StorePath $testDbPath 2>&1
         $searchStr = $searchResult | Out-String
         Assert-Test "Search works" ($searchStr -match "Found" -or $searchStr.Length -gt 10)
     } else {
@@ -437,6 +503,20 @@ function Invoke-ManagerSelfTest {
     Assert-Test "DecayReport workflow completes" $drResult
     $adResult = Invoke-AutoDecayWorkflow
     Assert-Test "AutoDecay workflow completes" $adResult
+
+    $productionUntouched = $true
+    foreach ($watch in $productionWatch) {
+        $existsNow = Test-Path -LiteralPath $watch.path
+        if ($existsNow -ne $watch.exists) { $productionUntouched = $false; break }
+        if ($existsNow) {
+            $itemNow = Get-Item -LiteralPath $watch.path
+            if ($itemNow.Length -ne $watch.length -or $itemNow.LastWriteTimeUtc.Ticks -ne $watch.last_write) {
+                $productionUntouched = $false
+                break
+            }
+        }
+    }
+    Assert-Test "SelfTest leaves production scope memory untouched" $productionUntouched
 
     # Summary
     Write-Host ""
