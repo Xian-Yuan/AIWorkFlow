@@ -1,9 +1,23 @@
 ﻿name: "vsummary"
-last_run: "2026-06-22T14:30:00"
-status: "idle"
-progress: "218/232 videos summarized (94%)"
-provider: "MiniMax-M1"
-next_steps: "4 failed videos need retry; 10 skipped (no audio)"
+last_run: "2026-07-08T10:00:00"
+status: "completed_with_permanent_skips"
+progress: "479/479 actionable videos summarized (100%); 6 permanent skip (3 no_audio AV1 + 1 B站失效 + 2 cookie 412 WAF)"
+provider: "zhipu_glm4flash + nvidia_deepseek"
+next_steps: "1) Refresh cookie + retry BV1tp7G6oEcN, BV1HxXGBBESv when needed; 2) Fix 350 unclassifiable frontmatter (WP03 follow-up); 3) Standardize batch_pipeline.py Python venv (independent of backend)"
 error: null
-updated_by: "manual"
-updated_at: "2026-06-27T03:25:00"
+updated_by: "金璃小天才 (Plan Agent)"
+updated_at: "2026-07-08T10:00:00"
+
+# 增量信息
+delta_since_last_status:
+  - "下载: 452 → 485 mp4 (+33, 含 _p1 分P)"
+  - "总结: 439 → 479 summary (+40)"
+  - "PATH 修复: _start_backend.bat 加 WinGet\\Packages\\bin 到 PATH (ffprobe 0xC0000142 fix)"
+  - "Permanent skip: 6 个视频写入 data/permanent_skip.json"
+  - "Backend fixes 备忘: data/backend_fixes.md"
+
+# 已知未解决（不阻塞本任务）
+known_issues:
+  - "350 个笔记 frontmatter 缺 tags → classify 跑 Apply 也是 0 移动"
+  - "batch_pipeline.py 用错 Python venv，偶尔报 faster-whisper not installed"
+  - "obsidian-classify.ps1 Add-ToUnclassifiedQueue 不去重"

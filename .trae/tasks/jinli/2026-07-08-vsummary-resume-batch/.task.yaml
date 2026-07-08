@@ -1,0 +1,85 @@
+---
+task: 2026-07-08-vsummary-resume-batch
+project: jinli
+created_at: 2026-07-08
+created_by: 金璃小天才
+phase: verify
+status: verify_passed
+contract_state: not_initialized
+priority: high
+quality_level: mature
+mature_path_verified: yes
+
+# 父任务引用
+parent_task: jinli/2026-06-21-bilibili-favorites-knowledge-automation
+
+# 子任务依赖
+depends_on:
+  - jinli/2026-06-29-obsidian-knowledge-autopoiesis
+  - jinli/2026-06-22-vsummary-workflow-repair
+
+# 当前状态
+current_phase: verify
+verified_at: 2026-07-08T10:00:00
+verified_by: 金璃小天才
+handoff_to: null
+
+# 关键指标 (after run)
+metrics:
+  favorites_total: 456
+  downloaded_after: 485
+  summarized_after: 479
+  to_skip_permanent: 6
+  classify_backlog: 350
+  knowledge_md: 374
+  gene_yaml: 5
+  link_suggestions: 13822
+  permanent_skip_categories:
+    no_audio: 3
+    bilibili_deleted: 1
+    cookie_412_waf: 2
+
+# Provider
+provider_state:
+  zhipu_glm4flash: active
+  nvidia_deepseek: active
+
+# 验收
+acceptance_criteria_count: 8
+ac_passed: 7
+ac_partial: 1
+ac_failed: 0
+
+# 验证报告
+verification_report: verification-report.md
+
+# 已知未解决 (限 L1-L5, 不阻塞)
+known_limitations:
+  - id: L1
+    desc: 350 个笔记 frontmatter 缺 tags → classify 无法分类
+    blocking: false
+  - id: L2
+    desc: Gene 池仅 5 个（受 L1 拖累）
+    blocking: false
+  - id: L3
+    desc: link-discover -Apply 写入率低
+    blocking: false
+  - id: L4
+    desc: batch_pipeline.py Python venv 不一致
+    blocking: false
+  - id: L5
+    desc: obsidian-classify Add-ToUnclassifiedQueue 不去重
+    blocking: false
+
+# 状态历史
+phase_history:
+  - phase: plan
+    at: 2026-07-08T09:00
+    by: 金璃小天才
+  - phase: implement
+    at: 2026-07-08T09:30
+    by: 金璃好帮手
+  - phase: verify
+    at: 2026-07-08T10:00
+    by: 金璃小天才
+    result: PASSED with documented limitations

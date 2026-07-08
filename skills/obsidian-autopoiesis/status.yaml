@@ -1,9 +1,30 @@
-﻿name: obsidian-autopoiesis
-last_run: "2026-06-29T10:38:58"
-status: active
-progress: "5 scripts + 2 rules + skill + helpers implemented; self-tests pass; awaiting AC verification"
-provider: codex
-next_steps: "Run AC01-AC08 verification against real vault data"
+﻿name: "obsidian-autopoiesis"
+last_run: "2026-07-08T10:00:00"
+status: "completed_partial"
+progress: "classify: 211 skipped (已有 kg_id), 0 moved this run, 350 unclassified backlog; evolve: 5 genes total; link-discover: 13822 suggestions (apply 实际写入有限)"
+provider: null
+next_steps: "1) Fix vsummary workflow 写笔记时填 frontmatter tags (WP03); 2) Re-run classify after fix; 3) Expand classification-rules.yaml; 4) Improve link-discover -Apply 实际写入"
 error: null
-updated_by: wp02-wp06-implementation
-updated_at: "2026-06-29T10:38:58"
+updated_by: "金璃小天才 (Plan Agent)"
+updated_at: "2026-07-08T10:00:00"
+
+# 详细指标
+metrics:
+  obsidian_knowledge_md: 374
+  gene_yaml: 5
+  link_suggestions: 13822
+  link_applied_real: 1  # 5 样本里只有 1 个命中
+  unclassified_backlog: 350
+  unclassified_queue_lines: 4335  # 多次 run 累积
+
+# 已知问题
+known_issues:
+  - "frontmatter tags 缺失 → classify 无法分类 350 个笔记"
+  - "Add-ToUnclassifiedQueue 不去重 → queue 文件膨胀"
+  - "link-discover -Apply 写入率低 → 13822 suggest 仅少量 .md 实际写入 Related 块"
+
+# 安全护栏遵循
+guardrails:
+  D1_zero_destructive: "✓ 所有 Move-Item 留 redirect stub"
+  D3_SPL: "✓ mean ≥ 0.6 才提 Gene (但实际只提 5 个, 池小)"
+  D7_apply: "✓ 所有破坏性操作显式 -Apply"

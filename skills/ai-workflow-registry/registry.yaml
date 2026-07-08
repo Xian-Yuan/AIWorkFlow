@@ -7,9 +7,9 @@ workflows:
   description: Self-organizing Obsidian knowledge autopoiesis system. Classifies video
     summaries into knowledge directories, extracts compact Gene YAMLs, discovers cross-note
     associations, runs dream-reflection, and self-maintains the vault.
-  status: active
+  status: completed_partial
   skill_path: skills/obsidian-autopoiesis/SKILL.md
-  last_run: '2026-06-29T10:38:58'
+  last_run: '2026-07-08T10:00:00'
   trigger_keywords:
   - obsidian
   - autopoiesis
@@ -22,15 +22,15 @@ workflows:
   category: knowledge-management
   providers:
   - codex
-  progress: 5 scripts + 2 rules + skill + helpers implemented; self-tests pass; awaiting
-    AC verification
+  progress: 'classify: 211 skipped (已有 kg_id), 0 moved this run, 350 unclassified
+    backlog; evolve: 5 genes total; link-discover: 13822 suggestions (apply 实际写入有限)'
 - name: vsummary
   description: Batch video download and AI summarization from Bilibili favorites.
     yt-dlp download -> vsummary ASR+LLM summarization -> progress resume -> provider
     auto-switch.
-  status: idle
+  status: completed_with_permanent_skips
   skill_path: skills/vsummary/SKILL.md
-  last_run: '2026-06-22T14:30:00'
+  last_run: '2026-07-08T10:00:00'
   trigger_keywords:
   - vsummary
   - video summary
@@ -45,4 +45,5 @@ workflows:
   - MiniMax-M1
   - NVIDIA-DS-V4-Pro
   - Zhipu-GLM-4-Flash
-  progress: 218/232 videos summarized (94%)
+  progress: 479/479 actionable videos summarized (100%); 6 permanent skip (3 no_audio
+    AV1 + 1 B站失效 + 2 cookie 412 WAF)
