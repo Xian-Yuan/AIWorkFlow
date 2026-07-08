@@ -10,6 +10,8 @@
 #   6. scope-evolution-log.ps1 -- AGP-inspired evolution audit trail
 #   7. scope-decay.ps1      -- Scope-aware memory lifecycle and garbage collection
 #   8. scope-digest.ps1     -- Nightly digest: consolidate, desensitize, archive
+#   9. scope-rerank.ps1     -- Relevance ranking and result re-ranking
+#  10. scope-secret-index.ps1 -- Secret-only evidence index (no plaintext)
 #
 # Usage:
 #   .\scope-recall-manager.ps1 -InitAll
@@ -67,14 +69,16 @@ if (-not [string]::IsNullOrEmpty($StateRoot)) {
 $script:stateRootPath = $StateRoot
 
 $scriptMap = @{
-    store    = Join-Path $scriptsDir "scope-store.ps1"
-    bridge   = Join-Path $scriptsDir "scope-bridge.ps1"
-    closure  = Join-Path $scriptsDir "turn-closure.ps1"
-    fusion   = Join-Path $scriptsDir "scope-fusion.ps1"
-    index    = Join-Path $scriptsDir "scope-index.ps1"
-    evoLog   = Join-Path $scriptsDir "scope-evolution-log.ps1"
-    decay    = Join-Path $scriptsDir "scope-decay.ps1"
-    digest   = Join-Path $scriptsDir "scope-digest.ps1"
+    store       = Join-Path $scriptsDir "scope-store.ps1"
+    bridge      = Join-Path $scriptsDir "scope-bridge.ps1"
+    closure     = Join-Path $scriptsDir "turn-closure.ps1"
+    fusion      = Join-Path $scriptsDir "scope-fusion.ps1"
+    index       = Join-Path $scriptsDir "scope-index.ps1"
+    evoLog      = Join-Path $scriptsDir "scope-evolution-log.ps1"
+    decay       = Join-Path $scriptsDir "scope-decay.ps1"
+    digest      = Join-Path $scriptsDir "scope-digest.ps1"
+    rerank      = Join-Path $scriptsDir "scope-rerank.ps1"
+    secretIndex = Join-Path $scriptsDir "scope-secret-index.ps1"
 }
 
 function Add-IsolatedArg {
@@ -121,7 +125,16 @@ function Get-IsolatedArgs {
         "scope-digest.ps1" {
             $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value (Join-Path $script:stateRootPath "scope-digest.json")
         }
-   }
+        "scope-rerank.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeJson
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-IndexPath" -Value (Join-Path $script:stateRootPath "scope-index.json")
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DecayDbPath" -Value $storeDb
+        }
+        "scope-secret-index.ps1" {
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-DbPath" -Value $storeJson
+            $merged = Add-IsolatedArg -Arguments $merged -Name "-IndexPath" -Value (Join-Path $script:stateRootPath "scope-store-secret-index.json")
+        }
+    }
     return $merged
 }
 
@@ -359,6 +372,12 @@ function Invoke-Status {
         Write-Host "--- Decay ---"
         Write-Host ($result | Out-String)
     }
+    $secretIndexPath = $scriptMap['secretIndex']
+    if (Test-Path -LiteralPath $secretIndexPath) {
+        $result = Invoke-ScopeScript -ScriptPath $secretIndexPath -Arguments @("-SecretReport")
+        Write-Host "--- Secret Index ---"
+        Write-Host ($result | Out-String)
+    }
     Write-Host "=== End Status ==="
     return $true
 }
@@ -414,7 +433,7 @@ function Invoke-ManagerSelfTest {
     Write-Host ""
     $productionWatch = @()
    $repoMemoryDir = Join-Path $ProjectPath "Docs\Memory"
-    foreach ($watchName in @("scope-store.json", "scope-index.json", "scope-evolution-log.json", "scope-store-decay.json", "scope-fusion.json", "scope-bridge.json", "turn-closure.json", "scope-digest.json")) {
+    foreach ($watchName in @("scope-store.json", "scope-index.json", "scope-evolution-log.json", "scope-store-decay.json", "scope-fusion.json", "scope-bridge.json", "turn-closure.json", "scope-digest.json", "scope-store-secret-index.json")) {
         $watchPath = Join-Path $repoMemoryDir $watchName
         if (Test-Path -LiteralPath $watchPath) {
             $item = Get-Item -LiteralPath $watchPath
@@ -431,7 +450,7 @@ function Invoke-ManagerSelfTest {
         if (Test-Path -LiteralPath $entry.Value) { $foundCount++ }
         else { Write-Host "  [WARN] Missing: $($entry.Key)" }
     }
-    Assert-Test "All 8 scripts found" ($foundCount -eq 8)
+    Assert-Test "All 10 scripts found" ($foundCount -eq 10)
 
     # Test 2: InitAll
     Write-Host ""

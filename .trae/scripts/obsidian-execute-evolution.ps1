@@ -174,6 +174,7 @@ $evidenceBlock
    - For turn-closure: Init, ClosureAudit
    - For scope-fusion: Init, FusionReport
    - For scope-index: Init, BuildIndex, SearchIndex, Prefetch, IndexStats
+   - For scope-secret-index: Init, Scan, Search, Audit, Purge, SecretReport
    - Every new function must be called with real arguments and produce expected output
 5. If all tests AND live verification pass, stage and commit: "evolve: $direction from gene $geneId"
 6. If tests fail, fix up to 5 rounds. Still failing = revert all changes
@@ -206,7 +207,9 @@ function Run-AllSelfTests {
         "$ProjectPath\.trae\scripts\scope-evolution-log.ps1",
        "$ProjectPath\.trae\scripts\scope-decay.ps1",
         "$ProjectPath\.trae\scripts\scope-recall-manager.ps1",
-        "$ProjectPath\.trae\scripts\scope-digest.ps1"
+        "$ProjectPath\.trae\scripts\scope-digest.ps1",
+        "$ProjectPath\.trae\scripts\scope-rerank.ps1",
+        "$ProjectPath\.trae\scripts\scope-secret-index.ps1"
     )
     
     $allPassed = $true
@@ -296,6 +299,8 @@ function Run-LiveVerification {
    $scopeRecallScripts += 'scope-decay.ps1'
    $scopeRecallScripts += 'scope-recall-manager.ps1'
     $scopeRecallScripts += 'scope-digest.ps1'
+    $scopeRecallScripts += 'scope-rerank.ps1'
+    $scopeRecallScripts += 'scope-secret-index.ps1'
     foreach ($sr in $scopeRecallScripts) {
         $srPath = Join-Path $ProjectPath ".trae\scripts\$sr"
         if (-not (Test-Path $srPath)) { continue }
@@ -404,6 +409,36 @@ function Run-LiveVerification {
                     if (-not $desensOk -or -not $reportOk) { $liveOk = $false; $liveResults += "${sr}: Desensitize or DigestReport failed" }
                     else { $liveResults += "${sr}: Init+Desensitize+DigestReport OK" }
                 }
+                'scope-rerank.ps1' {
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -DbPath $liveStoreJson -IndexPath $liveIndexPath 2>&1 | Out-Null
+                    $rankResult = & powershell -ExecutionPolicy Bypass -File $srPath -Rank -Query "rts" -Scope project -DbPath $liveStoreJson -IndexPath $liveIndexPath 2>&1
+                    $rankStr = $rankResult | Out-String
+                    $rankOk = $rankStr -match "Rank|rank|score"
+                    $anchorResult = & powershell -ExecutionPolicy Bypass -File $srPath -ExtractAnchors -Text "See GitHub issue #123 and PR #456" -DbPath $liveStoreJson -IndexPath $liveIndexPath 2>&1
+                    $anchorStr = $anchorResult | Out-String
+                    $anchorOk = $anchorStr -match "Artifact|issue|pr"
+                    if (-not $rankOk -and -not $anchorOk) { $liveOk = $false; $liveResults += "${sr}: Rank and ExtractAnchors failed" }
+                    else { $liveResults += "${sr}: Init+Rank+ExtractAnchors OK" }
+                }
+                'scope-secret-index.ps1' {
+                    $secretIndexPath = Join-Path $liveStateRoot "scope-store-secret-index.json"
+                    & powershell -ExecutionPolicy Bypass -File $srPath -Init -IndexPath $secretIndexPath 2>&1 | Out-Null
+                    # Store a test entry with a secret, then scan
+                    & powershell -ExecutionPolicy Bypass -File (Join-Path $ProjectPath ".trae\scripts\scope-store.ps1") -Store -Scope project -Key live-secret-test -Value "api_key=sk-livetest1234567890abcdefghij" -Apply -DbPath $liveStoreDb 2>&1 | Out-Null
+                    $scanResult = & powershell -ExecutionPolicy Bypass -File $srPath -Scan -DbPath $liveStoreJson -IndexPath $secretIndexPath -Apply 2>&1
+                    $scanStr = $scanResult | Out-String
+                    $scanOk = $scanStr -match "Found"
+                    $searchResult = & powershell -ExecutionPolicy Bypass -File $srPath -Search -Type secret -IndexPath $secretIndexPath 2>&1
+                    $searchStr = $searchResult | Out-String
+                    $searchOk = $searchStr -match "secret"
+                    # Verify no plaintext in index
+                    $rawIndex = [System.IO.File]::ReadAllText($secretIndexPath, [System.Text.Encoding]::UTF8)
+                    $noPlaintext = -not ($rawIndex -match 'sk-livetest')
+                    # Cleanup test entry
+                    & powershell -ExecutionPolicy Bypass -File (Join-Path $ProjectPath ".trae\scripts\scope-store.ps1") -Delete -Scope project -Key live-secret-test -Apply -DbPath $liveStoreDb 2>&1 | Out-Null
+                    if (-not $scanOk -or -not $searchOk -or -not $noPlaintext) { $liveOk = $false; $liveResults += "${sr}: Scan/Search/no-plaintext check failed" }
+                    else { $liveResults += "${sr}: Init+Scan+Search+no-plaintext OK" }
+                }
             }
         } catch {
             $liveOk = $false
@@ -467,7 +502,9 @@ function Invoke-VerifyAndCommit {
                         ".trae/scripts/obsidian-spl-cycle.ps1",
                        ".trae/scripts/scope-decay.ps1",
                         ".trae/scripts/scope-recall-manager.ps1",
-                        ".trae/scripts/scope-digest.ps1"
+                        ".trae/scripts/scope-digest.ps1",
+                        ".trae/scripts/scope-rerank.ps1",
+                        ".trae/scripts/scope-secret-index.ps1"
                     )
                     foreach ($cp in $commitPaths) {
                         if (Test-Path (Join-Path $ProjectPath $cp)) {
